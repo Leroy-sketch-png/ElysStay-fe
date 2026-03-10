@@ -1,0 +1,248 @@
+'use client'
+
+import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '@/providers/AuthProvider'
+import { PageContainer } from '@/components/layouts/PageContainer'
+import { Skeleton } from '@/components/ui/skeleton'
+import { fetchDashboard, fetchCurrentUser, userKeys } from '@/lib/queries/users'
+import {
+  Building2,
+  DoorOpen,
+  FileText,
+  Users,
+  AlertTriangle,
+  TrendingUp,
+  Gauge,
+  Receipt,
+  Wrench,
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { formatCurrency, formatNumber } from '@/lib/utils'
+import type {
+  OwnerDashboardDto,
+  StaffDashboardDto,
+  TenantDashboardDto,
+} from '@/types/api'
+
+// ─── Stat Card ──────────────────────────────────────────
+
+interface StatCardProps {
+  label: string
+  value: string | number
+  icon: React.ReactNode
+  trend?: string
+  variant?: 'default' | 'warning' | 'success' | 'destructive'
+}
+
+function StatCard({ label, value, icon, trend, variant = 'default' }: StatCardProps) {
+  const variantStyles = {
+    default: 'bg-card',
+    warning: 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800',
+    success: 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800',
+    destructive: 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800',
+  }
+
+  return (
+    <div
+      className={cn(
+        'rounded-xl border p-5 transition-all hover:-translate-y-0.5 hover:shadow-md',
+        variantStyles[variant],
+      )}
+    >
+      <div className='flex items-center justify-between'>
+        <p className='text-sm font-medium text-muted-foreground'>{label}</p>
+        <div className='text-muted-foreground'>{icon}</div>
+      </div>
+      <div className='mt-3'>
+        <p className='text-2xl font-bold tracking-tight'>{value}</p>
+        {trend && <p className='mt-1 text-xs text-muted-foreground'>{trend}</p>}
+      </div>
+    </div>
+  )
+}
+
+// ─── Owner Dashboard ────────────────────────────────────
+
+function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
+  return (
+    <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+      <StatCard
+        label='Total Buildings'
+        value={data.totalBuildings}
+        icon={<Building2 className='size-5' />}
+      />
+      <StatCard
+        label='Total Rooms'
+        value={data.totalRooms}
+        icon={<DoorOpen className='size-5' />}
+        trend={`${data.occupiedRooms} occupied`}
+      />
+      <StatCard
+        label='Occupancy Rate'
+        value={`${Math.round(data.occupancyRate)}%`}
+        icon={<TrendingUp className='size-5' />}
+        variant={data.occupancyRate >= 80 ? 'success' : data.occupancyRate >= 50 ? 'default' : 'warning'}
+      />
+      <StatCard
+        label='Active Contracts'
+        value={data.activeContracts}
+        icon={<FileText className='size-5' />}
+      />
+      <StatCard
+        label='Monthly Revenue'
+        value={formatCurrency(data.monthlyRevenue)}
+        icon={<TrendingUp className='size-5' />}
+        variant='success'
+      />
+      <StatCard
+        label='Overdue Invoices'
+        value={data.overdueInvoiceCount}
+        icon={<AlertTriangle className='size-5' />}
+        trend={data.overdueAmount > 0 ? `${formatCurrency(data.overdueAmount)} total` : undefined}
+        variant={data.overdueInvoiceCount > 0 ? 'destructive' : 'default'}
+      />
+    </div>
+  )
+}
+
+// ─── Staff Dashboard ────────────────────────────────────
+
+function StaffDashboard({ data }: { data: StaffDashboardDto }) {
+  return (
+    <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+      <StatCard
+        label='Assigned Buildings'
+        value={data.assignedBuildings}
+        icon={<Building2 className='size-5' />}
+      />
+      <StatCard
+        label='Pending Issues'
+        value={data.pendingIssues}
+        icon={<Wrench className='size-5' />}
+        variant={data.pendingIssues > 0 ? 'warning' : 'success'}
+      />
+      <StatCard
+        label='Pending Meter Readings'
+        value={data.pendingMeterReadings}
+        icon={<Gauge className='size-5' />}
+        variant={data.pendingMeterReadings > 0 ? 'warning' : 'success'}
+      />
+    </div>
+  )
+}
+
+// ─── Tenant Dashboard ───────────────────────────────────
+
+function TenantDashboard({ data }: { data: TenantDashboardDto }) {
+  return (
+    <div className='space-y-6'>
+      {/* Room info card */}
+      {data.roomNumber && (
+        <div className='rounded-xl border bg-card p-6'>
+          <h3 className='text-lg font-semibold'>Your Room</h3>
+          <div className='mt-3 grid gap-2 text-sm'>
+            <div className='flex justify-between'>
+              <span className='text-muted-foreground'>Room</span>
+              <span className='font-medium'>{data.roomNumber}</span>
+            </div>
+            <div className='flex justify-between'>
+              <span className='text-muted-foreground'>Building</span>
+              <span className='font-medium'>{data.buildingName}</span>
+            </div>
+            {data.contractStatus && (
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>Contract</span>
+                <span className='font-medium'>{data.contractStatus}</span>
+              </div>
+            )}
+            {data.contractEndDate && (
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>Ends</span>
+                <span className='font-medium'>{new Date(data.contractEndDate).toLocaleDateString('vi-VN')}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
+        <StatCard
+          label='Unpaid Invoices'
+          value={data.unpaidInvoiceCount}
+          icon={<Receipt className='size-5' />}
+          trend={data.unpaidAmount > 0 ? formatCurrency(data.unpaidAmount) : undefined}
+          variant={data.unpaidInvoiceCount > 0 ? 'warning' : 'success'}
+        />
+        <StatCard
+          label='Open Issues'
+          value={data.openIssueCount}
+          icon={<Wrench className='size-5' />}
+          variant={data.openIssueCount > 0 ? 'warning' : 'default'}
+        />
+      </div>
+    </div>
+  )
+}
+
+// ─── Dashboard Page ─────────────────────────────────────
+
+export default function DashboardPage() {
+  const { user, hasRole } = useAuth()
+
+  const { data: profile } = useQuery({
+    queryKey: userKeys.me(),
+    queryFn: fetchCurrentUser,
+  })
+
+  const { data: dashboard, isLoading } = useQuery({
+    queryKey: userKeys.dashboard(),
+    queryFn: fetchDashboard,
+  })
+
+  const greeting = getGreeting()
+  const displayName = profile?.fullName || user?.fullName || 'there'
+
+  return (
+    <PageContainer
+      title={`${greeting}, ${displayName}`}
+      description={getRoleDescription(user?.roles || [])}
+    >
+      {isLoading ? (
+        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className='h-32 rounded-xl' />
+          ))}
+        </div>
+      ) : dashboard ? (
+        <>
+          {hasRole('Owner') && <OwnerDashboard data={dashboard as OwnerDashboardDto} />}
+          {hasRole('Staff') && !hasRole('Owner') && <StaffDashboard data={dashboard as StaffDashboardDto} />}
+          {hasRole('Tenant') && !hasRole('Owner') && !hasRole('Staff') && (
+            <TenantDashboard data={dashboard as TenantDashboardDto} />
+          )}
+        </>
+      ) : (
+        <div className='rounded-xl border bg-card p-12 text-center'>
+          <p className='text-muted-foreground'>Unable to load dashboard data.</p>
+        </div>
+      )}
+    </PageContainer>
+  )
+}
+
+// ─── Helpers ────────────────────────────────────────────
+
+function getGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 18) return 'Good afternoon'
+  return 'Good evening'
+}
+
+function getRoleDescription(roles: string[]): string {
+  const lowerRoles = roles.map(r => r.toLowerCase())
+  if (lowerRoles.includes('owner')) return 'Here\'s your property portfolio overview'
+  if (lowerRoles.includes('staff')) return 'Here\'s what needs your attention today'
+  if (lowerRoles.includes('tenant')) return 'Here\'s your rental summary'
+  return 'Welcome to ElysStay'
+}
