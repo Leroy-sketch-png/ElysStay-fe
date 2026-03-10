@@ -8,7 +8,10 @@ import { useEffect, useState } from 'react'
  * disabled or minimized in that case.
  */
 export function useReducedMotion(): boolean {
-  const [prefersReduced, setPrefersReduced] = useState(false)
+  const [prefersReduced, setPrefersReduced] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  })
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')

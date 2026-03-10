@@ -24,6 +24,7 @@ export const contractKeys = {
 export interface ContractFilters {
   buildingId?: string
   roomId?: string
+  tenantUserId?: string
   status?: string
   page?: number
   pageSize?: number
@@ -36,6 +37,7 @@ export async function fetchContracts(
   const qs = toQueryString({
     buildingId: filters.buildingId,
     roomId: filters.roomId,
+    tenantUserId: filters.tenantUserId,
     status: filters.status,
     page: filters.page ?? 1,
     pageSize: filters.pageSize ?? 20,

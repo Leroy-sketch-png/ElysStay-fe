@@ -20,16 +20,11 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
 
   const { data, isLoading } = useQuery({
     queryKey: contractKeys.list({ tenantUserId, pageSize: 50 }),
-    queryFn: () => fetchContracts({ pageSize: 50 }),
+    queryFn: () => fetchContracts({ tenantUserId, pageSize: 50 }),
     enabled: !!tenantUserId,
   })
 
-  // Client-side filter since backend doesn't have tenantUserId filter param
-  // The backend auto-filters for Tenant role, but we're viewing as Owner/Staff
-  // so we filter client-side by tenantUserId
-  const tenantContracts = (data?.data ?? []).filter(
-    (c) => c.tenantUserId === tenantUserId,
-  )
+  const tenantContracts = data?.data ?? []
 
   const columns: Column<ContractDto>[] = [
     {

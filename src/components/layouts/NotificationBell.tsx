@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Bell, Check, CheckCheck, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, timeAgo } from '@/lib/utils'
 import {
   notificationKeys,
   fetchNotifications,
@@ -11,22 +11,6 @@ import {
   markAllNotificationsRead,
 } from '@/lib/queries/notifications'
 import type { NotificationDto } from '@/types/api'
-
-// ─── Time formatting ────────────────────────────────────
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now()
-  const then = new Date(dateStr).getTime()
-  const seconds = Math.floor((now - then) / 1000)
-  if (seconds < 60) return 'just now'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
-  return new Date(dateStr).toLocaleDateString('vi-VN')
-}
 
 // ─── Notification Item ──────────────────────────────────
 
@@ -207,9 +191,13 @@ export function NotificationBell() {
           {/* Footer */}
           {notifications.length > 0 && (
             <div className='border-t px-4 py-2 text-center'>
-              <p className='text-xs text-muted-foreground'>
-                Showing {notifications.length} most recent
-              </p>
+              <a
+                href='/notifications'
+                onClick={() => setOpen(false)}
+                className='text-xs font-medium text-primary hover:underline'
+              >
+                View all notifications
+              </a>
             </div>
           )}
         </div>

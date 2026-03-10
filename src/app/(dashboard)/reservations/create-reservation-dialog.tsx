@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -66,6 +66,11 @@ export function CreateReservationDialog({
       buildingId: '',
       roomId: '',
       tenantUserId: '',
+      expiresAt: (() => {
+        const d = new Date()
+        d.setDate(d.getDate() + 7)
+        return d.toISOString().slice(0, 16)
+      })(),
       note: '',
     },
   })
@@ -97,20 +102,18 @@ export function CreateReservationDialog({
   // Auto-populate deposit with 50% of room price
   const selectedRoom = rooms.find((r) => r.id === watchedRoomId)
 
-  // Default expiry = 7 days from now
-  const [defaultExpiry] = useState(() => {
-    const d = new Date()
-    d.setDate(d.getDate() + 7)
-    return d.toISOString().slice(0, 16) // datetime-local format
-  })
+  // Default expiry is set in form defaultValues to ensure React Hook Form tracks it
 
   // ─── Reset ─────────────────────────────────────────────
   useEffect(() => {
     if (open) {
+      const d = new Date()
+      d.setDate(d.getDate() + 7)
       reset({
         buildingId: '',
         roomId: '',
         tenantUserId: '',
+        expiresAt: d.toISOString().slice(0, 16),
         note: '',
       })
     }
@@ -137,8 +140,8 @@ export function CreateReservationDialog({
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       onOpenChange(false)
     },
-    onError: () => {
-      toast.error('Failed to create reservation')
+    onError: (error: Error) => {
+      toast.error('Failed to create reservation', error.message)
     },
   })
 
@@ -231,7 +234,6 @@ export function CreateReservationDialog({
                 <Label htmlFor='expiresAt'>Expires At</Label>
                 <Input
                   type='datetime-local'
-                  defaultValue={defaultExpiry}
                   {...register('expiresAt')}
                 />
                 <p className='text-xs text-muted-foreground'>Default: 7 days</p>

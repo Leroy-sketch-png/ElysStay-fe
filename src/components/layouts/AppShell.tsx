@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   Menu,
   LogOut,
+  UserCog,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -52,7 +53,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Maintenance', href: '/maintenance', icon: Wrench },
   { label: 'Notifications', href: '/notifications', icon: Bell },
   { label: 'P&L Report', href: '/reports/pnl', icon: BarChart3, roles: ['Owner'] },
-  { label: 'Staff', href: '/staff', icon: Users, roles: ['Owner'] },
+  { label: 'Staff', href: '/staff', icon: UserCog, roles: ['Owner'] },
 ]
 
 // ─── AppShell ───────────────────────────────────────────

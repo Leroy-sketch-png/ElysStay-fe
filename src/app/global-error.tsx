@@ -38,20 +38,20 @@ export default function GlobalError({
             <h1 className='mb-2 text-xl font-bold tracking-tight'>
               Something went seriously wrong
             </h1>
-            <p className='mb-8 text-sm text-gray-600 dark:text-gray-400'>
+            <p className='mb-8 text-sm text-muted-foreground'>
               A critical error occurred. Please try refreshing the page.
             </p>
 
             <div className='flex flex-wrap items-center justify-center gap-3'>
               <button
                 onClick={reset}
-                className='inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors'
+                className='inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors'
               >
                 Try Again
               </button>
               <a
                 href='/dashboard'
-                className='inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                className='inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-card-foreground hover:bg-accent transition-colors'
               >
                 Dashboard
               </a>

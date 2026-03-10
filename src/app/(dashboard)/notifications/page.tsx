@@ -9,7 +9,6 @@ import {
   CheckCheck,
   Loader2,
   Inbox,
-  Filter,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
@@ -17,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
-import { cn } from '@/lib/utils'
+import { cn, timeAgo } from '@/lib/utils'
 import { toast } from '@/components/ui/toaster'
 import {
   notificationKeys,
@@ -31,22 +30,6 @@ import type { NotificationDto } from '@/types/api'
 // ─── Types ──────────────────────────────────────────────
 
 type ReadFilter = 'all' | 'unread' | 'read'
-
-// ─── Time formatting ────────────────────────────────────
-
-function timeAgo(dateStr: string): string {
-  const now = Date.now()
-  const then = new Date(dateStr).getTime()
-  const seconds = Math.floor((now - then) / 1000)
-  if (seconds < 60) return 'just now'
-  const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
-  return new Date(dateStr).toLocaleDateString('vi-VN')
-}
 
 // ─── Notification type icon/label mapping ───────────────
 

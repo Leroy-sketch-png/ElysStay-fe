@@ -6,6 +6,7 @@ import Link from 'next/link'
 import {
   CreditCard,
   ExternalLink,
+  AlertTriangle,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
@@ -61,7 +62,7 @@ export default function PaymentsPage() {
     queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
   })
 
-  const { data: paymentsData, isLoading } = useQuery({
+  const { data: paymentsData, isLoading, isError, error } = useQuery({
     queryKey: paymentKeys.list(filters),
     queryFn: () => fetchPayments(filters),
   })
@@ -213,8 +214,17 @@ export default function PaymentsPage() {
         </div>
       </div>
 
+      {/* Error State */}
+      {isError && (
+        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+          <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
+          <p className='font-medium text-destructive'>Failed to load payments</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+        </div>
+      )}
+
       {/* Summary Cards */}
-      {pagination && pagination.totalItems > 0 && (
+      {!isError && pagination && pagination.totalItems > 0 && (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
           <Card>
             <CardContent className='p-4'>
@@ -244,6 +254,8 @@ export default function PaymentsPage() {
       )}
 
       {/* Table */}
+      {!isError && (
+        <>
       <DataTable
         columns={columns}
         data={payments}
@@ -263,6 +275,8 @@ export default function PaymentsPage() {
           onPageChange={setPage}
           onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
         />
+      )}
+        </>
       )}
     </PageContainer>
     </PageTransition>

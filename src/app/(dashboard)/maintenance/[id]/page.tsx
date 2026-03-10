@@ -23,7 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { IssueStatusBadge, PriorityBadge } from '@/components/ui/status-badge'
 import { toast } from '@/components/ui/toaster'
-import { formatDate } from '@/lib/utils'
+import { formatDate, timeAgo } from '@/lib/utils'
 import {
   issueKeys,
   fetchIssues,
@@ -47,20 +47,6 @@ const ALLOWED_TRANSITIONS: Record<IssueStatus, { status: IssueStatus; label: str
     { status: 'Closed', label: 'Close', icon: XCircle, variant: 'outline' },
   ],
   Closed: [],
-}
-
-// ─── Helper ─────────────────────────────────────────────
-
-function timeAgo(dateStr: string): string {
-  const date = new Date(dateStr)
-  const now = new Date()
-  const diffMs = now.getTime() - date.getTime()
-  const hours = Math.floor(diffMs / (1000 * 60 * 60))
-  if (hours < 1) return 'Just now'
-  if (hours < 24) return `${hours}h ago`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
-  return formatDate(dateStr)
 }
 
 // ─── Page ───────────────────────────────────────────────
