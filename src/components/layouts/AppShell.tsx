@@ -11,18 +11,19 @@ import {
   FileText,
   Wrench,
   Receipt,
-  CreditCard,
   Gauge,
   DollarSign,
+  CalendarClock,
+  BarChart3,
   ChevronLeft,
   Menu,
   LogOut,
-  Bell,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/providers/AuthProvider'
 import { SIDEBAR, HEADER, Z_INDEX } from '@/lib/layout-constants'
+import { NotificationBell } from './NotificationBell'
 
 // ─── Navigation Config ──────────────────────────────────
 
@@ -38,11 +39,13 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Buildings', href: '/buildings', icon: Building2, roles: ['Owner', 'Staff'] },
   { label: 'Rooms', href: '/rooms', icon: DoorOpen, roles: ['Owner', 'Staff'] },
   { label: 'Tenants', href: '/tenants', icon: Users, roles: ['Owner', 'Staff'] },
+  { label: 'Reservations', href: '/reservations', icon: CalendarClock, roles: ['Owner', 'Staff'] },
   { label: 'Contracts', href: '/contracts', icon: FileText, roles: ['Owner', 'Staff'] },
   { label: 'Invoices', href: '/billing/invoices', icon: Receipt },
   { label: 'Meters', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
   { label: 'Expenses', href: '/expenses', icon: DollarSign, roles: ['Owner', 'Staff'] },
   { label: 'Maintenance', href: '/maintenance', icon: Wrench },
+  { label: 'P&L Report', href: '/reports/pnl', icon: BarChart3, roles: ['Owner'] },
   { label: 'Staff', href: '/staff', icon: Users, roles: ['Owner'] },
 ]
 
@@ -190,9 +193,7 @@ export function AppShell({ children }: AppShellProps) {
 
           {/* Right-side actions */}
           <div className='flex items-center gap-3'>
-            <button className='p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer'>
-              <Bell className='size-5' />
-            </button>
+            <NotificationBell />
 
             {/* User info + logout */}
             <div className='flex items-center gap-2'>

@@ -549,3 +549,84 @@ export interface UpdateIssueRequest {
 export interface ChangeIssueStatusRequest {
   status: IssueStatus
 }
+
+// ─── Reservations ───────────────────────────────────────
+
+export type ReservationStatus = 'Pending' | 'Confirmed' | 'Converted' | 'Cancelled' | 'Expired'
+
+export interface ReservationDto {
+  id: string
+  roomId: string
+  roomNumber: string
+  buildingId: string
+  buildingName: string
+  tenantUserId: string
+  tenantName: string | null
+  depositAmount: number
+  status: ReservationStatus
+  expiresAt: string
+  note: string | null
+  refundAmount: number | null
+  refundedAt: string | null
+  refundNote: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateReservationRequest {
+  roomId: string
+  tenantUserId: string
+  depositAmount?: number
+  expiresAt?: string
+  note?: string
+}
+
+export type ReservationAction = 'CONFIRM' | 'CANCEL'
+
+export interface ChangeReservationStatusRequest {
+  action: ReservationAction
+  refundAmount?: number
+  refundNote?: string
+}
+
+// ─── Notifications ──────────────────────────────────────
+
+export interface NotificationDto {
+  id: string
+  userId: string
+  title: string
+  message: string
+  isRead: boolean
+  type: string
+  referenceId: string | null
+  createdAt: string
+}
+
+// ─── Reports ────────────────────────────────────────────
+
+export interface DashboardStatsDto {
+  totalRooms: number
+  occupiedRooms: number
+  occupancyRate: number
+  activeContracts: number
+  overdueContracts: number
+  overdueInvoiceCount: number
+  overdueAmount: number
+  monthlyRevenue: number
+}
+
+export interface PnlMonthDto {
+  month: number
+  operationalIncome: number
+  depositsReceived: number
+  depositsRefunded: number
+  expenses: number
+  netOperational: number
+  netCashFlow: number
+}
+
+export interface PnlReportDto {
+  buildingId: string | null
+  year: number
+  months: PnlMonthDto[]
+}

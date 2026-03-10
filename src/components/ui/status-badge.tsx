@@ -132,3 +132,18 @@ export function PriorityBadge({ priority }: { priority: string }) {
   const config = priorityConfig[priority] ?? { label: priority, variant: 'muted' as const }
   return <Badge variant={config.variant}>{config.label}</Badge>
 }
+
+// ─── Reservation Status ─────────────────────────────────
+
+const reservationStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+  Pending: { label: 'Pending', variant: 'warning' },
+  Confirmed: { label: 'Confirmed', variant: 'info' },
+  Converted: { label: 'Converted', variant: 'success' },
+  Cancelled: { label: 'Cancelled', variant: 'destructive' },
+  Expired: { label: 'Expired', variant: 'muted' },
+}
+
+export function ReservationStatusBadge({ status }: { status: string }) {
+  const config = reservationStatusConfig[status] ?? { label: status, variant: 'muted' as const }
+  return <Badge variant={config.variant}>{config.label}</Badge>
+}
