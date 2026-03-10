@@ -6,6 +6,17 @@ import { cn } from '@/lib/utils'
 import { Portal } from './portal'
 import { Button } from './button'
 
+// ─── Focus Trap Utilities ───────────────────────────────
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+function getFocusableElements(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    (el) => !el.closest('[aria-hidden="true"]') && el.offsetParent !== null,
+  )
+}
+
 // ─── Dialog Context ─────────────────────────────────────
 
 interface DialogContextValue {
@@ -30,6 +41,27 @@ interface DialogProps {
 }
 
 function Dialog({ open, onOpenChange, children }: DialogProps) {
+  const previousFocusRef = React.useRef<HTMLElement | null>(null)
+
+  // Store the element that had focus before opening
+  React.useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement | null
+    }
+  }, [open])
+
+  // Restore focus on close
+  React.useEffect(() => {
+    if (!open && previousFocusRef.current) {
+      const el = previousFocusRef.current
+      previousFocusRef.current = null
+      // Defer to next frame so the portal unmounts first
+      requestAnimationFrame(() => {
+        el?.focus?.()
+      })
+    }
+  }, [open])
+
   // Close on Escape
   React.useEffect(() => {
     if (!open) return
@@ -65,16 +97,45 @@ function DialogContent({ className, children, size = 'md', ...props }: DialogCon
   const { open, onOpenChange } = useDialogContext()
   const contentRef = React.useRef<HTMLDivElement>(null)
 
-  // Focus trap
+  // Auto-focus first focusable element on open
   React.useEffect(() => {
     if (!open) return
     const timer = setTimeout(() => {
-      const focusable = contentRef.current?.querySelector<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-      )
+      const focusable = contentRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
       focusable?.focus()
     }, 50)
     return () => clearTimeout(timer)
+  }, [open])
+
+  // Focus trap: cycle Tab/Shift+Tab within dialog
+  React.useEffect(() => {
+    if (!open) return
+    const container = contentRef.current
+    if (!container) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusable = getFocusableElements(container)
+      if (focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (e.shiftKey) {
+        if (document.activeElement === first || !container.contains(document.activeElement)) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (document.activeElement === last || !container.contains(document.activeElement)) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
   }, [open])
 
   if (!open) return null

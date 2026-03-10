@@ -17,7 +17,7 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { roomKeys, fetchRoomById, changeRoomStatus, deleteRoom } from '@/lib/queries/rooms'
-import { buildingKeys } from '@/lib/queries/buildings'
+import { buildingKeys, fetchBuildingById } from '@/lib/queries/buildings'
 import { RoomFormDialog } from '../room-form-dialog'
 import { RoomServicesTab } from './room-services-tab'
 
@@ -33,6 +33,13 @@ export default function RoomDetailPage() {
     queryKey: roomKeys.detail(id),
     queryFn: () => fetchRoomById(id),
     enabled: !!id,
+  })
+
+  // Fetch building to get totalFloors for the edit dialog
+  const { data: building } = useQuery({
+    queryKey: buildingKeys.detail(room?.buildingId ?? ''),
+    queryFn: () => fetchBuildingById(room!.buildingId),
+    enabled: !!room?.buildingId,
   })
 
   const statusMutation = useMutation({
@@ -269,13 +276,13 @@ export default function RoomDetailPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Edit Dialog — need buildingId & totalFloors from building context */}
+      {/* Edit Dialog — totalFloors from building context */}
       <RoomFormDialog
         open={editOpen}
         onOpenChange={setEditOpen}
         mode='edit'
         buildingId={room.buildingId}
-        totalFloors={99}
+        totalFloors={building?.totalFloors ?? room.floor}
         room={room}
       />
 

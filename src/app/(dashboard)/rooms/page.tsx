@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { DoorOpen, Search, Building2 } from 'lucide-react'
+import { DoorOpen, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -29,7 +29,7 @@ export default function RoomsPage() {
     pageSize: 20,
   }
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, isError } = useQuery({
     queryKey: roomKeys.list(filters),
     queryFn: () => fetchRooms(filters),
   })
@@ -82,6 +82,25 @@ export default function RoomsPage() {
       header: 'Status',
       render: (row) => <RoomStatusBadge status={row.status} />,
     },
+    {
+      key: 'actions',
+      header: '',
+      render: (row) => (
+        <div className='flex items-center justify-end'>
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={(e) => {
+              e.stopPropagation()
+              router.push(`/rooms/${row.id}`)
+            }}
+          >
+            View
+          </Button>
+        </div>
+      ),
+      headerClassName: 'w-[80px]',
+    },
   ]
 
   return (
@@ -115,27 +134,40 @@ export default function RoomsPage() {
         </Select>
       </div>
 
-      {/* Table */}
-      <DataTable
-        columns={columns}
-        data={data?.data ?? []}
-        loading={isLoading}
-        rowKey={(row) => row.id}
-        onRowClick={(row) => router.push(`/rooms/${row.id}`)}
-        emptyMessage='No rooms found matching your filters.'
-        emptyIcon={<DoorOpen className='size-10' />}
-      />
-
-      {data?.pagination && data.pagination.totalPages > 1 && (
-        <div className='mt-4'>
-          <Pagination
-            page={data.pagination.page}
-            pageSize={data.pagination.pageSize}
-            totalItems={data.pagination.totalItems}
-            totalPages={data.pagination.totalPages}
-            onPageChange={setPage}
-          />
+      {/* Error State */}
+      {isError && (
+        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+          <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
+          <p className='font-medium text-destructive'>Failed to load rooms</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
         </div>
+      )}
+
+      {/* Table */}
+      {!isError && (
+        <>
+          <DataTable
+            columns={columns}
+            data={data?.data ?? []}
+            loading={isLoading}
+            rowKey={(row) => row.id}
+            onRowClick={(row) => router.push(`/rooms/${row.id}`)}
+            emptyMessage='No rooms found matching your filters.'
+            emptyIcon={<DoorOpen className='size-10' />}
+          />
+
+          {data?.pagination && data.pagination.totalPages > 1 && (
+            <div className='mt-4'>
+              <Pagination
+                page={data.pagination.page}
+                pageSize={data.pagination.pageSize}
+                totalItems={data.pagination.totalItems}
+                totalPages={data.pagination.totalPages}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+        </>
       )}
     </PageContainer>
   )

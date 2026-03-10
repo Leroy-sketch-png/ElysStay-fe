@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Building2, Search, MapPin } from 'lucide-react'
+import { Plus, Building2, Search, MapPin, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,7 +11,7 @@ import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
 import { toast } from '@/components/ui/toaster'
-import { formatDate, formatNumber } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import {
   buildingKeys,
   fetchBuildings,
@@ -34,7 +34,7 @@ export default function BuildingsPage() {
   const [deleteTarget, setDeleteTarget] = useState<BuildingDto | null>(null)
 
   // ─── Data ───────────────────────────────────────────────
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, isError } = useQuery({
     queryKey: buildingKeys.list(filters),
     queryFn: () => fetchBuildings(filters),
   })
@@ -187,8 +187,20 @@ export default function BuildingsPage() {
         )}
       </div>
 
+      {/* Error State */}
+      {isError && (
+        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+          <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
+          <p className='font-medium text-destructive'>Failed to load buildings</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+          <Button variant='outline' className='mt-4' onClick={() => queryClient.invalidateQueries({ queryKey: buildingKeys.list(filters) })}>
+            Try Again
+          </Button>
+        </div>
+      )}
+
       {/* Table or Empty State */}
-      {!isLoading && data && data.data.length === 0 && !hasActiveFilters ? (
+      {!isError && !isLoading && data && data.data.length === 0 && !hasActiveFilters ? (
         <EmptyState
           icon={<Building2 className='size-12' />}
           title='No buildings yet'
@@ -196,7 +208,7 @@ export default function BuildingsPage() {
           actionLabel='Add Building'
           onAction={() => setCreateOpen(true)}
         />
-      ) : (
+      ) : !isError ? (
         <>
           <DataTable
             columns={columns}
@@ -219,7 +231,7 @@ export default function BuildingsPage() {
             />
           )}
         </>
-      )}
+      ) : null}
 
       {/* Create Dialog */}
       <BuildingFormDialog
