@@ -11,11 +11,9 @@ import { formatDate } from '@/lib/utils'
 import {
   staffKeys,
   fetchBuildingStaff,
-  fetchStaffList,
-  assignStaff,
   unassignStaff,
 } from '@/lib/queries/staff'
-import type { StaffAssignmentDto, UserDto } from '@/types/api'
+import type { StaffAssignmentDto } from '@/types/api'
 import { AssignStaffDialog } from './assign-staff-dialog'
 
 interface BuildingStaffTabProps {

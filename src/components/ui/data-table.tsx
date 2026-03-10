@@ -62,7 +62,6 @@ export interface Column<T> {
   render: (row: T) => React.ReactNode
   className?: string
   headerClassName?: string
-  sortable?: boolean
 }
 
 // ─── DataTable ──────────────────────────────────────────

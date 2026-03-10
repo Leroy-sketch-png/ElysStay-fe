@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Plus, Users, UserCheck, UserX } from 'lucide-react'
+import { Plus, Users, UserCheck, UserX, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Button } from '@/components/ui/button'
 import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
-import { UserStatusBadge, UserRoleBadge } from '@/components/ui/status-badge'
+import { UserStatusBadge } from '@/components/ui/status-badge'
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
 import { formatDate } from '@/lib/utils'
@@ -23,7 +23,7 @@ export default function StaffPage() {
 
   const filters = { page, pageSize: 20 }
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error, isError } = useQuery({
     queryKey: staffKeys.list(filters),
     queryFn: () => fetchStaffList(filters),
   })
@@ -122,25 +122,38 @@ export default function StaffPage() {
         </Button>
       }
     >
-      <DataTable
-        columns={columns}
-        data={data?.data ?? []}
-        loading={isLoading}
-        rowKey={(row) => row.id}
-        emptyMessage='No staff members yet. Create one to get started.'
-        emptyIcon={<Users className='size-10' />}
-      />
-
-      {data?.pagination && data.pagination.totalPages > 1 && (
-        <div className='mt-4'>
-          <Pagination
-            page={data.pagination.page}
-            pageSize={data.pagination.pageSize}
-            totalItems={data.pagination.totalItems}
-            totalPages={data.pagination.totalPages}
-            onPageChange={setPage}
-          />
+      {/* Error State */}
+      {isError && (
+        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center mb-4'>
+          <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
+          <p className='font-medium text-destructive'>Failed to load staff</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
         </div>
+      )}
+
+      {!isError && (
+        <>
+          <DataTable
+            columns={columns}
+            data={data?.data ?? []}
+            loading={isLoading}
+            rowKey={(row) => row.id}
+            emptyMessage='No staff members yet. Create one to get started.'
+            emptyIcon={<Users className='size-10' />}
+          />
+
+          {data?.pagination && data.pagination.totalPages > 1 && (
+            <div className='mt-4'>
+              <Pagination
+                page={data.pagination.page}
+                pageSize={data.pagination.pageSize}
+                totalItems={data.pagination.totalItems}
+                totalPages={data.pagination.totalPages}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {/* Create Staff Dialog */}

@@ -21,7 +21,7 @@ import { BuildingStaffTab } from './building-staff-tab'
 export default function BuildingDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
-  const [tab, setTab] = useState('overview')
+  const [tab, setTab] = useState('rooms')
   const [editOpen, setEditOpen] = useState(false)
 
   const { data: building, isLoading, error } = useQuery({
@@ -142,7 +142,7 @@ export default function BuildingDetailPage() {
       {/* Tabs */}
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
-          <TabsTrigger value='overview'>
+          <TabsTrigger value='rooms'>
             <DoorOpen className='size-4 mr-1.5' />
             Rooms
           </TabsTrigger>
@@ -156,7 +156,7 @@ export default function BuildingDetailPage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value='overview'>
+        <TabsContent value='rooms'>
           <BuildingRoomsTab buildingId={id} totalFloors={building.totalFloors} />
         </TabsContent>
 

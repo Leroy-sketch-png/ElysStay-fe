@@ -69,24 +69,34 @@ async function apiFetch<T>(
     ;(headers as Record<string, string>)['Authorization'] = `Bearer ${token}`
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  })
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+    })
+  } catch {
+    throw new ApiError(0, 'NETWORK_ERROR', undefined, 'Network error — check your connection and try again.')
+  }
 
   // 204 No Content
   if (response.status === 204) {
     return undefined as T
   }
 
-  const json = await response.json()
+  let json: Record<string, unknown>
+  try {
+    json = await response.json()
+  } catch {
+    throw new ApiError(response.status, 'PARSE_ERROR', undefined, 'Unexpected response from the server.')
+  }
 
   if (!response.ok) {
     throw new ApiError(
       response.status,
-      json.errorCode,
-      json.errors,
-      json.message,
+      json.errorCode as string | undefined,
+      json.errors as Record<string, string[]> | undefined,
+      (json.message as string | undefined) ?? `Request failed (${response.status})`,
     )
   }
 
