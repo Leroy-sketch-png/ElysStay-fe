@@ -76,3 +76,32 @@ export function DepositStatusBadge({ status }: { status: string }) {
   const config = depositStatusConfig[status] ?? { label: status, variant: 'muted' as const }
   return <Badge variant={config.variant}>{config.label}</Badge>
 }
+
+// ─── Invoice Status ─────────────────────────────────────
+
+const invoiceStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+  Draft: { label: 'Draft', variant: 'muted' },
+  Sent: { label: 'Sent', variant: 'info' },
+  PartiallyPaid: { label: 'Partially Paid', variant: 'warning' },
+  Paid: { label: 'Paid', variant: 'success' },
+  Overdue: { label: 'Overdue', variant: 'destructive' },
+  Void: { label: 'Void', variant: 'muted' },
+}
+
+export function InvoiceStatusBadge({ status }: { status: string }) {
+  const config = invoiceStatusConfig[status] ?? { label: status, variant: 'muted' as const }
+  return <Badge variant={config.variant}>{config.label}</Badge>
+}
+
+// ─── Payment Type ───────────────────────────────────────
+
+const paymentTypeConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+  RentPayment: { label: 'Rent', variant: 'info' },
+  DepositIn: { label: 'Deposit In', variant: 'success' },
+  DepositRefund: { label: 'Deposit Refund', variant: 'warning' },
+}
+
+export function PaymentTypeBadge({ type }: { type: string }) {
+  const config = paymentTypeConfig[type] ?? { label: type, variant: 'muted' as const }
+  return <Badge variant={config.variant}>{config.label}</Badge>
+}

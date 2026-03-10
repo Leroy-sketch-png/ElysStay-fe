@@ -38,10 +38,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Rooms', href: '/rooms', icon: DoorOpen, roles: ['Owner', 'Staff'] },
   { label: 'Tenants', href: '/tenants', icon: Users, roles: ['Owner', 'Staff'] },
   { label: 'Contracts', href: '/contracts', icon: FileText, roles: ['Owner', 'Staff'] },
-  { label: 'Invoices', href: '/invoices', icon: Receipt },
+  { label: 'Invoices', href: '/billing/invoices', icon: Receipt },
   { label: 'Payments', href: '/payments', icon: CreditCard },
   { label: 'Issues', href: '/issues', icon: Wrench },
-  { label: 'Meters', href: '/meters', icon: Gauge, roles: ['Owner', 'Staff'] },
+  { label: 'Meters', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
   { label: 'Staff', href: '/staff', icon: Users, roles: ['Owner'] },
 ]
 

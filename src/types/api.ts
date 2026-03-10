@@ -13,6 +13,8 @@ export type UserStatus = 'Active' | 'Deactivated'
 export type RoomStatus = 'Available' | 'Booked' | 'Occupied' | 'Maintenance'
 export type ContractStatus = 'Active' | 'Terminated'
 export type DepositStatus = 'Held' | 'PartiallyRefunded' | 'Refunded' | 'Forfeited'
+export type InvoiceStatus = 'Draft' | 'Sent' | 'PartiallyPaid' | 'Paid' | 'Overdue' | 'Void'
+export type PaymentType = 'RentPayment' | 'DepositIn' | 'DepositRefund'
 
 // ─── User ───────────────────────────────────────────────
 
@@ -338,4 +340,137 @@ export interface CreateTenantRequest {
   fullName: string
   phone?: string
   password: string
+}
+
+// ─── Meter Reading ──────────────────────────────────────
+
+export interface MeterReadingDto {
+  id: string
+  roomId: string
+  roomNumber: string
+  serviceId: string
+  serviceName: string
+  serviceUnit: string
+  billingYear: number
+  billingMonth: number
+  previousReading: number
+  currentReading: number
+  consumption: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface MeterReadingEntry {
+  roomId: string
+  serviceId: string
+  previousReading?: number
+  currentReading: number
+}
+
+export interface BulkUpsertMeterReadingsRequest {
+  buildingId: string
+  billingYear: number
+  billingMonth: number
+  readings: MeterReadingEntry[]
+}
+
+export interface UpdateMeterReadingRequest {
+  previousReading?: number
+  currentReading?: number
+}
+
+// ─── Invoice ────────────────────────────────────────────
+
+export interface InvoiceDto {
+  id: string
+  contractId: string
+  roomId: string
+  roomNumber: string
+  buildingId: string
+  buildingName: string
+  tenantUserId: string
+  tenantName: string
+  billingYear: number
+  billingMonth: number
+  rentAmount: number
+  serviceAmount: number
+  penaltyAmount: number
+  discountAmount: number
+  totalAmount: number
+  paidAmount: number
+  status: InvoiceStatus
+  dueDate: string
+  note?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface InvoiceLineItemDto {
+  id: string
+  serviceId?: string
+  description: string
+  quantity: number
+  unitPrice: number
+  amount: number
+  previousReading?: number
+  currentReading?: number
+}
+
+export interface InvoiceDetailDto extends InvoiceDto {
+  lineItems: InvoiceLineItemDto[]
+}
+
+export interface GenerateInvoicesRequest {
+  buildingId: string
+  billingYear: number
+  billingMonth: number
+}
+
+export interface InvoiceGenerationResult {
+  generated: InvoiceDto[]
+  skipped: { contractId: string; reason: string }[]
+  warnings: string[]
+}
+
+export interface UpdateInvoiceRequest {
+  penaltyAmount?: number
+  discountAmount?: number
+  note?: string
+}
+
+export interface BatchSendInvoicesRequest {
+  invoiceIds: string[]
+}
+
+// ─── Payment ────────────────────────────────────────────
+
+export interface PaymentDto {
+  id: string
+  invoiceId?: string
+  contractId?: string
+  type: PaymentType
+  amount: number
+  paymentMethod?: string
+  note?: string
+  paidAt: string
+  recordedBy: string
+  recorderName?: string
+  createdAt: string
+}
+
+export interface RecordPaymentRequest {
+  amount: number
+  paymentMethod?: string
+  note?: string
+}
+
+export interface BatchRecordPaymentEntry {
+  invoiceId: string
+  amount: number
+  paymentMethod?: string
+  note?: string
+}
+
+export interface BatchRecordPaymentsRequest {
+  payments: BatchRecordPaymentEntry[]
 }
