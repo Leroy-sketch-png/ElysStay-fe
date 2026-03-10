@@ -155,6 +155,7 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
                     type='button'
                     role='switch'
                     aria-checked={state.isEnabled}
+                    aria-label={`Toggle ${svc.serviceName}`}
                     className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
                       state.isEnabled ? 'bg-primary' : 'bg-muted-foreground/30'
                     }`}
@@ -181,8 +182,9 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
                 {state.isEnabled && (
                   <div className='flex items-center gap-3 ml-auto'>
                     <div className='space-y-1'>
-                      <label className='text-[11px] text-muted-foreground'>Override Price</label>
+                      <label htmlFor={`price-${svc.serviceId}`} className='text-[11px] text-muted-foreground'>Override Price</label>
                       <Input
+                        id={`price-${svc.serviceId}`}
                         type='number'
                         min={0}
                         step={100}
@@ -194,8 +196,9 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
                     </div>
                     {!svc.isMetered && (
                       <div className='space-y-1'>
-                        <label className='text-[11px] text-muted-foreground'>Override Qty</label>
+                        <label htmlFor={`qty-${svc.serviceId}`} className='text-[11px] text-muted-foreground'>Override Qty</label>
                         <Input
+                          id={`qty-${svc.serviceId}`}
                           type='number'
                           min={0}
                           step={1}
