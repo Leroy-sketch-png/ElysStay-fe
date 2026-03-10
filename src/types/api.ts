@@ -474,3 +474,78 @@ export interface BatchRecordPaymentEntry {
 export interface BatchRecordPaymentsRequest {
   payments: BatchRecordPaymentEntry[]
 }
+
+// ─── Expense ────────────────────────────────────────────
+
+export interface ExpenseDto {
+  id: string
+  buildingId: string
+  buildingName: string
+  roomId?: string
+  roomNumber?: string
+  category: string
+  description: string
+  amount: number
+  receiptUrl?: string
+  expenseDate: string // YYYY-MM-DD
+  recordedBy: string
+  recorderName?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateExpenseRequest {
+  buildingId: string
+  roomId?: string
+  category: string
+  description: string
+  amount: number
+  expenseDate: string // YYYY-MM-DD
+}
+
+export interface UpdateExpenseRequest {
+  category?: string
+  description?: string
+  amount?: number
+  expenseDate?: string
+}
+
+// ─── Maintenance Issue ──────────────────────────────────
+
+export type IssueStatus = 'New' | 'InProgress' | 'Resolved' | 'Closed'
+export type PriorityLevel = 'Low' | 'Medium' | 'High'
+
+export interface MaintenanceIssueDto {
+  id: string
+  buildingId: string
+  buildingName: string
+  roomId?: string
+  roomNumber?: string
+  reportedBy: string
+  reporterName?: string
+  assignedTo?: string
+  assigneeName?: string
+  title: string
+  description: string
+  imageUrls?: string[]
+  status: IssueStatus
+  priority: PriorityLevel
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateIssueRequest {
+  buildingId?: string
+  roomId?: string
+  title: string
+  description: string
+}
+
+export interface UpdateIssueRequest {
+  title?: string
+  description?: string
+}
+
+export interface ChangeIssueStatusRequest {
+  status: IssueStatus
+}

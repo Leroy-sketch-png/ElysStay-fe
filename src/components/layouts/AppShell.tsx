@@ -13,6 +13,7 @@ import {
   Receipt,
   CreditCard,
   Gauge,
+  DollarSign,
   ChevronLeft,
   Menu,
   LogOut,
@@ -39,9 +40,9 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Tenants', href: '/tenants', icon: Users, roles: ['Owner', 'Staff'] },
   { label: 'Contracts', href: '/contracts', icon: FileText, roles: ['Owner', 'Staff'] },
   { label: 'Invoices', href: '/billing/invoices', icon: Receipt },
-  { label: 'Payments', href: '/payments', icon: CreditCard },
-  { label: 'Issues', href: '/issues', icon: Wrench },
   { label: 'Meters', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
+  { label: 'Expenses', href: '/expenses', icon: DollarSign, roles: ['Owner', 'Staff'] },
+  { label: 'Maintenance', href: '/maintenance', icon: Wrench },
   { label: 'Staff', href: '/staff', icon: Users, roles: ['Owner'] },
 ]
 

@@ -105,3 +105,30 @@ export function PaymentTypeBadge({ type }: { type: string }) {
   const config = paymentTypeConfig[type] ?? { label: type, variant: 'muted' as const }
   return <Badge variant={config.variant}>{config.label}</Badge>
 }
+
+// ─── Issue Status ───────────────────────────────────────
+
+const issueStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+  New: { label: 'New', variant: 'info' },
+  InProgress: { label: 'In Progress', variant: 'warning' },
+  Resolved: { label: 'Resolved', variant: 'success' },
+  Closed: { label: 'Closed', variant: 'muted' },
+}
+
+export function IssueStatusBadge({ status }: { status: string }) {
+  const config = issueStatusConfig[status] ?? { label: status, variant: 'muted' as const }
+  return <Badge variant={config.variant}>{config.label}</Badge>
+}
+
+// ─── Priority Level ─────────────────────────────────────
+
+const priorityConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+  Low: { label: 'Low', variant: 'muted' },
+  Medium: { label: 'Medium', variant: 'warning' },
+  High: { label: 'High', variant: 'destructive' },
+}
+
+export function PriorityBadge({ priority }: { priority: string }) {
+  const config = priorityConfig[priority] ?? { label: priority, variant: 'muted' as const }
+  return <Badge variant={config.variant}>{config.label}</Badge>
+}

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { DataTable, type Column } from '@/components/ui/data-table'
-import { EmptyState } from '@/components/ui/empty-state'
+import { EmptyState } from '@/components/EmptyState'
 import { InvoiceStatusBadge } from '@/components/ui/status-badge'
 import { Pagination } from '@/components/ui/pagination'
 import { toast } from '@/components/ui/toaster'
@@ -426,15 +426,14 @@ export default function InvoicesPage() {
               ? 'No invoices match your filters.'
               : `No invoices for ${formatBillingPeriod(billingYear, billingMonth)}. Click "Generate Invoices" to create them.`
           }
-          action={
-            !statusFilter && (
-              <Button onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
-                <Plus className='size-4' />
-                Generate Invoices
-              </Button>
-            )
-          }
-        />
+        >
+          {!statusFilter && (
+            <Button onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
+              <Plus className='size-4' />
+              Generate Invoices
+            </Button>
+          )}
+        </EmptyState>
       )}
 
       {/* Data Table */}
