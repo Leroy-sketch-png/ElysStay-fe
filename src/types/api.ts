@@ -1,7 +1,16 @@
 /**
  * TypeScript type definitions matching backend DTOs.
  * Keep in sync with Application layer DTO classes.
+ *
+ * All IDs are Guid (string) from the backend.
+ * All dates are ISO 8601 strings.
  */
+
+// ─── Enums / Literal Unions ─────────────────────────────
+
+export type UserRole = 'Owner' | 'Staff' | 'Tenant'
+export type UserStatus = 'Active' | 'Deactivated'
+export type RoomStatus = 'Available' | 'Booked' | 'Occupied' | 'Maintenance'
 
 // ─── User ───────────────────────────────────────────────
 
@@ -11,8 +20,8 @@ export interface UserDto {
   fullName: string
   phone?: string
   avatarUrl?: string
-  role: 'Owner' | 'Staff' | 'Tenant'
-  status: 'Active' | 'Deactivated'
+  role: UserRole
+  status: UserStatus
   createdAt: string
 }
 
@@ -69,20 +78,138 @@ export interface BuildingDetailDto extends BuildingDto {
   occupancyRate: number
 }
 
+export interface CreateBuildingRequest {
+  name: string
+  address: string
+  description?: string
+  totalFloors: number
+  invoiceDueDay?: number
+}
+
+export interface UpdateBuildingRequest {
+  name?: string
+  address?: string
+  description?: string
+  totalFloors?: number
+  invoiceDueDay?: number
+}
+
 // ─── Room ───────────────────────────────────────────────
 
 export interface RoomDto {
   id: string
   buildingId: string
+  buildingName?: string
   roomNumber: string
   floor: number
   area: number
   price: number
   maxOccupants: number
   description?: string
-  status: 'Available' | 'Booked' | 'Occupied' | 'Maintenance'
+  status: RoomStatus
   createdAt: string
   updatedAt: string
+}
+
+export interface CreateRoomRequest {
+  roomNumber: string
+  floor: number
+  area: number
+  price: number
+  maxOccupants: number
+  description?: string
+}
+
+export interface UpdateRoomRequest {
+  roomNumber?: string
+  floor?: number
+  area?: number
+  price?: number
+  maxOccupants?: number
+  description?: string
+}
+
+export interface ChangeRoomStatusRequest {
+  status: 'Available' | 'Maintenance'
+}
+
+// ─── Service ────────────────────────────────────────────
+
+export interface ServiceDto {
+  id: string
+  buildingId: string
+  name: string
+  unit: string
+  unitPrice: number
+  previousUnitPrice?: number
+  priceUpdatedAt?: string
+  isMetered: boolean
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreateServiceRequest {
+  name: string
+  unit: string
+  unitPrice: number
+  isMetered: boolean
+}
+
+export interface UpdateServiceRequest {
+  name?: string
+  unit?: string
+  unitPrice?: number
+  isMetered?: boolean
+}
+
+// ─── Room Service ───────────────────────────────────────
+
+export interface RoomServiceDto {
+  serviceId: string
+  serviceName: string
+  unit: string
+  buildingUnitPrice: number
+  overrideUnitPrice?: number
+  overrideQuantity?: number
+  isEnabled: boolean
+  isMetered: boolean
+  effectiveUnitPrice: number
+}
+
+export interface RoomServiceOverride {
+  serviceId: string
+  isEnabled: boolean
+  overrideUnitPrice?: number
+  overrideQuantity?: number
+}
+
+// ─── Staff Assignment ───────────────────────────────────
+
+export interface StaffAssignmentDto {
+  buildingId: string
+  staffId: string
+  staffFullName: string
+  staffEmail: string
+  staffPhone?: string
+  assignedAt: string
+}
+
+export interface AssignStaffRequest {
+  staffId: string
+}
+
+// ─── Staff User Management ──────────────────────────────
+
+export interface CreateStaffRequest {
+  email: string
+  fullName: string
+  phone?: string
+  password: string
+}
+
+export interface ChangeUserStatusRequest {
+  status: 'Active' | 'Deactivated'
 }
 
 // ─── Pagination ─────────────────────────────────────────
@@ -94,6 +221,7 @@ export interface PaginationMeta {
   totalPages: number
 }
 
+/** Use PagedResponse from api-client.ts for API calls. This is for component props only. */
 export interface PagedResult<T> {
   success: boolean
   data: T[]
