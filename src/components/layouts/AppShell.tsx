@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Building2,
   LayoutDashboard,
@@ -16,6 +17,7 @@ import {
   DollarSign,
   CalendarClock,
   BarChart3,
+  Bell,
   Settings,
   ChevronLeft,
   Menu,
@@ -48,6 +50,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Meters', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
   { label: 'Expenses', href: '/expenses', icon: DollarSign, roles: ['Owner', 'Staff'] },
   { label: 'Maintenance', href: '/maintenance', icon: Wrench },
+  { label: 'Notifications', href: '/notifications', icon: Bell },
   { label: 'P&L Report', href: '/reports/pnl', icon: BarChart3, roles: ['Owner'] },
   { label: 'Staff', href: '/staff', icon: Users, roles: ['Owner'] },
 ]
@@ -106,16 +109,25 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <div className='flex h-screen overflow-hidden bg-background'>
       {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className='fixed inset-0 bg-black/50 md:hidden'
-          style={{ zIndex: Z_INDEX.overlay }}
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            className='fixed inset-0 bg-black/50 md:hidden'
+            style={{ zIndex: Z_INDEX.overlay }}
+            onClick={() => setMobileOpen(false)}
+            aria-hidden='true'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
       <aside
+        role='navigation'
+        aria-label='Main navigation'
         className={cn(
           'fixed top-0 left-0 h-full border-r bg-background transition-all duration-200 flex flex-col',
           'md:relative md:translate-x-0',
@@ -188,6 +200,8 @@ export function AppShell({ children }: AppShellProps) {
           <button
             onClick={() => setMobileOpen(true)}
             className='md:hidden p-2 text-muted-foreground hover:text-foreground cursor-pointer'
+            aria-label='Open navigation menu'
+            aria-expanded={mobileOpen}
           >
             <Menu className='size-5' />
           </button>
@@ -223,7 +237,7 @@ export function AppShell({ children }: AppShellProps) {
         </header>
 
         {/* Page content */}
-        <main className='flex-1 overflow-y-auto'>
+        <main id='main-content' className='flex-1 overflow-y-auto'>
           {children}
         </main>
       </div>

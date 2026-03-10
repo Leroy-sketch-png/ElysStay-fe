@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Wrench, Eye } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
@@ -139,6 +140,7 @@ export default function MaintenanceIssuesPage() {
   // ─── Render ────────────────────────────────────────────
 
   return (
+    <PageTransition>
     <PageContainer
       title='Maintenance Issues'
       description='Track and manage building maintenance requests.'
@@ -256,5 +258,6 @@ export default function MaintenanceIssuesPage() {
         onOpenChange={setCreateOpen}
       />
     </PageContainer>
+    </PageTransition>
   )
 }

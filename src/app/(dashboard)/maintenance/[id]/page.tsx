@@ -17,6 +17,7 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -132,6 +133,7 @@ export default function IssueDetailPage() {
     <PageContainer
       title={issue.title}
       description={`Reported ${timeAgo(issue.createdAt)}`}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Maintenance', href: '/maintenance' }, { label: issue.title }]} />}
       actions={
         <div className='flex items-center gap-2'>
           <Button variant='outline' onClick={() => router.push('/maintenance')}>

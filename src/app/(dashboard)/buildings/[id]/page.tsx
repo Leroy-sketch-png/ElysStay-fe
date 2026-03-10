@@ -7,6 +7,7 @@ import {
   ArrowLeft, Building2, DoorOpen, Settings, Users, Pencil, MapPin, CalendarDays, Layers,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -69,6 +70,7 @@ export default function BuildingDetailPage() {
     <PageContainer
       title={building.name}
       description={building.address}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Buildings', href: '/buildings' }, { label: building.name }]} />}
       actions={
         <div className='flex items-center gap-2'>
           <Button variant='outline' onClick={() => router.push('/buildings')}>

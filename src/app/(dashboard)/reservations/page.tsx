@@ -8,6 +8,7 @@ import {
   Building2,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { DataTable, type Column } from '@/components/ui/data-table'
@@ -165,6 +166,7 @@ export default function ReservationsPage() {
 
   // ─── Render ────────────────────────────────────────────
   return (
+    <PageTransition>
     <PageContainer
       title='Reservations'
       description='Manage room reservation pipeline'
@@ -248,5 +250,6 @@ export default function ReservationsPage() {
         />
       )}
     </PageContainer>
+    </PageTransition>
   )
 }

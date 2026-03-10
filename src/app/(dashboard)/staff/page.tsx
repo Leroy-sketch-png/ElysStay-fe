@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Users, UserCheck, UserX, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
@@ -113,6 +114,7 @@ export default function StaffPage() {
   const newStatus = targetIsActive ? 'Deactivated' : 'Active'
 
   return (
+    <PageTransition>
     <PageContainer
       title='Staff Management'
       description='Manage staff accounts. Assign staff to buildings from the building detail page.'
@@ -183,5 +185,6 @@ export default function StaffPage() {
         }
       />
     </PageContainer>
+    </PageTransition>
   )
 }

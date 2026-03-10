@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, FileText, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
 import { DataTable, type Column } from '@/components/ui/data-table'
@@ -132,6 +133,7 @@ export default function ContractsPage() {
 
   // ─── Render ─────────────────────────────────────────────
   return (
+    <PageTransition>
     <PageContainer
       title='Contracts'
       description='Manage rental contracts and agreements.'
@@ -237,5 +239,6 @@ export default function ContractsPage() {
         onOpenChange={setCreateOpen}
       />
     </PageContainer>
+    </PageTransition>
   )
 }

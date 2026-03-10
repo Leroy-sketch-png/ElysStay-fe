@@ -9,6 +9,7 @@ import {
   Building2,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Select } from '@/components/ui/select'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -157,6 +158,7 @@ export default function PnlReportPage() {
   }, [months])
 
   return (
+    <PageTransition>
     <PageContainer
       title='Profit & Loss Report'
       description={`Financial summary for ${selectedYear}`}
@@ -305,5 +307,6 @@ export default function PnlReportPage() {
         </CardContent>
       </Card>
     </PageContainer>
+    </PageTransition>
   )
 }

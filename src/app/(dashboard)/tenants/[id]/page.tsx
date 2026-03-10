@@ -7,6 +7,7 @@ import {
   ArrowLeft, User, FileText, Mail, Phone, CalendarDays, Shield,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -65,6 +66,7 @@ export default function TenantDetailPage() {
     <PageContainer
       title={tenant.fullName}
       description={tenant.email}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Tenants', href: '/tenants' }, { label: tenant.fullName }]} />}
       actions={
         <Button variant='outline' onClick={() => router.push('/tenants')}>
           <ArrowLeft className='size-4' />

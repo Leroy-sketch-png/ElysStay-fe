@@ -8,6 +8,7 @@ import {
   AlertTriangle, Pencil, Ban, RefreshCw, Building2,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -78,6 +79,7 @@ export default function ContractDetailPage() {
     <PageContainer
       title={`Contract — Room ${contract.roomNumber}`}
       description={`${contract.buildingName} • ${contract.tenantName}`}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Contracts', href: '/contracts' }, { label: `Room ${contract.roomNumber}` }]} />}
       actions={
         <div className='flex items-center gap-2 flex-wrap'>
           <Button variant='outline' onClick={() => router.push('/contracts')}>

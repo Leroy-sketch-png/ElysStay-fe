@@ -8,6 +8,7 @@ import {
   Banknote, Settings, ToggleLeft,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -112,6 +113,7 @@ export default function RoomDetailPage() {
     <PageContainer
       title={`Room ${room.roomNumber}`}
       description={room.buildingName ?? undefined}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Rooms', href: '/rooms' }, { label: `Room ${room.roomNumber}` }]} />}
       actions={
         <div className='flex items-center gap-2'>
           <Button variant='outline' onClick={() => router.push('/rooms')}>

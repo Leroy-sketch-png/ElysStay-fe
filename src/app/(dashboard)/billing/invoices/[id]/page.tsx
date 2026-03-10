@@ -7,6 +7,7 @@ import {
   ArrowLeft, FileText, Send, Ban, DollarSign, CalendarDays, Building2, User, Receipt,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { Breadcrumbs } from '@/components/Breadcrumbs'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { ConfirmDialog } from '@/components/ui/dialog'
@@ -101,6 +102,7 @@ export default function InvoiceDetailPage() {
     <PageContainer
       title={`Invoice — ${billingPeriod}`}
       description={`${invoice.roomNumber} • ${invoice.tenantName}`}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Invoices', href: '/billing/invoices' }, { label: billingPeriod }]} />}
       actions={
         <div className='flex items-center gap-2 flex-wrap'>
           <Button variant='outline' onClick={() => router.push('/billing/invoices')}>

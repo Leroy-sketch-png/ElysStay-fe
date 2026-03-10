@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ConfirmDialog } from '@/components/ui/dialog'
@@ -194,6 +195,7 @@ export default function ExpensesPage() {
   // ─── Render ────────────────────────────────────────────
 
   return (
+    <PageTransition>
     <PageContainer
       title='Expenses'
       description='Track building operating costs and expenses.'
@@ -329,5 +331,6 @@ export default function ExpensesPage() {
         }}
       />
     </PageContainer>
+    </PageTransition>
   )
 }

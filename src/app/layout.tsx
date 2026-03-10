@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@/providers/QueryProvider";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { SkipLink } from "@/components/SkipLink";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,8 +34,10 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
+            <SkipLink />
             {children}
             <Toaster />
+            <OfflineBanner />
           </AuthProvider>
         </QueryProvider>
       </body>

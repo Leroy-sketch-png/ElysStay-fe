@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { User, Lock, Shield, Loader2 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -107,6 +108,7 @@ export default function SettingsPage() {
 
   // ─── Render ────────────────────────────────────────────
   return (
+    <PageTransition>
     <PageContainer title='Settings' description='Manage your account'>
       <div className='grid gap-6 max-w-2xl'>
         {/* Profile Card */}
@@ -273,5 +275,6 @@ export default function SettingsPage() {
         </Card>
       </div>
     </PageContainer>
+    </PageTransition>
   )
 }

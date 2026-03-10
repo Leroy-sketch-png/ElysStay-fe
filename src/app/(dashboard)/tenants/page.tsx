@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Users, Search, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTable, type Column } from '@/components/ui/data-table'
@@ -135,6 +136,7 @@ export default function TenantsPage() {
 
   // ─── Render ─────────────────────────────────────────────
   return (
+    <PageTransition>
     <PageContainer
       title='Tenants'
       description='Manage tenant accounts and profiles.'
@@ -241,5 +243,6 @@ export default function TenantsPage() {
         }
       />
     </PageContainer>
+    </PageTransition>
   )
 }

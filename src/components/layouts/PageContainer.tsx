@@ -10,6 +10,8 @@ interface PageContainerProps {
   description?: string
   /** Action buttons area (top-right) */
   actions?: ReactNode
+  /** Breadcrumb navigation rendered above the title */
+  breadcrumbs?: ReactNode
   /** Additional className */
   className?: string
   /** Use compact spacing */
@@ -21,6 +23,7 @@ export function PageContainer({
   title,
   description,
   actions,
+  breadcrumbs,
   className,
   compact = false,
 }: PageContainerProps) {
@@ -33,6 +36,7 @@ export function PageContainer({
         className,
       )}
     >
+      {breadcrumbs}
       {(title || actions) && (
         <div className='mb-6 flex items-start justify-between gap-4'>
           <div>

@@ -8,6 +8,7 @@ import {
   ExternalLink,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
@@ -151,6 +152,7 @@ export default function PaymentsPage() {
   ]
 
   return (
+    <PageTransition>
     <PageContainer title='Payments' description='Payment history across all buildings'>
       {/* Filters */}
       <div className='flex flex-wrap items-end gap-4'>
@@ -263,5 +265,6 @@ export default function PaymentsPage() {
         />
       )}
     </PageContainer>
+    </PageTransition>
   )
 }

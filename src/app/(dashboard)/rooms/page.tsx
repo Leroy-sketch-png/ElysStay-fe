@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { DoorOpen, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select } from '@/components/ui/select'
@@ -105,6 +106,7 @@ export default function RoomsPage() {
   ]
 
   return (
+    <PageTransition>
     <PageContainer
       title='Rooms'
       description='All rooms across your buildings.'
@@ -172,5 +174,6 @@ export default function RoomsPage() {
         </>
       )}
     </PageContainer>
+    </PageTransition>
   )
 }

@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { CalendarDays, Gauge, Info, Loader2 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -174,6 +175,7 @@ export default function MeterReadingsPage() {
   const noOccupiedRooms = rooms.length === 0
 
   return (
+    <PageTransition>
     <PageContainer
       title='Meter Readings'
       description='Record utility meter readings for billing.'
@@ -367,5 +369,6 @@ export default function MeterReadingsPage() {
         )
       )}
     </PageContainer>
+    </PageTransition>
   )
 }

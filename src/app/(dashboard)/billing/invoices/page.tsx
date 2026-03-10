@@ -7,6 +7,7 @@ import {
   FileText, Plus, Send, AlertTriangle, Eye, Loader2, Filter,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
+import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -265,6 +266,7 @@ export default function InvoicesPage() {
   // ─── Render ────────────────────────────────────────────
 
   return (
+    <PageTransition>
     <PageContainer
       title='Invoices'
       description='Generate and manage monthly invoices.'
@@ -443,5 +445,6 @@ export default function InvoicesPage() {
         </>
       )}
     </PageContainer>
+    </PageTransition>
   )
 }

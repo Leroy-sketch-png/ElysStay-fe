@@ -9,7 +9,20 @@ function makeQueryClient() {
       queries: {
         staleTime: 60 * 1000,
         refetchOnWindowFocus: false,
-        retry: 1,
+        retry: (failureCount, error) => {
+          // Never retry on 4xx client errors (auth, validation, not-found)
+          if (error && typeof error === 'object' && 'status' in error) {
+            const status = (error as { status: number }).status
+            if (status >= 400 && status < 500) return false
+          }
+          // Retry up to 3 times for server/network errors
+          return failureCount < 3
+        },
+        retryDelay: (attemptIndex) =>
+          Math.min(1000 * 2 ** attemptIndex, 10000),
+      },
+      mutations: {
+        retry: false,
       },
     },
   })

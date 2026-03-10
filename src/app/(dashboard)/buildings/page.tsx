@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
+import { PageTransition } from '@/components/Motion'
 import { toast } from '@/components/ui/toaster'
 import { formatDate } from '@/lib/utils'
 import {
@@ -145,6 +146,7 @@ export default function BuildingsPage() {
 
   // ─── Render ─────────────────────────────────────────────
   return (
+    <PageTransition>
     <PageContainer
       title='Buildings'
       description='Manage your rental properties'
@@ -252,5 +254,6 @@ export default function BuildingsPage() {
         onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
       />
     </PageContainer>
+    </PageTransition>
   )
 }
