@@ -19,6 +19,7 @@ import type { RoomDto } from '@/types/api'
 export default function RoomsPage() {
   const router = useRouter()
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [buildingFilter, setBuildingFilter] = useState<string>('')
   const [statusFilter, setStatusFilter] = useState<string>('')
 
@@ -26,7 +27,7 @@ export default function RoomsPage() {
     buildingId: buildingFilter || undefined,
     status: statusFilter || undefined,
     page,
-    pageSize: 20,
+    pageSize,
   }
 
   const { data, isLoading, error, isError } = useQuery({
@@ -164,6 +165,7 @@ export default function RoomsPage() {
                 totalItems={data.pagination.totalItems}
                 totalPages={data.pagination.totalPages}
                 onPageChange={setPage}
+                onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
               />
             </div>
           )}

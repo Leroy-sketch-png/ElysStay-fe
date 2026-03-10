@@ -39,7 +39,7 @@ export default function PaymentsPage() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
 
   // ─── Filters ───────────────────────────────────────────
   const filters: PaymentFilters = useMemo(
@@ -51,7 +51,7 @@ export default function PaymentsPage() {
       page,
       pageSize,
     }),
-    [selectedBuildingId, typeFilter, fromDate, toDate, page],
+    [selectedBuildingId, typeFilter, fromDate, toDate, page, pageSize],
   )
 
   // ─── Queries ───────────────────────────────────────────
@@ -259,6 +259,7 @@ export default function PaymentsPage() {
           totalItems={pagination.totalItems}
           totalPages={pagination.totalPages}
           onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
         />
       )}
     </PageContainer>

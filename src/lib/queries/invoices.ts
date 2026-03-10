@@ -29,16 +29,16 @@ export interface InvoiceFilters {
 // ─── Queries ────────────────────────────────────────────
 
 export async function fetchInvoices(filters: InvoiceFilters = {}) {
-  const params = new URLSearchParams()
-  if (filters.buildingId) params.set('buildingId', filters.buildingId)
-  if (filters.billingYear) params.set('billingYear', String(filters.billingYear))
-  if (filters.billingMonth) params.set('billingMonth', String(filters.billingMonth))
-  if (filters.status) params.set('status', filters.status)
-  params.set('page', String(filters.page ?? 1))
-  params.set('pageSize', String(filters.pageSize ?? 20))
-  if (filters.sort) params.set('sort', filters.sort)
-
-  return api.getPaged<InvoiceDto>(`/invoices?${params}`)
+  const qs = toQueryString({
+    buildingId: filters.buildingId,
+    billingYear: filters.billingYear,
+    billingMonth: filters.billingMonth,
+    status: filters.status,
+    page: filters.page ?? 1,
+    pageSize: filters.pageSize ?? 20,
+    sort: filters.sort ?? 'createdAt:desc',
+  })
+  return api.getPaged<InvoiceDto>(`/invoices${qs}`)
 }
 
 export async function fetchInvoiceById(id: string) {

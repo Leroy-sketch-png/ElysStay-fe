@@ -218,19 +218,7 @@ export interface ChangeUserStatusRequest {
 
 // ─── Pagination ─────────────────────────────────────────
 
-export interface PaginationMeta {
-  page: number
-  pageSize: number
-  totalItems: number
-  totalPages: number
-}
-
-/** Use PagedResponse from api-client.ts for API calls. This is for component props only. */
-export interface PagedResult<T> {
-  success: boolean
-  data: T[]
-  pagination: PaginationMeta
-}
+export type { PaginationMeta, PagedResponse } from '@/lib/api-client'
 
 // ─── Contract ───────────────────────────────────────────
 

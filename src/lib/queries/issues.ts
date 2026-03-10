@@ -11,7 +11,6 @@ import type {
 export const issueKeys = {
   all: ['issues'] as const,
   list: (params: IssueFilters) => [...issueKeys.all, 'list', params] as const,
-  detail: (id: string) => [...issueKeys.all, 'detail', id] as const,
 }
 
 export interface IssueFilters {

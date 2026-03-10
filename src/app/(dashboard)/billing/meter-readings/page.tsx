@@ -20,23 +20,7 @@ import {
   bulkUpsertMeterReadings,
 } from '@/lib/queries/meter-readings'
 import type { MeterReadingEntry } from '@/types/api'
-
-// ─── Helpers ────────────────────────────────────────────
-
-function getCurrentBillingPeriod() {
-  const now = new Date()
-  return {
-    year: now.getFullYear(),
-    month: now.getMonth() + 1,
-  }
-}
-
-function formatBillingPeriod(year: number, month: number) {
-  return new Date(year, month - 1).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-  })
-}
+import { formatBillingPeriod, getCurrentBillingPeriod } from '@/lib/utils'
 
 // ─── Page ───────────────────────────────────────────────
 
@@ -145,18 +129,21 @@ export default function MeterReadingsPage() {
 
   const submitMutation = useMutation({
     mutationFn: () => {
+      // Only submit rooms/services that were actually edited by the user
+      // or already have existing readings (to allow corrections)
       const readings: MeterReadingEntry[] = []
-      const rooms = roomsData?.data ?? []
 
-      for (const room of rooms) {
-        for (const service of meteredServices) {
-          const current = getCurrentValue(room.id, service.id)
-          readings.push({
-            roomId: room.id,
-            serviceId: service.id,
-            currentReading: current,
-          })
-        }
+      for (const [key, value] of Object.entries(editedReadings)) {
+        const [roomId, serviceId] = key.split('-')
+        readings.push({
+          roomId,
+          serviceId,
+          currentReading: value,
+        })
+      }
+
+      if (readings.length === 0) {
+        throw new Error('No readings were changed.')
       }
 
       return bulkUpsertMeterReadings({
@@ -252,7 +239,7 @@ export default function MeterReadingsPage() {
               >
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                   <option key={m} value={m}>
-                    {new Date(2000, m - 1).toLocaleDateString('en-US', { month: 'long' })}
+                    {new Date(2000, m - 1).toLocaleDateString('vi-VN', { month: 'long' })}
                   </option>
                 ))}
               </Select>

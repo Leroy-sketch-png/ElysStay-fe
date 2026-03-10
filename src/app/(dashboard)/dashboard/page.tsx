@@ -24,6 +24,22 @@ import type {
   TenantDashboardDto,
 } from '@/types/api'
 
+// ─── Type Guards ────────────────────────────────────────
+
+type DashboardDto = OwnerDashboardDto | StaffDashboardDto | TenantDashboardDto
+
+function isOwnerDashboard(d: DashboardDto): d is OwnerDashboardDto {
+  return 'totalBuildings' in d && 'occupancyRate' in d
+}
+
+function isStaffDashboard(d: DashboardDto): d is StaffDashboardDto {
+  return 'assignedBuildings' in d && 'pendingIssues' in d && !('occupancyRate' in d)
+}
+
+function isTenantDashboard(d: DashboardDto): d is TenantDashboardDto {
+  return 'unpaidInvoiceCount' in d && !('totalBuildings' in d)
+}
+
 // ─── Stat Card ──────────────────────────────────────────
 
 interface StatCardProps {
@@ -79,9 +95,9 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
       />
       <StatCard
         label='Occupancy Rate'
-        value={`${Math.round(data.occupancyRate)}%`}
+        value={`${Math.round(data.occupancyRate * 100)}%`}
         icon={<TrendingUp className='size-5' />}
-        variant={data.occupancyRate >= 80 ? 'success' : data.occupancyRate >= 50 ? 'default' : 'warning'}
+        variant={data.occupancyRate >= 0.8 ? 'success' : data.occupancyRate >= 0.5 ? 'default' : 'warning'}
       />
       <StatCard
         label='Active Contracts'
@@ -187,7 +203,7 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
 // ─── Dashboard Page ─────────────────────────────────────
 
 export default function DashboardPage() {
-  const { user, hasRole } = useAuth()
+  const { user } = useAuth()
 
   const { data: profile } = useQuery({
     queryKey: userKeys.me(),
@@ -215,11 +231,9 @@ export default function DashboardPage() {
         </div>
       ) : dashboard ? (
         <>
-          {hasRole('Owner') && <OwnerDashboard data={dashboard as OwnerDashboardDto} />}
-          {hasRole('Staff') && !hasRole('Owner') && <StaffDashboard data={dashboard as StaffDashboardDto} />}
-          {hasRole('Tenant') && !hasRole('Owner') && !hasRole('Staff') && (
-            <TenantDashboard data={dashboard as TenantDashboardDto} />
-          )}
+          {isOwnerDashboard(dashboard) && <OwnerDashboard data={dashboard} />}
+          {isStaffDashboard(dashboard) && <StaffDashboard data={dashboard} />}
+          {isTenantDashboard(dashboard) && <TenantDashboard data={dashboard} />}
         </>
       ) : (
         <div className='rounded-xl border bg-card p-12 text-center'>

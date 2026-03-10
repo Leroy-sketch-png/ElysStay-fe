@@ -35,3 +35,19 @@ export function formatDate(date: string | Date): string {
     year: 'numeric',
   }).format(new Date(date))
 }
+
+/**
+ * Format a billing period as "Tháng M/YYYY".
+ */
+export function formatBillingPeriod(year: number, month: number): string {
+  return `Tháng ${month}/${year}`
+}
+
+/**
+ * Get the current billing period (year, month) defaulting to the current
+ * calendar month.
+ */
+export function getCurrentBillingPeriod(): { year: number; month: number } {
+  const now = new Date()
+  return { year: now.getFullYear(), month: now.getMonth() + 1 }
+}

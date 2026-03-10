@@ -20,6 +20,7 @@ import {
   DialogBody,
   DialogFooter,
   DialogClose,
+  ConfirmDialog,
 } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
 import { formatDate } from '@/lib/utils'
@@ -51,7 +52,7 @@ export function ContractTenantsSection({
 }: ContractTenantsSectionProps) {
   const queryClient = useQueryClient()
   const [addOpen, setAddOpen] = useState(false)
-  const [removingId, setRemovingId] = useState<string | null>(null)
+  const [removingTenant, setRemovingTenant] = useState<ContractTenantDto | null>(null)
 
   // ─── Remove Mutation ────────────────────────────────
   const removeMutation = useMutation({
@@ -59,11 +60,11 @@ export function ContractTenantsSection({
     onSuccess: () => {
       toast.success('Roommate removed')
       queryClient.invalidateQueries({ queryKey: contractKeys.detail(contractId) })
-      setRemovingId(null)
+      setRemovingTenant(null)
     },
     onError: (error: Error) => {
       toast.error('Failed to remove roommate', error.message)
-      setRemovingId(null)
+      setRemovingTenant(null)
     },
   })
 
@@ -72,10 +73,7 @@ export function ContractTenantsSection({
       toast.error('Cannot remove main tenant', 'Terminate the contract to remove the main tenant.')
       return
     }
-    if (confirm(`Remove ${tenant.tenantName} from this contract?`)) {
-      setRemovingId(tenant.id)
-      removeMutation.mutate(tenant.id)
-    }
+    setRemovingTenant(tenant)
   }
 
   const activeTenants = tenants.filter((t) => !t.moveOutDate)
@@ -134,7 +132,7 @@ export function ContractTenantsSection({
                       variant='ghost'
                       className='text-destructive hover:text-destructive'
                       onClick={() => handleRemove(tenant)}
-                      disabled={removingId === tenant.id}
+                      disabled={removeMutation.isPending}
                       aria-label={`Remove ${tenant.tenantName}`}
                     >
                       <UserMinus className='size-4' />
@@ -172,6 +170,24 @@ export function ContractTenantsSection({
         onOpenChange={setAddOpen}
         contractId={contractId}
         existingTenantIds={tenants.filter((t) => !t.moveOutDate).map((t) => t.tenantUserId)}
+      />
+
+      {/* Remove Roommate Confirmation */}
+      <ConfirmDialog
+        open={!!removingTenant}
+        onOpenChange={(open) => { if (!open) setRemovingTenant(null) }}
+        title='Remove Roommate'
+        description={
+          removingTenant
+            ? `Remove ${removingTenant.tenantName} from this contract? They will be recorded as moved out.`
+            : ''
+        }
+        confirmLabel='Remove'
+        variant='destructive'
+        loading={removeMutation.isPending}
+        onConfirm={() => {
+          if (removingTenant) removeMutation.mutate(removingTenant.id)
+        }}
       />
     </>
   )

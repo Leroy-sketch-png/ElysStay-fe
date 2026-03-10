@@ -43,7 +43,7 @@ export default function ReservationsPage() {
   const [selectedBuildingId, setSelectedBuildingId] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [statusDialogReservation, setStatusDialogReservation] = useState<ReservationDto | null>(null)
 
@@ -55,13 +55,13 @@ export default function ReservationsPage() {
       page,
       pageSize,
     }),
-    [selectedBuildingId, statusFilter, page],
+    [selectedBuildingId, statusFilter, page, pageSize],
   )
 
   // ─── Queries ───────────────────────────────────────────
   const { data: buildings } = useQuery({
-    queryKey: buildingKeys.list({}),
-    queryFn: () => fetchBuildings(),
+    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
   })
 
   const { data: reservationsData, isLoading } = useQuery({
@@ -228,6 +228,7 @@ export default function ReservationsPage() {
           totalItems={pagination.totalItems}
           totalPages={pagination.totalPages}
           onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
         />
       )}
 

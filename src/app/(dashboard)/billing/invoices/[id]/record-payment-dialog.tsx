@@ -21,7 +21,7 @@ import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toaster'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatBillingPeriod } from '@/lib/utils'
 import { invoiceKeys } from '@/lib/queries/invoices'
 import { paymentKeys, recordPayment } from '@/lib/queries/payments'
 import type { InvoiceDetailDto, RecordPaymentRequest } from '@/types/api'
@@ -130,10 +130,7 @@ export function RecordPaymentDialog({
           <DialogTitle>Record Payment</DialogTitle>
           <DialogDescription>
             Recording payment for Room {invoice.roomNumber} —{' '}
-            {new Date(invoice.billingYear, invoice.billingMonth - 1).toLocaleDateString('en-US', {
-              month: 'long',
-              year: 'numeric',
-            })}
+            {formatBillingPeriod(invoice.billingYear, invoice.billingMonth)}
           </DialogDescription>
         </DialogHeader>
 

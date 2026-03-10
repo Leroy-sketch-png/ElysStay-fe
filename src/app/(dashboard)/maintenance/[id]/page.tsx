@@ -70,16 +70,13 @@ export default function IssueDetailPage() {
   const queryClient = useQueryClient()
   const [editOpen, setEditOpen] = useState(false)
 
-  // Fetch via list query (no dedicated detail endpoint)
-  // We'll fetch with all and find by id
+  // NOTE: Backend has no GET /issues/:id endpoint.
+  // We use the list endpoint with a large page and find locally.
+  // The query key matches the actual fetch params for cache correctness.
   const { data: issuesData, isLoading } = useQuery({
-    queryKey: issueKeys.list({ pageSize: 1 }),
-    queryFn: async () => {
-      // Use the list endpoint — detail is embedded in paged result
-      // Since there's no dedicated GET /issues/:id, we'll search with large page
-      const data = await fetchIssues({ pageSize: 200 })
-      return data
-    },
+    queryKey: issueKeys.list({ pageSize: 200 }),
+    queryFn: () => fetchIssues({ pageSize: 200 }),
+    staleTime: 30_000, // cache for 30s to avoid redundant re-fetches
   })
 
   const issue = issuesData?.data?.find((i) => i.id === id) ?? null

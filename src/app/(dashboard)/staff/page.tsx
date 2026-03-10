@@ -18,10 +18,11 @@ import { CreateStaffDialog } from './create-staff-dialog'
 export default function StaffPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [createOpen, setCreateOpen] = useState(false)
   const [statusTarget, setStatusTarget] = useState<UserDto | null>(null)
 
-  const filters = { page, pageSize: 20 }
+  const filters = { page, pageSize }
 
   const { data, isLoading, error, isError } = useQuery({
     queryKey: staffKeys.list(filters),
@@ -150,6 +151,7 @@ export default function StaffPage() {
                 totalItems={data.pagination.totalItems}
                 totalPages={data.pagination.totalPages}
                 onPageChange={setPage}
+                onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
               />
             </div>
           )}

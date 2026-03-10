@@ -12,6 +12,7 @@ import {
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { ConfirmDialog } from '@/components/ui/dialog'
 import { Select } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -55,9 +56,10 @@ export default function ExpensesPage() {
   const [selectedBuildingId, setSelectedBuildingId] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<ExpenseDto | null>(null)
+  const [deletingExpense, setDeletingExpense] = useState<ExpenseDto | null>(null)
 
   // ─── Data: Buildings ───────────────────────────────────
   const { data: buildingsData } = useQuery({
@@ -97,17 +99,12 @@ export default function ExpensesPage() {
     onSuccess: () => {
       toast.success('Expense deleted')
       queryClient.invalidateQueries({ queryKey: expenseKeys.all })
+      setDeletingExpense(null)
     },
     onError: (error: Error) => {
       toast.error('Failed to delete expense', error.message)
     },
   })
-
-  const handleDelete = (expense: ExpenseDto) => {
-    if (confirm(`Delete this ${expense.category} expense (${formatCurrency(expense.amount)})?`)) {
-      deleteMutation.mutate(expense.id)
-    }
-  }
 
   // ─── Columns ───────────────────────────────────────────
   const columns: Column<ExpenseDto>[] = [
@@ -182,7 +179,7 @@ export default function ExpensesPage() {
             size='sm'
             onClick={(e) => {
               e.stopPropagation()
-              handleDelete(row)
+              setDeletingExpense(row)
             }}
             disabled={deleteMutation.isPending}
             aria-label='Delete expense'
@@ -247,7 +244,7 @@ export default function ExpensesPage() {
               {pagination && ` of ${pagination.totalItems}`}
             </span>
             <span className='text-lg font-bold tabular-nums'>
-              Total: {formatCurrency(totalAmount)}
+              Page Total: {formatCurrency(totalAmount)}
             </span>
           </CardContent>
         </Card>
@@ -300,6 +297,7 @@ export default function ExpensesPage() {
                 totalItems={pagination.totalItems}
                 totalPages={pagination.totalPages}
                 onPageChange={setPage}
+                onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
               />
             </div>
           )}
@@ -311,6 +309,24 @@ export default function ExpensesPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         expense={editingExpense}
+      />
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        open={!!deletingExpense}
+        onOpenChange={(open) => { if (!open) setDeletingExpense(null) }}
+        title='Delete Expense'
+        description={
+          deletingExpense
+            ? `Delete this ${deletingExpense.category} expense (${formatCurrency(deletingExpense.amount)})? This cannot be undone.`
+            : ''
+        }
+        confirmLabel='Delete'
+        variant='destructive'
+        loading={deleteMutation.isPending}
+        onConfirm={() => {
+          if (deletingExpense) deleteMutation.mutate(deletingExpense.id)
+        }}
       />
     </PageContainer>
   )

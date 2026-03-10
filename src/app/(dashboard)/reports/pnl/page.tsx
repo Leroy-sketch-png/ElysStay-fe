@@ -72,9 +72,10 @@ function SummaryCard({
 
 // ─── Month Row ──────────────────────────────────────────
 
-function MonthRow({ month, now }: { month: PnlMonthDto; now: Date }) {
-  const isCurrent = month.month === now.getMonth() + 1
-  const isFuture = month.month > now.getMonth() + 1
+function MonthRow({ month, now, selectedYear }: { month: PnlMonthDto; now: Date; selectedYear: number }) {
+  const isCurrentYear = selectedYear === now.getFullYear()
+  const isCurrent = isCurrentYear && month.month === now.getMonth() + 1
+  const isFuture = selectedYear > now.getFullYear() || (isCurrentYear && month.month > now.getMonth() + 1)
   const isEmpty = month.operationalIncome === 0 && month.expenses === 0 && month.depositsReceived === 0
 
   return (
@@ -267,7 +268,7 @@ export default function PnlReportPage() {
                     </tr>
                   ))
                 ) : (
-                  months.map((m) => <MonthRow key={m.month} month={m} now={now} />)
+                  months.map((m) => <MonthRow key={m.month} month={m} now={now} selectedYear={selectedYear} />)
                 )}
               </tbody>
               {!isLoading && months.length > 0 && (

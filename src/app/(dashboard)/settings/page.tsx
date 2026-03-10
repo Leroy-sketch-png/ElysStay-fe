@@ -59,7 +59,8 @@ export default function SettingsPage() {
         phone: profile.phone || '',
       })
     }
-  }, [profile, profileForm])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile])
 
   const profileMutation = useMutation({
     mutationFn: updateProfile,
@@ -263,7 +264,9 @@ export default function SettingsPage() {
               </div>
               <div className='flex justify-between py-2'>
                 <span className='text-muted-foreground'>Account Status</span>
-                <span className='font-medium text-green-600'>Active</span>
+                <span className={`font-medium ${profile?.status === 'Active' ? 'text-green-600' : 'text-destructive'}`}>
+                  {profile?.status ?? '—'}
+                </span>
               </div>
             </div>
           </CardContent>

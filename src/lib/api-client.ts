@@ -61,8 +61,12 @@ async function apiFetch<T>(
   const token = getToken?.()
 
   const headers: HeadersInit = {
-    'Content-Type': 'application/json',
     ...options.headers,
+  }
+
+  // Only set Content-Type for requests that have a body
+  if (options.body) {
+    ;(headers as Record<string, string>)['Content-Type'] = 'application/json'
   }
 
   if (token) {

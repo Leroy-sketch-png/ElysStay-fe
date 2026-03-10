@@ -21,12 +21,12 @@ export interface MeterReadingFilters {
 // ─── Queries ────────────────────────────────────────────
 
 export async function fetchMeterReadings(filters: MeterReadingFilters) {
-  const params = new URLSearchParams()
-  if (filters.buildingId) params.set('buildingId', filters.buildingId)
-  params.set('billingYear', String(filters.billingYear))
-  params.set('billingMonth', String(filters.billingMonth))
-
-  const response = await api.get<MeterReadingDto[]>(`/meter-readings?${params}`)
+  const qs = toQueryString({
+    buildingId: filters.buildingId,
+    billingYear: filters.billingYear,
+    billingMonth: filters.billingMonth,
+  })
+  const response = await api.get<MeterReadingDto[]>(`/meter-readings${qs}`)
   return response.data
 }
 

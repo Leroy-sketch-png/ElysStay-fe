@@ -146,7 +146,9 @@ export function NotificationBell() {
         ref={buttonRef}
         onClick={() => setOpen((prev) => !prev)}
         className='relative p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer'
-        title='Notifications'
+        aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
+        aria-haspopup='true'
+        aria-expanded={open}
       >
         <Bell className='size-5' />
         {unreadCount > 0 && (
@@ -160,6 +162,8 @@ export function NotificationBell() {
       {open && (
         <div
           ref={dropdownRef}
+          role='dialog'
+          aria-label='Notifications'
           className='absolute right-0 top-full mt-2 w-80 rounded-xl border bg-popover shadow-lg overflow-hidden'
           style={{ zIndex: 50 }}
         >

@@ -36,7 +36,7 @@ export default function MaintenanceIssuesPage() {
   const [statusFilter, setStatusFilter] = useState<IssueStatus | ''>('')
   const [priorityFilter, setPriorityFilter] = useState<PriorityLevel | ''>('')
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
   const [createOpen, setCreateOpen] = useState(false)
 
   // ─── Data: Buildings ───────────────────────────────────
@@ -243,6 +243,7 @@ export default function MaintenanceIssuesPage() {
                 totalItems={pagination.totalItems}
                 totalPages={pagination.totalPages}
                 onPageChange={setPage}
+                onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
               />
             </div>
           )}

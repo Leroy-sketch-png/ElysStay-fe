@@ -9,10 +9,11 @@ import {
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { ConfirmDialog } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { InvoiceStatusBadge } from '@/components/ui/status-badge'
 import { toast } from '@/components/ui/toaster'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, formatBillingPeriod } from '@/lib/utils'
 import { invoiceKeys, fetchInvoiceById, sendInvoice, voidInvoice } from '@/lib/queries/invoices'
 import { RecordPaymentDialog } from './record-payment-dialog'
 
@@ -21,6 +22,7 @@ export default function InvoiceDetailPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [paymentOpen, setPaymentOpen] = useState(false)
+  const [voidConfirmOpen, setVoidConfirmOpen] = useState(false)
 
   const { data: invoice, isLoading, error } = useQuery({
     queryKey: invoiceKeys.detail(id),
@@ -85,10 +87,7 @@ export default function InvoiceDetailPage() {
     )
   }
 
-  const billingPeriod = new Date(invoice.billingYear, invoice.billingMonth - 1).toLocaleDateString(
-    'en-US',
-    { year: 'numeric', month: 'long' },
-  )
+  const billingPeriod = formatBillingPeriod(invoice.billingYear, invoice.billingMonth)
 
   const amountDue = invoice.totalAmount - invoice.paidAmount
   const canSend = invoice.status === 'Draft'
@@ -127,11 +126,7 @@ export default function InvoiceDetailPage() {
           {canVoid && (
             <Button
               variant='destructive'
-              onClick={() => {
-                if (confirm('Void this invoice? This cannot be undone.')) {
-                  voidMutation.mutate()
-                }
-              }}
+              onClick={() => setVoidConfirmOpen(true)}
               disabled={voidMutation.isPending}
             >
               <Ban className='size-4' />
@@ -315,6 +310,22 @@ export default function InvoiceDetailPage() {
           </table>
         </CardContent>
       </Card>
+
+      {/* Void confirmation */}
+      <ConfirmDialog
+        open={voidConfirmOpen}
+        onOpenChange={setVoidConfirmOpen}
+        title='Void Invoice'
+        description='This will permanently void the invoice. This action cannot be undone. Any outstanding balance will be written off.'
+        confirmLabel='Void Invoice'
+        variant='destructive'
+        loading={voidMutation.isPending}
+        onConfirm={() => {
+          voidMutation.mutate(undefined, {
+            onSuccess: () => setVoidConfirmOpen(false),
+          })
+        }}
+      />
 
       {/* Record Payment Dialog */}
       <RecordPaymentDialog

@@ -26,6 +26,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
   const router = useRouter()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(20)
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [floorFilter, setFloorFilter] = useState<string>('')
   const [createOpen, setCreateOpen] = useState(false)
@@ -35,7 +36,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
     status: statusFilter || undefined,
     floor: floorFilter ? Number(floorFilter) : undefined,
     page,
-    pageSize: 20,
+    pageSize,
   }
 
   const { data, isLoading } = useQuery({
@@ -201,6 +202,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
           totalItems={data.pagination.totalItems}
           totalPages={data.pagination.totalPages}
           onPageChange={setPage}
+          onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
         />
       )}
 

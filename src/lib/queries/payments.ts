@@ -25,16 +25,16 @@ export interface PaymentFilters {
 // ─── Queries ────────────────────────────────────────────
 
 export async function fetchPayments(filters: PaymentFilters = {}) {
-  const params = new URLSearchParams()
-  if (filters.buildingId) params.set('buildingId', filters.buildingId)
-  if (filters.type) params.set('type', filters.type)
-  if (filters.fromDate) params.set('fromDate', filters.fromDate)
-  if (filters.toDate) params.set('toDate', filters.toDate)
-  params.set('page', String(filters.page ?? 1))
-  params.set('pageSize', String(filters.pageSize ?? 20))
-  if (filters.sort) params.set('sort', filters.sort)
-
-  return api.getPaged<PaymentDto>(`/payments?${params}`)
+  const qs = toQueryString({
+    buildingId: filters.buildingId,
+    type: filters.type,
+    fromDate: filters.fromDate,
+    toDate: filters.toDate,
+    page: filters.page ?? 1,
+    pageSize: filters.pageSize ?? 20,
+    sort: filters.sort ?? 'paidAt:desc',
+  })
+  return api.getPaged<PaymentDto>(`/payments${qs}`)
 }
 
 // ─── Mutations ──────────────────────────────────────────

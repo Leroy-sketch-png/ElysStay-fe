@@ -17,7 +17,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { InvoiceStatusBadge } from '@/components/ui/status-badge'
 import { Pagination } from '@/components/ui/pagination'
 import { toast } from '@/components/ui/toaster'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, formatBillingPeriod, getCurrentBillingPeriod } from '@/lib/utils'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
 import {
   invoiceKeys,
@@ -28,23 +28,6 @@ import {
   voidInvoice,
 } from '@/lib/queries/invoices'
 import type { InvoiceDto, InvoiceStatus } from '@/types/api'
-
-// ─── Helpers ────────────────────────────────────────────
-
-function getCurrentBillingPeriod() {
-  const now = new Date()
-  return {
-    year: now.getFullYear(),
-    month: now.getMonth() + 1,
-  }
-}
-
-function formatBillingPeriod(year: number, month: number) {
-  return new Date(year, month - 1).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-  })
-}
 
 const statusOptions: { label: string; value: InvoiceStatus | '' }[] = [
   { label: 'All Statuses', value: '' },
@@ -69,7 +52,7 @@ export default function InvoicesPage() {
   const [billingMonth, setBillingMonth] = useState(defaultPeriod.month)
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | ''>('')
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   // ─── Data: Buildings ───────────────────────────────────
@@ -366,7 +349,7 @@ export default function InvoicesPage() {
               >
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                   <option key={m} value={m}>
-                    {new Date(2000, m - 1).toLocaleDateString('en-US', { month: 'long' })}
+                    {new Date(2000, m - 1).toLocaleDateString('vi-VN', { month: 'long' })}
                   </option>
                 ))}
               </Select>
@@ -453,6 +436,7 @@ export default function InvoicesPage() {
                 totalItems={pagination.totalItems}
                 totalPages={pagination.totalPages}
                 onPageChange={setPage}
+                onPageSizeChange={(s) => { setPageSize(s); setPage(1) }}
               />
             </div>
           )}
