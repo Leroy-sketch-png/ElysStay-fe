@@ -11,10 +11,12 @@ import {
   FileText,
   Wrench,
   Receipt,
+  CreditCard,
   Gauge,
   DollarSign,
   CalendarClock,
   BarChart3,
+  Settings,
   ChevronLeft,
   Menu,
   LogOut,
@@ -42,6 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Reservations', href: '/reservations', icon: CalendarClock, roles: ['Owner', 'Staff'] },
   { label: 'Contracts', href: '/contracts', icon: FileText, roles: ['Owner', 'Staff'] },
   { label: 'Invoices', href: '/billing/invoices', icon: Receipt },
+  { label: 'Payments', href: '/billing/payments', icon: CreditCard },
   { label: 'Meters', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
   { label: 'Expenses', href: '/expenses', icon: DollarSign, roles: ['Owner', 'Staff'] },
   { label: 'Maintenance', href: '/maintenance', icon: Wrench },
@@ -195,12 +198,19 @@ export function AppShell({ children }: AppShellProps) {
           <div className='flex items-center gap-3'>
             <NotificationBell />
 
-            {/* User info + logout */}
+            {/* User info + actions */}
             <div className='flex items-center gap-2'>
               <div className='hidden sm:block text-right'>
                 <p className='text-sm font-medium leading-none'>{user?.fullName}</p>
                 <p className='text-xs text-muted-foreground'>{user?.roles[0]}</p>
               </div>
+              <Link
+                href='/settings'
+                className='p-2 text-muted-foreground hover:text-foreground transition-colors'
+                title='Settings'
+              >
+                <Settings className='size-5' />
+              </Link>
               <button
                 onClick={logout}
                 className='p-2 text-muted-foreground hover:text-destructive transition-colors cursor-pointer'
