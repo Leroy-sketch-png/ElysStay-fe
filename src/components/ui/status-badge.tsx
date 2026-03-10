@@ -50,3 +50,29 @@ export function ActiveBadge({ active }: { active: boolean }) {
 export function MeteredBadge({ metered }: { metered: boolean }) {
   return <Badge variant={metered ? 'info' : 'secondary'}>{metered ? 'Metered' : 'Flat fee'}</Badge>
 }
+
+// ─── Contract Status ────────────────────────────────────
+
+const contractStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+  Active: { label: 'Active', variant: 'success' },
+  Terminated: { label: 'Terminated', variant: 'destructive' },
+}
+
+export function ContractStatusBadge({ status }: { status: string }) {
+  const config = contractStatusConfig[status] ?? { label: status, variant: 'muted' as const }
+  return <Badge variant={config.variant}>{config.label}</Badge>
+}
+
+// ─── Deposit Status ─────────────────────────────────────
+
+const depositStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
+  Held: { label: 'Held', variant: 'info' },
+  PartiallyRefunded: { label: 'Partially Refunded', variant: 'warning' },
+  Refunded: { label: 'Refunded', variant: 'success' },
+  Forfeited: { label: 'Forfeited', variant: 'destructive' },
+}
+
+export function DepositStatusBadge({ status }: { status: string }) {
+  const config = depositStatusConfig[status] ?? { label: status, variant: 'muted' as const }
+  return <Badge variant={config.variant}>{config.label}</Badge>
+}

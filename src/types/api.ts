@@ -11,6 +11,8 @@
 export type UserRole = 'Owner' | 'Staff' | 'Tenant'
 export type UserStatus = 'Active' | 'Deactivated'
 export type RoomStatus = 'Available' | 'Booked' | 'Occupied' | 'Maintenance'
+export type ContractStatus = 'Active' | 'Terminated'
+export type DepositStatus = 'Held' | 'PartiallyRefunded' | 'Refunded' | 'Forfeited'
 
 // ─── User ───────────────────────────────────────────────
 
@@ -226,4 +228,114 @@ export interface PagedResult<T> {
   success: boolean
   data: T[]
   pagination: PaginationMeta
+}
+
+// ─── Contract ───────────────────────────────────────────
+
+export interface ContractDto {
+  id: string
+  roomId: string
+  roomNumber: string
+  buildingId: string
+  buildingName: string
+  tenantUserId: string
+  tenantName: string
+  reservationId?: string
+  startDate: string
+  endDate: string
+  moveInDate: string
+  monthlyRent: number
+  depositAmount: number
+  depositStatus: DepositStatus
+  status: ContractStatus
+  terminationDate?: string
+  terminationNote?: string
+  refundAmount?: number
+  note?: string
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ContractDetailDto extends ContractDto {
+  tenants: ContractTenantDto[]
+}
+
+export interface ContractTenantDto {
+  id: string
+  tenantUserId: string
+  tenantName: string
+  tenantEmail?: string
+  tenantPhone?: string
+  isMainTenant: boolean
+  moveInDate: string
+  moveOutDate?: string
+}
+
+export interface CreateContractRequest {
+  roomId: string
+  tenantUserId: string
+  reservationId?: string
+  startDate: string
+  endDate: string
+  moveInDate: string
+  monthlyRent: number
+  depositAmount: number
+  note?: string
+}
+
+export interface UpdateContractRequest {
+  endDate?: string
+  monthlyRent?: number
+  note?: string
+}
+
+export interface TerminateContractRequest {
+  terminationDate: string
+  note?: string
+  deductions?: number
+}
+
+export interface RenewContractRequest {
+  newEndDate: string
+  newMonthlyRent?: number
+}
+
+export interface AddContractTenantRequest {
+  tenantUserId: string
+  moveInDate: string
+}
+
+// ─── Tenant Profile ─────────────────────────────────────
+
+export interface TenantProfileDto {
+  userId: string
+  idNumber?: string
+  idFrontUrl?: string
+  idBackUrl?: string
+  dateOfBirth?: string
+  gender?: string
+  permanentAddress?: string
+  issuedDate?: string
+  issuedPlace?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface UpdateTenantProfileRequest {
+  idNumber?: string
+  dateOfBirth?: string
+  gender?: string
+  permanentAddress?: string
+  issuedDate?: string
+  issuedPlace?: string
+}
+
+// ─── Tenant User Management ─────────────────────────────
+
+export interface CreateTenantRequest {
+  email: string
+  fullName: string
+  phone?: string
+  password: string
 }
