@@ -85,7 +85,7 @@ export default function StaffPage() {
             <Button
               variant='ghost'
               size='sm'
-              className={isActive ? 'text-destructive hover:text-destructive' : 'text-green-600 hover:text-green-600'}
+              className={isActive ? 'text-destructive hover:text-destructive' : 'text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300'}
               onClick={(e) => {
                 e.stopPropagation()
                 setStatusTarget(row)

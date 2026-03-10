@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -42,7 +42,7 @@ export default function SettingsPage() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, isError, error } = useQuery({
     queryKey: userKeys.me(),
     queryFn: fetchCurrentUser,
   })
@@ -110,6 +110,14 @@ export default function SettingsPage() {
   return (
     <PageTransition>
     <PageContainer title='Settings' description='Manage your account'>
+      {isError && (
+        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+          <p className='font-medium text-destructive'>Failed to load profile</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+        </div>
+      )}
+
+      {!isError && (
       <div className='grid gap-6 max-w-2xl'>
         {/* Profile Card */}
         <Card>
@@ -266,7 +274,7 @@ export default function SettingsPage() {
               </div>
               <div className='flex justify-between py-2'>
                 <span className='text-muted-foreground'>Account Status</span>
-                <span className={`font-medium ${profile?.status === 'Active' ? 'text-green-600' : 'text-destructive'}`}>
+                <span className={`font-medium ${profile?.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
                   {profile?.status ?? '—'}
                 </span>
               </div>
@@ -274,6 +282,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+      )}
     </PageContainer>
     </PageTransition>
   )

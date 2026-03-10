@@ -112,8 +112,7 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
         }
         setInitialized(true)
       })
-      .catch(err => {
-        console.error('Keycloak init failed:', err)
+      .catch(() => {
         setInitialized(true)
       })
 
@@ -127,7 +126,6 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
           }
         })
         .catch(() => {
-          console.warn('Token refresh failed, logging out')
           kc.logout()
         })
     }

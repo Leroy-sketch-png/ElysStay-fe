@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Plus, Wrench, Eye } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
@@ -15,7 +15,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Card, CardContent } from '@/components/ui/card'
 import { EmptyState } from '@/components/EmptyState'
 import { IssueStatusBadge, PriorityBadge } from '@/components/ui/status-badge'
-import { toast } from '@/components/ui/toaster'
 import { formatDate } from '@/lib/utils'
 import {
   issueKeys,
@@ -30,7 +29,6 @@ import { CreateIssueDialog } from './create-issue-dialog'
 
 export default function MaintenanceIssuesPage() {
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   // ─── State ─────────────────────────────────────────────
   const [selectedBuildingId, setSelectedBuildingId] = useState('')

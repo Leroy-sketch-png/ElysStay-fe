@@ -11,6 +11,7 @@ import type {
 export const issueKeys = {
   all: ['issues'] as const,
   list: (params: IssueFilters) => [...issueKeys.all, 'list', params] as const,
+  detail: (id: string) => [...issueKeys.all, 'detail', id] as const,
 }
 
 export interface IssueFilters {
@@ -36,6 +37,11 @@ export async function fetchIssues(filters: IssueFilters = {}) {
     pageSize: filters.pageSize ?? 20,
   })
   return api.getPaged<MaintenanceIssueDto>(`/issues${qs}`)
+}
+
+export async function fetchIssueById(id: string) {
+  const response = await api.get<MaintenanceIssueDto>(`/issues/${id}`)
+  return response.data!
 }
 
 // ─── Mutations ──────────────────────────────────────────

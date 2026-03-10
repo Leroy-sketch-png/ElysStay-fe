@@ -18,7 +18,7 @@ export default function GlobalError({
         <div className='flex min-h-screen flex-col items-center justify-center px-4 py-16'>
           <div className='mx-auto max-w-md text-center'>
             <div className='mb-6 flex justify-center'>
-              <div className='rounded-full bg-red-100 p-6 dark:bg-red-950/30'>
+              <div className='rounded-full bg-destructive/10 p-6'>
                 <svg
                   viewBox='0 0 24 24'
                   fill='none'
@@ -26,7 +26,7 @@ export default function GlobalError({
                   strokeWidth={2}
                   strokeLinecap='round'
                   strokeLinejoin='round'
-                  className='size-10 text-red-600 dark:text-red-400'
+                  className='size-10 text-destructive'
                 >
                   <path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z' />
                   <path d='M12 9v4' />

@@ -26,9 +26,8 @@ import { toast } from '@/components/ui/toaster'
 import { formatDate, timeAgo } from '@/lib/utils'
 import {
   issueKeys,
-  fetchIssues,
+  fetchIssueById,
   changeIssueStatus,
-  updateIssue,
 } from '@/lib/queries/issues'
 import type { MaintenanceIssueDto, IssueStatus } from '@/types/api'
 import { EditIssueDialog } from './edit-issue-dialog'
@@ -57,16 +56,11 @@ export default function IssueDetailPage() {
   const queryClient = useQueryClient()
   const [editOpen, setEditOpen] = useState(false)
 
-  // NOTE: Backend has no GET /issues/:id endpoint.
-  // We use the list endpoint with a large page and find locally.
-  // The query key matches the actual fetch params for cache correctness.
-  const { data: issuesData, isLoading } = useQuery({
-    queryKey: issueKeys.list({ pageSize: 200 }),
-    queryFn: () => fetchIssues({ pageSize: 200 }),
-    staleTime: 30_000, // cache for 30s to avoid redundant re-fetches
+  // Fetch single issue by ID via GET /issues/:id
+  const { data: issue, isLoading } = useQuery({
+    queryKey: issueKeys.detail(id),
+    queryFn: () => fetchIssueById(id),
   })
-
-  const issue = issuesData?.data?.find((i) => i.id === id) ?? null
 
   // ─── Status Transition ─────────────────────────────────
   const statusMutation = useMutation({

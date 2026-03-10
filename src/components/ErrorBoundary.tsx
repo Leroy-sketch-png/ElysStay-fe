@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
 	}
 
 	public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-		console.error('ErrorBoundary caught:', error, errorInfo)
+		// TODO: report to error tracking service (e.g. Sentry)
 		this.props.onError?.(error, errorInfo)
 	}
 
