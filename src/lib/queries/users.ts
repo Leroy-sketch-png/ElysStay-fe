@@ -11,7 +11,7 @@ export const userKeys = {
   me: () => [...userKeys.all, 'me'] as const,
   dashboard: () => [...userKeys.all, 'dashboard'] as const,
   detail: (id: string) => [...userKeys.all, id] as const,
-  list: (filters: Record<string, unknown>) => [...userKeys.all, 'list', filters] as const,
+  list: (filters: object) => [...userKeys.all, 'list', filters] as const,
 }
 
 export async function fetchCurrentUser() {
