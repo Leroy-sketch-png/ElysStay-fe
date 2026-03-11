@@ -18,8 +18,7 @@ export interface IssueFilters {
   buildingId?: string
   status?: string
   priority?: string
-  sortBy?: string
-  sortDesc?: boolean
+  sort?: string
   page?: number
   pageSize?: number
 }
@@ -31,8 +30,7 @@ export async function fetchIssues(filters: IssueFilters = {}) {
     buildingId: filters.buildingId,
     status: filters.status,
     priority: filters.priority,
-    sortBy: filters.sortBy,
-    sortDesc: filters.sortDesc,
+    sort: filters.sort ?? 'createdAt:desc',
     page: filters.page ?? 1,
     pageSize: filters.pageSize ?? 20,
   })

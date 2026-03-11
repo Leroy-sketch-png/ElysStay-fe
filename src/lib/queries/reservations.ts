@@ -19,8 +19,7 @@ export interface ReservationFilters {
   buildingId?: string
   roomId?: string
   status?: string
-  sortBy?: string
-  sortDesc?: boolean
+  sort?: string
   page?: number
   pageSize?: number
 }
@@ -30,8 +29,7 @@ export async function fetchReservations(filters: ReservationFilters = {}) {
     buildingId: filters.buildingId,
     roomId: filters.roomId,
     status: filters.status,
-    sortBy: filters.sortBy ?? 'createdAt',
-    sortDesc: filters.sortDesc ?? true,
+    sort: filters.sort ?? 'createdAt:desc',
     page: filters.page ?? 1,
     pageSize: filters.pageSize ?? 20,
   })

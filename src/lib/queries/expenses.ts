@@ -19,8 +19,7 @@ export interface ExpenseFilters {
   category?: string
   fromDate?: string
   toDate?: string
-  sortBy?: string
-  sortDesc?: boolean
+  sort?: string
   page?: number
   pageSize?: number
 }
@@ -34,8 +33,7 @@ export async function fetchExpenses(filters: ExpenseFilters = {}) {
     category: filters.category,
     fromDate: filters.fromDate,
     toDate: filters.toDate,
-    sortBy: filters.sortBy,
-    sortDesc: filters.sortDesc,
+    sort: filters.sort ?? 'expenseDate:desc',
     page: filters.page ?? 1,
     pageSize: filters.pageSize ?? 20,
   })

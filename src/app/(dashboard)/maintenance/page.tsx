@@ -53,8 +53,7 @@ export default function MaintenanceIssuesPage() {
     priority: priorityFilter || undefined,
     page,
     pageSize,
-    sortBy: 'createdAt',
-    sortDesc: true,
+    sort: 'createdAt:desc',
   }
 
   const { data: issuesData, isLoading, error } = useQuery({

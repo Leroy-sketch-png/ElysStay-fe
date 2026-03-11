@@ -76,8 +76,7 @@ export default function ExpensesPage() {
     category: categoryFilter || undefined,
     page,
     pageSize,
-    sortBy: 'expenseDate',
-    sortDesc: true,
+    sort: 'expenseDate:desc',
   }
 
   const { data: expensesData, isLoading, error } = useQuery({
