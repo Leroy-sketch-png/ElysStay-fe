@@ -27,17 +27,17 @@ export async function fetchMeterReadings(filters: MeterReadingFilters) {
     billingMonth: filters.billingMonth,
   })
   const response = await api.get<MeterReadingDto[]>(`/meter-readings${qs}`)
-  return response.data
+  return response.data!
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function bulkUpsertMeterReadings(data: BulkUpsertMeterReadingsRequest) {
   const response = await api.post<MeterReadingDto[]>('/meter-readings/bulk', data)
-  return response.data
+  return response.data!
 }
 
 export async function updateMeterReading(id: string, data: UpdateMeterReadingRequest) {
   const response = await api.put<MeterReadingDto>(`/meter-readings/${id}`, data)
-  return response.data
+  return response.data!
 }

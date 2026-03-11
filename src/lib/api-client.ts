@@ -52,6 +52,15 @@ export function setTokenAccessor(accessor: () => string | undefined) {
   getToken = accessor
 }
 
+// ─── Auth Error Handler ─────────────────────────────────
+
+let onUnauthorized: (() => void) | null = null
+
+/** Register a callback invoked on 401 responses (e.g. redirect to login) */
+export function setOnUnauthorized(handler: () => void) {
+  onUnauthorized = handler
+}
+
 // ─── Core Fetch ─────────────────────────────────────────
 
 async function apiFetch<T>(
@@ -96,6 +105,11 @@ async function apiFetch<T>(
   }
 
   if (!response.ok) {
+    // 401 Unauthorized — token expired or invalid, trigger auth redirect
+    if (response.status === 401) {
+      onUnauthorized?.()
+    }
+
     throw new ApiError(
       response.status,
       json.errorCode as string | undefined,

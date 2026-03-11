@@ -118,7 +118,7 @@ export default function TenantsPage() {
           <Button
             variant='ghost'
             size='sm'
-            className={row.status === 'Active' ? 'text-destructive hover:text-destructive' : 'text-green-600 hover:text-green-600'}
+            className={row.status === 'Active' ? 'text-destructive hover:text-destructive' : 'text-green-600 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300'}
             onClick={(e) => {
               e.stopPropagation()
               setStatusTarget(row)

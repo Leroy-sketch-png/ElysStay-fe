@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from 'react'
 import Keycloak from 'keycloak-js'
-import { setTokenAccessor } from '@/lib/api-client'
+import { setTokenAccessor, setOnUnauthorized } from '@/lib/api-client'
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -109,6 +109,8 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
           setUser(parseUser(kc))
           setToken(kc.token)
           setTokenAccessor(() => kc.token)
+          // Redirect to login on any 401 API response
+          setOnUnauthorized(() => kc.login())
         }
         setInitialized(true)
       })
@@ -116,7 +118,7 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
         setInitialized(true)
       })
 
-    // Token refresh
+    // Reactive token refresh (fallback when onTokenExpired fires)
     kc.onTokenExpired = () => {
       kc.updateToken(MIN_TOKEN_VALIDITY)
         .then(refreshed => {
@@ -130,6 +132,24 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
         })
     }
 
+    // Proactive token refresh — refresh well before expiry so requests never hit a stale token
+    const REFRESH_INTERVAL_MS = 30_000 // check every 30s
+    const refreshInterval = setInterval(() => {
+      if (kc.authenticated) {
+        kc.updateToken(MIN_TOKEN_VALIDITY)
+          .then(refreshed => {
+            if (refreshed) {
+              setToken(kc.token)
+              setUser(parseUser(kc))
+            }
+          })
+          .catch(() => {
+            // Refresh failed — session likely expired, force logout
+            kc.logout()
+          })
+      }
+    }, REFRESH_INTERVAL_MS)
+
     // Auth state events
     kc.onAuthLogout = () => {
       setAuthenticated(false)
@@ -141,6 +161,10 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
       setAuthenticated(false)
       setUser(null)
       setToken(undefined)
+    }
+
+    return () => {
+      clearInterval(refreshInterval)
     }
   }, [loginRequired, parseUser])
 

@@ -10,6 +10,7 @@ import type {
 export const expenseKeys = {
   all: ['expenses'] as const,
   list: (params: ExpenseFilters) => [...expenseKeys.all, 'list', params] as const,
+  detail: (id: string) => [...expenseKeys.all, 'detail', id] as const,
 }
 
 export interface ExpenseFilters {
@@ -39,6 +40,11 @@ export async function fetchExpenses(filters: ExpenseFilters = {}) {
     pageSize: filters.pageSize ?? 20,
   })
   return api.getPaged<ExpenseDto>(`/expenses${qs}`)
+}
+
+export async function fetchExpenseById(id: string) {
+  const response = await api.get<ExpenseDto>(`/expenses/${id}`)
+  return response.data!
 }
 
 // ─── Mutations ──────────────────────────────────────────

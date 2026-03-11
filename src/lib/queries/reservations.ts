@@ -10,7 +10,7 @@ import type {
 export const reservationKeys = {
   all: ['reservations'] as const,
   list: (filters: object) => [...reservationKeys.all, 'list', filters] as const,
-  detail: (id: string) => [...reservationKeys.all, id] as const,
+  detail: (id: string) => [...reservationKeys.all, 'detail', id] as const,
 }
 
 // ─── Queries ────────────────────────────────────────────
@@ -36,6 +36,11 @@ export async function fetchReservations(filters: ReservationFilters = {}) {
     pageSize: filters.pageSize ?? 20,
   })
   return api.getPaged<ReservationDto>(`/reservations${qs}`)
+}
+
+export async function fetchReservationById(id: string) {
+  const response = await api.get<ReservationDto>(`/reservations/${id}`)
+  return response.data!
 }
 
 // ─── Mutations ──────────────────────────────────────────

@@ -103,7 +103,7 @@ export default function PaymentsPage() {
       render: (p) => (
         <span
           className={
-            p.type === 'DepositRefund' ? 'font-medium text-destructive' : 'font-medium text-green-600'
+            p.type === 'DepositRefund' ? 'font-medium text-destructive' : 'font-medium text-green-600 dark:text-green-400'
           }
         >
           {p.type === 'DepositRefund' ? '-' : '+'}
@@ -235,19 +235,19 @@ export default function PaymentsPage() {
           <Card className='border-green-200 bg-green-50/50 dark:bg-green-950/10 dark:border-green-800'>
             <CardContent className='p-4'>
               <p className='text-sm text-muted-foreground'>Rent Payments</p>
-              <p className='text-xl font-bold text-green-600'>{formatCurrency(summary.rentPayments)}</p>
+              <p className='text-xl font-bold text-green-600 dark:text-green-400'>{formatCurrency(summary.rentPayments)}</p>
             </CardContent>
           </Card>
           <Card className='border-blue-200 bg-blue-50/50 dark:bg-blue-950/10 dark:border-blue-800'>
             <CardContent className='p-4'>
               <p className='text-sm text-muted-foreground'>Deposits In</p>
-              <p className='text-xl font-bold text-blue-600'>{formatCurrency(summary.depositsIn)}</p>
+              <p className='text-xl font-bold text-blue-600 dark:text-blue-400'>{formatCurrency(summary.depositsIn)}</p>
             </CardContent>
           </Card>
           <Card className='border-amber-200 bg-amber-50/50 dark:bg-amber-950/10 dark:border-amber-800'>
             <CardContent className='p-4'>
               <p className='text-sm text-muted-foreground'>Deposits Refunded</p>
-              <p className='text-xl font-bold text-amber-600'>{formatCurrency(summary.depositsOut)}</p>
+              <p className='text-xl font-bold text-amber-600 dark:text-amber-400'>{formatCurrency(summary.depositsOut)}</p>
             </CardContent>
           </Card>
         </div>

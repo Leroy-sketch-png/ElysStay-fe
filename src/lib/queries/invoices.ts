@@ -43,19 +43,19 @@ export async function fetchInvoices(filters: InvoiceFilters = {}) {
 
 export async function fetchInvoiceById(id: string) {
   const response = await api.get<InvoiceDetailDto>(`/invoices/${id}`)
-  return response.data
+  return response.data!
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function generateInvoices(data: GenerateInvoicesRequest) {
   const response = await api.post<InvoiceGenerationResult>('/invoices/generate', data)
-  return response.data
+  return response.data!
 }
 
 export async function updateInvoice(id: string, data: UpdateInvoiceRequest) {
   const response = await api.put<InvoiceDto>(`/invoices/${id}`, data)
-  return response.data
+  return response.data!
 }
 
 export async function sendInvoice(id: string) {
@@ -64,7 +64,7 @@ export async function sendInvoice(id: string) {
 
 export async function batchSendInvoices(data: BatchSendInvoicesRequest) {
   const response = await api.post<{ sentCount: number }>('/invoices/send-batch', data)
-  return response.data
+  return response.data!
 }
 
 export async function voidInvoice(id: string) {

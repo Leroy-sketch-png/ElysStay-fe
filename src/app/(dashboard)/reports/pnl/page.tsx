@@ -100,12 +100,12 @@ function MonthRow({ month, now, selectedYear }: { month: PnlMonthDto; now: Date;
       <td className='px-4 py-3 text-sm text-right'>{formatCurrency(month.depositsRefunded)}</td>
       <td className='px-4 py-3 text-sm text-right text-destructive'>{formatCurrency(month.expenses)}</td>
       <td className='px-4 py-3 text-sm text-right font-medium'>
-        <span className={month.netOperational >= 0 ? 'text-green-600' : 'text-destructive'}>
+        <span className={month.netOperational >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}>
           {formatCurrency(month.netOperational)}
         </span>
       </td>
       <td className='px-4 py-3 text-sm text-right font-semibold'>
-        <span className={month.netCashFlow >= 0 ? 'text-green-600' : 'text-destructive'}>
+        <span className={month.netCashFlow >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}>
           {formatCurrency(month.netCashFlow)}
         </span>
       </td>
@@ -290,12 +290,12 @@ export default function PnlReportPage() {
                       {formatCurrency(totals.expenses)}
                     </td>
                     <td className='px-4 py-3 text-sm text-right'>
-                      <span className={totals.netOperational >= 0 ? 'text-green-600' : 'text-destructive'}>
+                      <span className={totals.netOperational >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}>
                         {formatCurrency(totals.netOperational)}
                       </span>
                     </td>
                     <td className='px-4 py-3 text-sm text-right'>
-                      <span className={totals.netCashFlow >= 0 ? 'text-green-600' : 'text-destructive'}>
+                      <span className={totals.netCashFlow >= 0 ? 'text-green-600 dark:text-green-400' : 'text-destructive'}>
                         {formatCurrency(totals.netCashFlow)}
                       </span>
                     </td>

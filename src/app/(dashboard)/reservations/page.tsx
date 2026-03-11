@@ -118,7 +118,7 @@ export default function ReservationsPage() {
         const expiring = isExpiringSoon(r)
         const expired = isExpired(r)
         return (
-          <span className={expired ? 'text-destructive font-medium' : expiring ? 'text-amber-600 font-medium' : ''}>
+          <span className={expired ? 'text-destructive font-medium' : expiring ? 'text-amber-600 dark:text-amber-400 font-medium' : ''}>
             {formatDate(r.expiresAt)}
             {expired && ' (expired)'}
             {expiring && ' (soon)'}

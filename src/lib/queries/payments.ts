@@ -10,6 +10,7 @@ import type {
 export const paymentKeys = {
   all: ['payments'] as const,
   list: (params: PaymentFilters) => [...paymentKeys.all, 'list', params] as const,
+  detail: (id: string) => [...paymentKeys.all, 'detail', id] as const,
 }
 
 export interface PaymentFilters {
@@ -42,11 +43,11 @@ export async function fetchPayments(filters: PaymentFilters = {}) {
 /** Record payment on invoice (via invoices/{id}/payments) */
 export async function recordPayment(invoiceId: string, data: RecordPaymentRequest) {
   const response = await api.post<PaymentDto>(`/invoices/${invoiceId}/payments`, data)
-  return response.data
+  return response.data!
 }
 
 /** Batch record payments */
 export async function batchRecordPayments(data: BatchRecordPaymentsRequest) {
   const response = await api.post<PaymentDto[]>('/payments/batch', data)
-  return response.data
+  return response.data!
 }

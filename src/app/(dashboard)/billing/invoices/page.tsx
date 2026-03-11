@@ -205,7 +205,7 @@ export default function InvoicesPage() {
         key: 'paidAmount',
         header: 'Paid',
         render: (row) => (
-          <span className={row.paidAmount < row.totalAmount ? 'text-muted-foreground' : 'text-green-600'}>
+          <span className={row.paidAmount < row.totalAmount ? 'text-muted-foreground' : 'text-green-600 dark:text-green-400'}>
             {formatCurrency(row.paidAmount)}
           </span>
         ),
