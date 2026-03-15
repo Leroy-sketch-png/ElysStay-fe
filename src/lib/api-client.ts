@@ -5,7 +5,14 @@
  * Automatically injects Keycloak JWT token from the auth store.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5027/api/v1'
+const DEFAULT_API_BASE_URL = 'http://localhost:5027/api/v1'
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (process.env.NODE_ENV === 'development' ? DEFAULT_API_BASE_URL : '')
+
+if (!API_BASE_URL) {
+  throw new Error('Missing NEXT_PUBLIC_API_URL in non-development environment.')
+}
 
 // ─── Response Types (match backend envelope) ────────────
 

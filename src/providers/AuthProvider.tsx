@@ -43,9 +43,19 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 // ─── Config ─────────────────────────────────────────────
 
-const KEYCLOAK_URL = process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8080'
-const KEYCLOAK_REALM = process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'elysstay'
-const KEYCLOAK_CLIENT_ID = process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID || 'elysstay-fe'
+const KEYCLOAK_URL =
+  process.env.NEXT_PUBLIC_KEYCLOAK_URL ||
+  (process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : '')
+const KEYCLOAK_REALM =
+  process.env.NEXT_PUBLIC_KEYCLOAK_REALM ||
+  (process.env.NODE_ENV === 'development' ? 'elysstay' : '')
+const KEYCLOAK_CLIENT_ID =
+  process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ||
+  (process.env.NODE_ENV === 'development' ? 'elysstay-fe' : '')
+
+if (!KEYCLOAK_URL || !KEYCLOAK_REALM || !KEYCLOAK_CLIENT_ID) {
+  throw new Error('Missing Keycloak public env vars in non-development environment.')
+}
 
 /** How many seconds before token expiry to refresh (default 60s) */
 const MIN_TOKEN_VALIDITY = 60
