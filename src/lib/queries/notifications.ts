@@ -13,12 +13,14 @@ export const notificationKeys = {
 export interface NotificationFilters {
   page?: number
   pageSize?: number
+  isRead?: boolean
 }
 
 export async function fetchNotifications(filters: NotificationFilters = {}) {
   const qs = toQueryString({
     page: filters.page ?? 1,
     pageSize: filters.pageSize ?? 20,
+    isRead: filters.isRead,
   })
   return api.getPaged<NotificationDto>(`/notifications${qs}`)
 }

@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/toaster'
-import { userKeys, fetchCurrentUser, updateProfile, changePassword } from '@/lib/queries/users'
+import { userKeys, fetchCurrentUser, updateProfile } from '@/lib/queries/users'
 import { useAuth } from '@/providers/AuthProvider'
 
 // ─── Schemas ────────────────────────────────────────────
@@ -24,17 +24,7 @@ const profileSchema = z.object({
   phone: z.string().max(20).optional().or(z.literal('')),
 })
 
-const passwordSchema = z.object({
-  currentPassword: z.string().min(1, 'Current password is required'),
-  newPassword: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: 'Passwords do not match',
-  path: ['confirmPassword'],
-})
-
 type ProfileFormData = z.infer<typeof profileSchema>
-type PasswordFormData = z.infer<typeof passwordSchema>
 
 // ─── Page ───────────────────────────────────────────────
 
@@ -79,31 +69,6 @@ export default function SettingsPage() {
       fullName: data.fullName,
       phone: data.phone || undefined,
     })
-  })
-
-  // ─── Password Form ─────────────────────────────────────
-  const passwordForm = useForm<PasswordFormData>({
-    resolver: zodResolver(passwordSchema),
-    defaultValues: { currentPassword: '', newPassword: '', confirmPassword: '' },
-  })
-
-  const passwordMutation = useMutation({
-    mutationFn: (data: PasswordFormData) =>
-      changePassword({
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
-      }),
-    onSuccess: () => {
-      toast.success('Password changed')
-      passwordForm.reset()
-    },
-    onError: () => {
-      toast.error('Failed to change password', 'Check your current password')
-    },
-  })
-
-  const onPasswordSubmit = passwordForm.handleSubmit((data) => {
-    passwordMutation.mutate(data)
   })
 
   // ─── Render ────────────────────────────────────────────
@@ -184,74 +149,32 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Password Card */}
+        {/* Password / Security Card */}
         <Card>
           <CardHeader>
             <div className='flex items-center gap-3'>
               <Lock className='size-5 text-primary' />
               <div>
-                <CardTitle>Password</CardTitle>
-                <CardDescription>Change your account password</CardDescription>
+                <CardTitle>Security</CardTitle>
+                <CardDescription>Manage your password and login settings</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <form onSubmit={onPasswordSubmit} className='space-y-4'>
-              <div className='space-y-1.5'>
-                <Label htmlFor='currentPassword'>Current Password</Label>
-                <Input
-                  type='password'
-                  {...passwordForm.register('currentPassword')}
-                  placeholder='••••••••'
-                />
-                {passwordForm.formState.errors.currentPassword && (
-                  <p className='text-xs text-destructive'>
-                    {passwordForm.formState.errors.currentPassword.message}
-                  </p>
-                )}
-              </div>
-
-              <div className='space-y-1.5'>
-                <Label htmlFor='newPassword'>New Password</Label>
-                <Input
-                  type='password'
-                  {...passwordForm.register('newPassword')}
-                  placeholder='••••••••'
-                />
-                {passwordForm.formState.errors.newPassword && (
-                  <p className='text-xs text-destructive'>
-                    {passwordForm.formState.errors.newPassword.message}
-                  </p>
-                )}
-              </div>
-
-              <div className='space-y-1.5'>
-                <Label htmlFor='confirmPassword'>Confirm Password</Label>
-                <Input
-                  type='password'
-                  {...passwordForm.register('confirmPassword')}
-                  placeholder='••••••••'
-                />
-                {passwordForm.formState.errors.confirmPassword && (
-                  <p className='text-xs text-destructive'>
-                    {passwordForm.formState.errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-
-              <div className='flex justify-end'>
-                <Button type='submit' disabled={passwordMutation.isPending}>
-                  {passwordMutation.isPending ? (
-                    <>
-                      <Loader2 className='mr-2 size-4 animate-spin' />
-                      Updating…
-                    </>
-                  ) : (
-                    'Change Password'
-                  )}
-                </Button>
-              </div>
-            </form>
+            <p className='text-sm text-muted-foreground mb-4'>
+              Your account is managed through Keycloak identity provider.
+              To change your password, update two-factor settings, or manage login sessions,
+              use the Keycloak Account Console.
+            </p>
+            <a
+              href={`${process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8080'}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'elysstay'}/account/#/security/signingin`}
+              target='_blank'
+              rel='noopener noreferrer'
+              className='inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors'
+            >
+              <Shield className='size-4' />
+              Manage Account Security
+            </a>
           </CardContent>
         </Card>
 

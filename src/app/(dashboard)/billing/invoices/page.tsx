@@ -335,7 +335,7 @@ export default function InvoicesPage() {
                 value={billingYear}
                 onChange={(e) => setBillingYear(Number(e.target.value))}
               >
-                {[defaultPeriod.year - 1, defaultPeriod.year, defaultPeriod.year + 1].map((y) => (
+                {Array.from({ length: 7 }, (_, i) => defaultPeriod.year - 5 + i).map((y) => (
                   <option key={y} value={y}>{y}</option>
                 ))}
               </Select>

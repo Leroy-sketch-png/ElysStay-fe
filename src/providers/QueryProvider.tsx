@@ -45,10 +45,14 @@ function getQueryClient() {
 
 export function QueryProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(getQueryClient)
+  const showDevtools = process.env.NODE_ENV === 'development'
+
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      <ReactQueryDevtools initialIsOpen={false} buttonPosition='bottom-left' />
+      {showDevtools ? (
+        <ReactQueryDevtools initialIsOpen={false} buttonPosition='bottom-left' />
+      ) : null}
     </QueryClientProvider>
   )
 }

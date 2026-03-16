@@ -193,22 +193,22 @@ export default function NotificationsPage() {
 
   // ─── Query ──────────────────────────────────────────────
   const { data, isLoading, isError } = useQuery({
-    queryKey: notificationKeys.list(filters),
-    queryFn: () => fetchNotifications(filters),
+    queryKey: notificationKeys.list({
+      ...filters,
+      isRead: readFilter === 'all' ? undefined : readFilter === 'read',
+    }),
+    queryFn: () =>
+      fetchNotifications({
+        ...filters,
+        isRead: readFilter === 'all' ? undefined : readFilter === 'read',
+      }),
   })
 
-  const allNotifications = data?.data ?? []
+  const notifications = data?.data ?? []
   const pagination = data?.pagination
 
-  // Client-side filter for read/unread
-  const notifications =
-    readFilter === 'all'
-      ? allNotifications
-      : allNotifications.filter((n) =>
-          readFilter === 'unread' ? !n.isRead : n.isRead,
-        )
-
-  const unreadCount = allNotifications.filter((n) => !n.isRead).length
+  // Count unread from the current page for UI badge
+  const unreadCount = notifications.filter((n) => !n.isRead).length
 
   // ─── Mutations ──────────────────────────────────────────
   const markReadMutation = useMutation({
