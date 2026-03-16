@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, type ReactNode } from 'react'
+import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -23,10 +23,16 @@ import {
   Menu,
   LogOut,
   UserCog,
+  Sun,
+  Moon,
+  Monitor,
+  ChevronRight,
+  Home,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/providers/AuthProvider'
+import { useTheme } from '@/providers/ThemeProvider'
 import { SIDEBAR, HEADER, Z_INDEX } from '@/lib/layout-constants'
 import { NotificationBell } from './NotificationBell'
 
@@ -56,6 +62,60 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Staff', href: '/staff', icon: UserCog, roles: ['Owner'] },
 ]
 
+// ─── Header Breadcrumbs ─────────────────────────────────
+
+const ROUTE_LABELS: Record<string, string> = {
+  dashboard: 'Dashboard',
+  buildings: 'Buildings',
+  rooms: 'Rooms',
+  tenants: 'Tenants',
+  contracts: 'Contracts',
+  billing: 'Billing',
+  invoices: 'Invoices',
+  payments: 'Payments',
+  'meter-readings': 'Meter Readings',
+  expenses: 'Expenses',
+  maintenance: 'Maintenance',
+  reservations: 'Reservations',
+  notifications: 'Notifications',
+  settings: 'Settings',
+  staff: 'Staff',
+  reports: 'Reports',
+  pnl: 'P&L Report',
+}
+
+function HeaderBreadcrumbs({ pathname }: { pathname: string }) {
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments.length === 0) return <div className='flex-1' />
+
+  const crumbs = segments.map((segment, i) => {
+    const isId = /^[0-9a-f-]{36}$/.test(segment) // UUID detection
+    const label = isId ? 'Details' : ROUTE_LABELS[segment] || segment
+    const href = '/' + segments.slice(0, i + 1).join('/')
+    return { label, href, isLast: i === segments.length - 1 }
+  })
+
+  return (
+    <nav aria-label='Breadcrumb' className='hidden md:flex flex-1 items-center gap-1 px-2 text-sm'>
+      <Link href='/dashboard' className='text-muted-foreground hover:text-foreground transition-colors'>
+        <Home className='size-4' />
+      </Link>
+      {crumbs.map((crumb, i) => (
+        <span key={i} className='flex items-center gap-1'>
+          <ChevronRight className='size-3.5 text-muted-foreground/50' />
+          {crumb.isLast ? (
+            <span className='font-medium text-foreground truncate max-w-[200px]'>{crumb.label}</span>
+          ) : (
+            <Link href={crumb.href} className='text-muted-foreground hover:text-foreground transition-colors truncate max-w-[200px]'>
+              {crumb.label}
+            </Link>
+          )}
+        </span>
+      ))}
+    </nav>
+  )
+}
+
 // ─── AppShell ───────────────────────────────────────────
 
 interface AppShellProps {
@@ -64,6 +124,7 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const { user, logout } = useAuth()
+  const { theme, setTheme } = useTheme()
   const pathname = usePathname()
 
   // Sidebar state
@@ -129,9 +190,10 @@ export function AppShell({ children }: AppShellProps) {
       <aside
         role='navigation'
         aria-label='Main navigation'
+        aria-hidden={!mobileOpen ? 'true' : undefined}
         className={cn(
-          'fixed top-0 left-0 h-full border-r bg-background transition-all duration-200 flex flex-col',
-          'md:relative md:translate-x-0',
+          'fixed top-0 left-0 h-full border-r bg-sidebar-bg transition-all duration-200 flex flex-col',
+          'md:relative md:translate-x-0 md:aria-[hidden=true]:block',
           mobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
         style={{
@@ -207,10 +269,28 @@ export function AppShell({ children }: AppShellProps) {
             <Menu className='size-5' />
           </button>
 
-          <div className='flex-1' />
+          {/* Breadcrumbs */}
+          <HeaderBreadcrumbs pathname={pathname} />
 
           {/* Right-side actions */}
-          <div className='flex items-center gap-3'>
+          <div className='flex items-center gap-2'>
+            {/* Theme toggle */}
+            <button
+              onClick={() =>
+                setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'dark' : 'light')
+              }
+              className='p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer'
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            >
+              {theme === 'dark' ? (
+                <Sun className='size-[18px]' />
+              ) : theme === 'light' ? (
+                <Moon className='size-[18px]' />
+              ) : (
+                <Monitor className='size-[18px]' />
+              )}
+            </button>
+
             <NotificationBell />
 
             {/* User info + actions */}
