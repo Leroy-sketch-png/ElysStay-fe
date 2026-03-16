@@ -80,8 +80,8 @@ async function apiFetch<T>(
     ...options.headers,
   }
 
-  // Only set Content-Type for requests that have a body
-  if (options.body) {
+  // Only set Content-Type for JSON requests (not FormData)
+  if (options.body && !(options.body instanceof FormData)) {
     ;(headers as Record<string, string>)['Content-Type'] = 'application/json'
   }
 
