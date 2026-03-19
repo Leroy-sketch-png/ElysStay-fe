@@ -3,10 +3,10 @@ import { Badge, type BadgeProps } from './badge'
 // ─── Room Status ────────────────────────────────────────
 
 const roomStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  Available: { label: 'Available', variant: 'success' },
-  Booked: { label: 'Booked', variant: 'info' },
-  Occupied: { label: 'Occupied', variant: 'default' },
-  Maintenance: { label: 'Maintenance', variant: 'warning' },
+  Available: { label: 'Trống', variant: 'success' },
+  Booked: { label: 'Đã đặt', variant: 'info' },
+  Occupied: { label: 'Đang ở', variant: 'default' },
+  Maintenance: { label: 'Bảo trì', variant: 'warning' },
 }
 
 export function RoomStatusBadge({ status }: { status: string }) {
@@ -17,8 +17,8 @@ export function RoomStatusBadge({ status }: { status: string }) {
 // ─── User Status ────────────────────────────────────────
 
 const userStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  Active: { label: 'Active', variant: 'success' },
-  Deactivated: { label: 'Deactivated', variant: 'destructive' },
+  Active: { label: 'Hoạt động', variant: 'success' },
+  Deactivated: { label: 'Vô hiệu hóa', variant: 'destructive' },
 }
 
 export function UserStatusBadge({ status }: { status: string }) {
@@ -29,9 +29,9 @@ export function UserStatusBadge({ status }: { status: string }) {
 // ─── User Role ──────────────────────────────────────────
 
 const userRoleConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  Owner: { label: 'Owner', variant: 'default' },
-  Staff: { label: 'Staff', variant: 'info' },
-  Tenant: { label: 'Tenant', variant: 'secondary' },
+  Owner: { label: 'Chủ nhà', variant: 'default' },
+  Staff: { label: 'Nhân viên', variant: 'info' },
+  Tenant: { label: 'Khách thuê', variant: 'secondary' },
 }
 
 export function UserRoleBadge({ role }: { role: string }) {
@@ -42,20 +42,20 @@ export function UserRoleBadge({ role }: { role: string }) {
 // ─── Boolean / Active Status ────────────────────────────
 
 export function ActiveBadge({ active }: { active: boolean }) {
-  return <Badge variant={active ? 'success' : 'muted'}>{active ? 'Active' : 'Inactive'}</Badge>
+  return <Badge variant={active ? 'success' : 'muted'}>{active ? 'Hoạt động' : 'Ngừng'}</Badge>
 }
 
 // ─── Metered Badge ──────────────────────────────────────
 
 export function MeteredBadge({ metered }: { metered: boolean }) {
-  return <Badge variant={metered ? 'info' : 'secondary'}>{metered ? 'Metered' : 'Flat fee'}</Badge>
+  return <Badge variant={metered ? 'info' : 'secondary'}>{metered ? 'Đo đếm' : 'Cố định'}</Badge>
 }
 
 // ─── Contract Status ────────────────────────────────────
 
 const contractStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  Active: { label: 'Active', variant: 'success' },
-  Terminated: { label: 'Terminated', variant: 'destructive' },
+  Active: { label: 'Hiệu lực', variant: 'success' },
+  Terminated: { label: 'Đã chấm dứt', variant: 'destructive' },
 }
 
 export function ContractStatusBadge({ status }: { status: string }) {
@@ -66,10 +66,10 @@ export function ContractStatusBadge({ status }: { status: string }) {
 // ─── Deposit Status ─────────────────────────────────────
 
 const depositStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  Held: { label: 'Held', variant: 'info' },
-  PartiallyRefunded: { label: 'Partially Refunded', variant: 'warning' },
-  Refunded: { label: 'Refunded', variant: 'success' },
-  Forfeited: { label: 'Forfeited', variant: 'destructive' },
+  Held: { label: 'Đang giữ', variant: 'info' },
+  PartiallyRefunded: { label: 'Hoàn một phần', variant: 'warning' },
+  Refunded: { label: 'Đã hoàn', variant: 'success' },
+  Forfeited: { label: 'Tịch thu', variant: 'destructive' },
 }
 
 export function DepositStatusBadge({ status }: { status: string }) {
@@ -80,12 +80,12 @@ export function DepositStatusBadge({ status }: { status: string }) {
 // ─── Invoice Status ─────────────────────────────────────
 
 const invoiceStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  Draft: { label: 'Draft', variant: 'muted' },
-  Sent: { label: 'Sent', variant: 'info' },
-  PartiallyPaid: { label: 'Partially Paid', variant: 'warning' },
-  Paid: { label: 'Paid', variant: 'success' },
-  Overdue: { label: 'Overdue', variant: 'destructive' },
-  Void: { label: 'Void', variant: 'muted' },
+  Draft: { label: 'Nháp', variant: 'muted' },
+  Sent: { label: 'Đã gửi', variant: 'info' },
+  PartiallyPaid: { label: 'Trả một phần', variant: 'warning' },
+  Paid: { label: 'Đã thanh toán', variant: 'success' },
+  Overdue: { label: 'Quá hạn', variant: 'destructive' },
+  Void: { label: 'Hủy bỏ', variant: 'muted' },
 }
 
 export function InvoiceStatusBadge({ status }: { status: string }) {
@@ -96,9 +96,9 @@ export function InvoiceStatusBadge({ status }: { status: string }) {
 // ─── Payment Type ───────────────────────────────────────
 
 const paymentTypeConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  RentPayment: { label: 'Rent', variant: 'info' },
-  DepositIn: { label: 'Deposit In', variant: 'success' },
-  DepositRefund: { label: 'Deposit Refund', variant: 'warning' },
+  RentPayment: { label: 'Tiền thuê', variant: 'info' },
+  DepositIn: { label: 'Tiền cọc vào', variant: 'success' },
+  DepositRefund: { label: 'Hoàn cọc', variant: 'warning' },
 }
 
 export function PaymentTypeBadge({ type }: { type: string }) {
@@ -109,10 +109,10 @@ export function PaymentTypeBadge({ type }: { type: string }) {
 // ─── Issue Status ───────────────────────────────────────
 
 const issueStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  New: { label: 'New', variant: 'info' },
-  InProgress: { label: 'In Progress', variant: 'warning' },
-  Resolved: { label: 'Resolved', variant: 'success' },
-  Closed: { label: 'Closed', variant: 'muted' },
+  New: { label: 'Mới', variant: 'info' },
+  InProgress: { label: 'Đang xử lý', variant: 'warning' },
+  Resolved: { label: 'Đã giải quyết', variant: 'success' },
+  Closed: { label: 'Đã đóng', variant: 'muted' },
 }
 
 export function IssueStatusBadge({ status }: { status: string }) {
@@ -123,9 +123,9 @@ export function IssueStatusBadge({ status }: { status: string }) {
 // ─── Priority Level ─────────────────────────────────────
 
 const priorityConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  Low: { label: 'Low', variant: 'muted' },
-  Medium: { label: 'Medium', variant: 'warning' },
-  High: { label: 'High', variant: 'destructive' },
+  Low: { label: 'Thấp', variant: 'muted' },
+  Medium: { label: 'Trung bình', variant: 'warning' },
+  High: { label: 'Cao', variant: 'destructive' },
 }
 
 export function PriorityBadge({ priority }: { priority: string }) {
@@ -136,11 +136,11 @@ export function PriorityBadge({ priority }: { priority: string }) {
 // ─── Reservation Status ─────────────────────────────────
 
 const reservationStatusConfig: Record<string, { label: string; variant: BadgeProps['variant'] }> = {
-  Pending: { label: 'Pending', variant: 'warning' },
-  Confirmed: { label: 'Confirmed', variant: 'info' },
-  Converted: { label: 'Converted', variant: 'success' },
-  Cancelled: { label: 'Cancelled', variant: 'destructive' },
-  Expired: { label: 'Expired', variant: 'muted' },
+  Pending: { label: 'Chờ duyệt', variant: 'warning' },
+  Confirmed: { label: 'Đã xác nhận', variant: 'info' },
+  Converted: { label: 'Đã chuyển đổi', variant: 'success' },
+  Cancelled: { label: 'Đã hủy', variant: 'destructive' },
+  Expired: { label: 'Hết hạn', variant: 'muted' },
 }
 
 export function ReservationStatusBadge({ status }: { status: string }) {

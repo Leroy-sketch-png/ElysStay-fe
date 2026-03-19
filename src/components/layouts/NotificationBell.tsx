@@ -55,7 +55,7 @@ function NotificationItem({
             onMarkRead(notification.id)
           }}
           className='shrink-0 p-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer'
-          title='Mark as read'
+          title='Đánh dấu đã đọc'
         >
           <Check className='size-3.5' />
         </button>
@@ -138,7 +138,7 @@ export function NotificationBell() {
         ref={buttonRef}
         onClick={() => setOpen((prev) => !prev)}
         className='relative p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer'
-        aria-label={unreadCount > 0 ? `${unreadCount} unread notifications` : 'Notifications'}
+        aria-label={unreadCount > 0 ? `${unreadCount} thông báo chưa đọc` : 'Thông báo'}
         aria-haspopup='true'
         aria-expanded={open}
       >
@@ -155,13 +155,13 @@ export function NotificationBell() {
         <div
           ref={dropdownRef}
           role='dialog'
-          aria-label='Notifications'
+          aria-label='Thông báo'
           className='absolute right-0 top-full mt-2 w-80 rounded-lg border bg-popover shadow-lg overflow-hidden'
           style={{ zIndex: 50 }}
         >
           {/* Header */}
           <div className='flex items-center justify-between border-b px-4 py-3'>
-            <h3 className='text-sm font-semibold'>Notifications</h3>
+            <h3 className='text-sm font-semibold'>Thông báo</h3>
             {unreadCount > 0 && (
               <button
                 onClick={() => markAllReadMutation.mutate()}
@@ -169,7 +169,7 @@ export function NotificationBell() {
                 className='flex items-center gap-1 text-xs text-primary hover:underline cursor-pointer disabled:opacity-50'
               >
                 <CheckCheck className='size-3.5' />
-                Mark all read
+                Đánh dấu tất cả đã đọc
               </button>
             )}
           </div>
@@ -183,7 +183,7 @@ export function NotificationBell() {
             ) : notifications.length === 0 ? (
               <div className='py-8 text-center'>
                 <Bell className='mx-auto size-6 text-muted-foreground/50' />
-                <p className='mt-2 text-sm text-muted-foreground'>No notifications yet</p>
+                <p className='mt-2 text-sm text-muted-foreground'>Chưa có thông báo nào</p>
               </div>
             ) : (
               notifications.map((n) => (
@@ -204,7 +204,7 @@ export function NotificationBell() {
                 onClick={() => setOpen(false)}
                 className='text-xs font-medium text-primary hover:underline'
               >
-                View all notifications
+                Xem tất cả notifications
               </Link>
             </div>
           )}

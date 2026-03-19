@@ -20,8 +20,8 @@ import { useAuth } from '@/providers/AuthProvider'
 // ─── Schemas ────────────────────────────────────────────
 
 const profileSchema = z.object({
-  fullName: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  phone: z.string().max(20).regex(/^[+\d][\d\s\-().]*$/, 'Invalid phone format').optional().or(z.literal('')),
+  fullName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự').max(100),
+  phone: z.string().max(20).regex(/^[+\d][\d\s\-().]*$/, 'Số điện thoại không hợp lệ').optional().or(z.literal('')),
 })
 
 type ProfileFormData = z.infer<typeof profileSchema>
@@ -57,11 +57,11 @@ export default function SettingsPage() {
   const profileMutation = useMutation({
     mutationFn: updateProfile,
     onSuccess: () => {
-      toast.success('Profile updated')
+      toast.success('Hồ sơ đã cập nhật')
       queryClient.invalidateQueries({ queryKey: userKeys.me() })
     },
     onError: (error: Error) => {
-      toast.error('Failed to update profile', error.message)
+      toast.error('Không thể cập nhật hồ sơ', error.message)
     },
   })
 
@@ -75,11 +75,11 @@ export default function SettingsPage() {
   // ─── Render ────────────────────────────────────────────
   return (
     <PageTransition>
-    <PageContainer title='Settings' description='Manage your account'>
+    <PageContainer title='Cài đặt' description='Quản lý tài khoản của bạn'>
       {isError && (
         <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
-          <p className='font-medium text-destructive'>Failed to load profile</p>
-          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+          <p className='font-medium text-destructive'>Không thể tải hồ sơ</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'Đã xảy ra lỗi không mong đợi.'}</p>
         </div>
       )}
 
@@ -91,8 +91,8 @@ export default function SettingsPage() {
             <div className='flex items-center gap-3'>
               <User className='size-5 text-primary' />
               <div>
-                <CardTitle>Profile</CardTitle>
-                <CardDescription>Update your display name and contact info</CardDescription>
+                <CardTitle>Hồ sơ</CardTitle>
+                <CardDescription>Cập nhật tên hiển thị và thông tin liên hệ</CardDescription>
               </div>
             </div>
           </CardHeader>
@@ -105,11 +105,11 @@ export default function SettingsPage() {
             ) : (
               <form noValidate onSubmit={onProfileSubmit} className='space-y-4'>
                 <div className='space-y-1.5'>
-                  <Label htmlFor='fullName'>Full Name</Label>
+                  <Label htmlFor='fullName'>Họ và tên</Label>
                   <Input
                     id='fullName'
                     {...profileForm.register('fullName')}
-                    placeholder='Your name'
+                    placeholder='Tên của bạn'
                   />
                   {profileForm.formState.errors.fullName && (
                     <p className='text-xs text-destructive'>
@@ -119,7 +119,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className='space-y-1.5'>
-                  <Label htmlFor='phone'>Phone</Label>
+                  <Label htmlFor='phone'>Số điện thoại</Label>
                   <Input
                     id='phone'
                     {...profileForm.register('phone')}
@@ -136,7 +136,7 @@ export default function SettingsPage() {
                   <Label>Email</Label>
                   <Input value={profile?.email || ''} disabled />
                   <p className='text-xs text-muted-foreground'>
-                    Email cannot be changed
+                    Email không thể thay đổi
                   </p>
                 </div>
 
@@ -163,16 +163,16 @@ export default function SettingsPage() {
             <div className='flex items-center gap-3'>
               <Lock className='size-5 text-primary' />
               <div>
-                <CardTitle>Security</CardTitle>
-                <CardDescription>Manage your password and login settings</CardDescription>
+                <CardTitle>Bảo mật</CardTitle>
+                <CardDescription>Quản lý mật khẩu và cài đặt đăng nhập</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <p className='text-sm text-muted-foreground mb-4'>
-              Your account is managed through Keycloak identity provider.
-              To change your password, update two-factor settings, or manage login sessions,
-              use the Keycloak Account Console.
+              Tài khoản của bạn được quản lý qua Keycloak.
+              Để đổi mật khẩu, cập nhật xác thực hai yếu tố, hoặc quản lý phiên đăng nhập,
+              hãy sử dụng Keycloak Account Console.
             </p>
             <a
               href={`${process.env.NEXT_PUBLIC_KEYCLOAK_URL}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'elysstay'}/account/#/security/signingin`}
@@ -186,7 +186,7 @@ export default function SettingsPage() {
               aria-disabled={!process.env.NEXT_PUBLIC_KEYCLOAK_URL}
             >
               <Shield className='size-4' />
-              Manage Account Security
+              Quản lý bảo mật tài khoản
             </a>
           </CardContent>
         </Card>
@@ -197,19 +197,19 @@ export default function SettingsPage() {
             <div className='flex items-center gap-3'>
               <Shield className='size-5 text-primary' />
               <div>
-                <CardTitle>Account</CardTitle>
-                <CardDescription>Your account information</CardDescription>
+                <CardTitle>Tài khoản</CardTitle>
+                <CardDescription>Thông tin tài khoản của bạn</CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className='grid gap-3 text-sm'>
               <div className='flex justify-between py-2 border-b'>
-                <span className='text-muted-foreground'>Role</span>
+                <span className='text-muted-foreground'>Vai trò</span>
                 <span className='font-medium'>{user?.roles.join(', ') || '—'}</span>
               </div>
               <div className='flex justify-between py-2'>
-                <span className='text-muted-foreground'>Account Status</span>
+                <span className='text-muted-foreground'>Trạng thái tài khoản</span>
                 <span className={`font-medium ${profile?.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
                   {profile?.status ?? '—'}
                 </span>

@@ -29,11 +29,11 @@ import type { ContractDetailDto, RenewContractRequest } from '@/types/api'
 // ─── Schema ─────────────────────────────────────────────
 
 const renewSchema = z.object({
-  newEndDate: z.string().min(1, 'New end date is required'),
+  newEndDate: z.string().min(1, 'Ngày kết thúc mới là bắt buộc'),
   newMonthlyRent: z
     .preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-      z.number().positive('Rent must be positive').optional(),
+      z.number().positive('Tiền thuê phải lớn hơn 0').optional(),
     ),
 })
 
@@ -41,7 +41,7 @@ const renewSchema = z.object({
 function buildRenewSchema(newStartDate: string) {
   return renewSchema.refine(
     (data) => data.newEndDate > newStartDate,
-    { message: 'End date must be after start date', path: ['newEndDate'] },
+    { message: 'Ngày kết thúc phải sau ngày bắt đầu', path: ['newEndDate'] },
   )
 }
 
@@ -117,8 +117,8 @@ export function RenewContractDialog({
     mutationFn: (data: RenewContractRequest) => renewContract(contract.id, data),
     onSuccess: () => {
       toast.success(
-        'Contract renewed',
-        'A new contract has been created. The old contract is now terminated.',
+        'Đã gia hạn hợp đồng',
+        'Hợp đồng mới đã được tạo. Hợp đồng cũ đã chấm dứt.',
       )
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       queryClient.invalidateQueries({ queryKey: contractKeys.detail(contract.id) })
@@ -128,7 +128,7 @@ export function RenewContractDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to renew contract', error.message)
+      toast.error('Gia hạn hợp đồng thất bại', error.message)
     },
   })
 
@@ -146,10 +146,10 @@ export function RenewContractDialog({
       <DialogContent>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Renew Contract</DialogTitle>
+          <DialogTitle>Gia hạn hợp đồng</DialogTitle>
           <DialogDescription>
-            Create a new contract continuing from Room {contract.roomNumber} ({contract.tenantName}).
-            The current contract will be terminated automatically.
+            Tạo hợp đồng mới tiếp nối Phòng {contract.roomNumber} ({contract.tenantName}).
+            Hợp đồng hiện tại sẽ tự động chấm dứt.
           </DialogDescription>
         </DialogHeader>
 
@@ -158,39 +158,39 @@ export function RenewContractDialog({
             {/* Current contract info */}
             <div className='rounded-lg bg-muted/50 p-4 space-y-2'>
               <p className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                Current Contract
+                Hợp đồng hiện tại
               </p>
               <div className='flex justify-between text-sm'>
-                <span className='text-muted-foreground'>End Date</span>
+                <span className='text-muted-foreground'>Ngày kết thúc</span>
                 <span className='font-medium'>{formatDate(contract.endDate)}</span>
               </div>
               <div className='flex justify-between text-sm'>
-                <span className='text-muted-foreground'>Monthly Rent</span>
+                <span className='text-muted-foreground'>Tiền thuê/tháng</span>
                 <span className='font-medium'>{formatCurrency(contract.monthlyRent)}</span>
               </div>
               <div className='flex justify-between text-sm'>
-                <span className='text-muted-foreground'>Deposit (carries over)</span>
+                <span className='text-muted-foreground'>Tiền cọc (giữ lại)</span>
                 <span className='font-medium'>{formatCurrency(contract.depositAmount)}</span>
               </div>
             </div>
 
             {/* New start info */}
             <div className='space-y-2'>
-              <Label>New Start Date</Label>
+              <Label>Ngày bắt đầu mới</Label>
               <Input
                 type='date'
                 value={newStartDate}
                 disabled
-                aria-label='New contract start date'
+                aria-label='Ngày bắt đầu hợp đồng mới'
               />
               <p className='text-xs text-muted-foreground'>
-                Automatically set to the day after current end date.
+                Tự động là ngày sau ngày kết thúc hiện tại.
               </p>
             </div>
 
             {/* New end date */}
             <div className='space-y-2'>
-              <Label htmlFor='renew-end'>New End Date *</Label>
+              <Label htmlFor='renew-end'>Ngày kết thúc mới *</Label>
               <Input
                 id='renew-end'
                 type='date'
@@ -205,7 +205,7 @@ export function RenewContractDialog({
 
             {/* Optional new rent */}
             <div className='space-y-2'>
-              <Label htmlFor='renew-rent'>New Monthly Rent (VND)</Label>
+              <Label htmlFor='renew-rent'>Tiền thuê mới/tháng (VND)</Label>
               <Input
                 id='renew-rent'
                 type='number'
@@ -225,18 +225,18 @@ export function RenewContractDialog({
                 <p className='text-xs text-destructive'>{errors.newMonthlyRent.message}</p>
               )}
               <p className='text-xs text-muted-foreground'>
-                Leave empty to keep the current rent of {formatCurrency(contract.monthlyRent)}.
+                Để trống để giữ tiền thuê hiện tại {formatCurrency(contract.monthlyRent)}.
               </p>
             </div>
 
             {/* What happens */}
             <div className='rounded-lg border border-warning/20 bg-warning/5 p-3 text-xs text-foreground space-y-1'>
-              <p className='font-medium'>What happens on renewal:</p>
+              <p className='font-medium'>Khi gia hạn sẽ:</p>
               <ul className='list-disc pl-4 space-y-0.5'>
-                <li>Current contract → Terminated (no deposit refund)</li>
-                <li>New Active contract → created with same room, tenant, and deposit</li>
-                <li>All active roommates will be carried over</li>
-                <li>Room stays Occupied — no interruption</li>
+                <li>Hợp đồng hiện tại → Chấm dứt (không hoàn cọc)</li>
+                <li>Tạo hợp đồng mới với cùng phòng, khách và tiền cọc</li>
+                <li>Tất cả người ở cùng sẽ được chuyển sang</li>
+                <li>Phòng vẫn Đang ở — không gián đoạn</li>
               </ul>
             </div>
           </DialogBody>
@@ -248,10 +248,10 @@ export function RenewContractDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Renewing…' : 'Renew Contract'}
+              {mutation.isPending ? 'Đang gia hạn…' : 'Gia hạn'}
             </Button>
           </DialogFooter>
         </form>

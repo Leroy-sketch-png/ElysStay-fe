@@ -35,29 +35,29 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
   const deactivateMutation = useMutation({
     mutationFn: (id: string) => deactivateService(id),
     onSuccess: () => {
-      toast.success('Service deactivated')
+      toast.success('Đã ngưng dịch vụ')
       queryClient.invalidateQueries({ queryKey: serviceKeys.byBuilding(buildingId) })
       setDeactivateTarget(null)
     },
     onError: (error: Error) => {
-      toast.error('Failed to deactivate service', error.message)
+      toast.error('Ngưng dịch vụ thất bại', error.message)
     },
   })
 
   const columns: Column<ServiceDto>[] = [
     {
       key: 'name',
-      header: 'Service',
+      header: 'Dịch vụ',
       render: (row) => (
         <div>
           <p className='font-medium'>{row.name}</p>
-          <p className='text-xs text-muted-foreground'>per {row.unit}</p>
+          <p className='text-xs text-muted-foreground'>/{row.unit}</p>
         </div>
       ),
     },
     {
       key: 'unitPrice',
-      header: 'Unit Price',
+      header: 'Đơn giá',
       render: (row) => (
         <div>
           <p className='font-medium'>{formatCurrency(row.unitPrice)}</p>
@@ -71,12 +71,12 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
     },
     {
       key: 'type',
-      header: 'Type',
+      header: 'Loại',
       render: (row) => <MeteredBadge metered={row.isMetered} />,
     },
     {
       key: 'isActive',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (row) => <ActiveBadge active={row.isActive} />,
     },
     {
@@ -92,7 +92,7 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
               setEditTarget(row)
             }}
           >
-            Edit
+            Sửa
           </Button>
           {row.isActive && (
             <Button
@@ -104,7 +104,7 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
                 setDeactivateTarget(row)
               }}
             >
-              Deactivate
+              Ngưng
             </Button>
           )}
         </div>
@@ -117,11 +117,11 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <p className='text-sm text-muted-foreground'>
-          Fee configuration for this building. These are the default prices used in invoice generation.
+          Cấu hình phí cho tòa nhà. Đây là đơn giá mặc định dùng khi tạo hóa đơn.
         </p>
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className='size-4' />
-          Add Service
+          Thêm dịch vụ
         </Button>
       </div>
 
@@ -130,7 +130,7 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
         data={services ?? []}
         loading={isLoading}
         rowKey={(row) => row.id}
-        emptyMessage='No services configured for this building.'
+        emptyMessage='Tòa nhà chưa có dịch vụ nào.'
         emptyIcon={<Settings className='size-10' />}
       />
 
@@ -155,9 +155,9 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
       <ConfirmDialog
         open={!!deactivateTarget}
         onOpenChange={(open) => !open && setDeactivateTarget(null)}
-        title='Deactivate Service'
-        description={`Deactivating "${deactivateTarget?.name}" will exclude it from future invoices. Existing invoices are not affected.`}
-        confirmLabel='Deactivate'
+        title='Ngưng dịch vụ'
+        description={`Ngưng "${deactivateTarget?.name}" sẽ không tính vào hóa đơn tương lai. Hóa đơn hiện tại không bị ảnh hưởng.`}
+        confirmLabel='Ngưng'
         variant='destructive'
         loading={deactivateMutation.isPending}
         onConfirm={() => deactivateTarget && deactivateMutation.mutate(deactivateTarget.id)}

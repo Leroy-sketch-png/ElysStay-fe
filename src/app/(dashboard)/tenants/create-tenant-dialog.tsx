@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
+import { Copy, Check, KeyRound } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -20,15 +21,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/toaster'
 import { tenantKeys, createTenant } from '@/lib/queries/tenants'
-import type { CreateTenantRequest } from '@/types/api'
+import type { CreateTenantRequest, CreateUserResultDto } from '@/types/api'
 
 // ─── Validation ─────────────────────────────────────────
 
 const tenantSchema = z.object({
-  email: z.string().trim().email('Valid email required'),
-  fullName: z.string().trim().min(1, 'Full name is required').max(200),
-  phone: z.string().trim().regex(/^\d{10}$/, 'Phone must be exactly 10 digits').optional().or(z.literal('')),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  email: z.string().trim().email('Email không hợp lệ'),
+  fullName: z.string().trim().min(1, 'Họ tên là bắt buộc').max(200),
+  phone: z.string().trim().regex(/^\d{10}$/, 'Số điện thoại phải đủ 10 chữ số').optional().or(z.literal('')),
+  password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự').optional().or(z.literal('')),
 })
 
 type TenantFormData = z.infer<typeof tenantSchema>
@@ -42,6 +43,8 @@ interface CreateTenantDialogProps {
 
 export function CreateTenantDialog({ open, onOpenChange }: CreateTenantDialogProps) {
   const queryClient = useQueryClient()
+  const [createdUser, setCreatedUser] = useState<CreateUserResultDto | null>(null)
+  const [copied, setCopied] = useState(false)
 
   const {
     register,
@@ -56,21 +59,22 @@ export function CreateTenantDialog({ open, onOpenChange }: CreateTenantDialogPro
   useEffect(() => {
     if (open) {
       reset({ email: '', fullName: '', phone: '', password: '' })
+      setCreatedUser(null)
+      setCopied(false)
     }
   }, [open, reset])
 
   const createMutation = useMutation({
     mutationFn: (data: CreateTenantRequest) => createTenant(data),
-    onSuccess: () => {
-      toast.success('Tenant account created', 'Their profile can now be completed and a contract can be created.')
+    onSuccess: (result) => {
+      setCreatedUser(result)
       queryClient.invalidateQueries({ queryKey: tenantKeys.all })
-      onOpenChange(false)
     },
     onError: (error: Error & { status?: number }) => {
       if ((error as { status?: number }).status === 409) {
-        toast.error('Email already exists', 'A user with this email address already exists.')
+        toast.error('Email đã tồn tại', 'Đã có tài khoản sử dụng email này.')
       } else {
-        toast.error('Failed to create tenant', error.message)
+        toast.error('Không thể tạo khách thuê', error.message)
       }
     },
   })
@@ -80,28 +84,89 @@ export function CreateTenantDialog({ open, onOpenChange }: CreateTenantDialogPro
       email: data.email,
       fullName: data.fullName,
       phone: data.phone || undefined,
-      password: data.password,
+      password: data.password || undefined,
     })
   }
 
+  const handleCopyCredentials = async () => {
+    if (!createdUser) return
+    const text = `Email: ${createdUser.email}\nMật khẩu: ${createdUser.temporaryPassword}`
+    await navigator.clipboard.writeText(text)
+    setCopied(true)
+    toast.success('Đã sao chép thông tin đăng nhập')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  // ─── Success State ─────────────────────────────────────
+  if (createdUser) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent size='sm'>
+          <DialogClose />
+          <DialogHeader>
+            <DialogTitle>Tạo tài khoản thành công</DialogTitle>
+            <DialogDescription>
+              Hãy gửi thông tin đăng nhập dưới đây cho khách thuê. Mật khẩu chỉ hiển thị một lần duy nhất.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogBody className='space-y-4'>
+            <div className='rounded-lg border bg-muted/30 p-4 space-y-3'>
+              <div className='flex items-center gap-2 text-sm'>
+                <span className='text-muted-foreground w-20'>Họ tên:</span>
+                <span className='font-medium'>{createdUser.fullName}</span>
+              </div>
+              <div className='flex items-center gap-2 text-sm'>
+                <span className='text-muted-foreground w-20'>Email:</span>
+                <span className='font-medium'>{createdUser.email}</span>
+              </div>
+              <div className='flex items-center gap-2 text-sm'>
+                <KeyRound className='size-4 text-muted-foreground' />
+                <span className='text-muted-foreground'>Mật khẩu:</span>
+                <code className='rounded bg-background px-2 py-0.5 font-mono text-sm font-semibold'>
+                  {createdUser.temporaryPassword}
+                </code>
+              </div>
+            </div>
+
+            <p className='text-xs text-warning font-medium'>
+              Khách thuê nên đổi mật khẩu ngay sau khi đăng nhập lần đầu.
+            </p>
+          </DialogBody>
+
+          <DialogFooter>
+            <Button variant='outline' onClick={handleCopyCredentials}>
+              {copied ? <Check className='size-4' /> : <Copy className='size-4' />}
+              {copied ? 'Đã sao chép' : 'Sao chép thông tin'}
+            </Button>
+            <Button onClick={() => onOpenChange(false)}>
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )
+  }
+
+  // ─── Form State ────────────────────────────────────────
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size='sm'>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Add Tenant</DialogTitle>
+          <DialogTitle>Thêm khách thuê</DialogTitle>
           <DialogDescription>
-            Create a new tenant account. They will be able to log in and view their room, invoices, and issues.
+            Tạo tài khoản mới cho khách thuê. Họ có thể đăng nhập để xem phòng, hóa đơn và sự cố.
           </DialogDescription>
         </DialogHeader>
 
         <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             <div className='space-y-2'>
-              <Label htmlFor='tenant-name'>Full Name *</Label>
+              <Label htmlFor='tenant-name'>Họ tên *</Label>
               <Input
                 id='tenant-name'
-                placeholder='Enter full name'
+                placeholder='Nhập họ tên đầy đủ'
                 {...register('fullName')}
                 aria-invalid={!!errors.fullName}
               />
@@ -113,7 +178,7 @@ export function CreateTenantDialog({ open, onOpenChange }: CreateTenantDialogPro
               <Input
                 id='tenant-email'
                 type='email'
-                placeholder='tenant@example.com'
+                placeholder='email@example.com'
                 {...register('email')}
                 aria-invalid={!!errors.email}
               />
@@ -121,38 +186,38 @@ export function CreateTenantDialog({ open, onOpenChange }: CreateTenantDialogPro
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='tenant-phone'>Phone</Label>
+              <Label htmlFor='tenant-phone'>Số điện thoại</Label>
               <Input
                 id='tenant-phone'
                 type='tel'
-                placeholder='10 digits (optional)'
+                placeholder='10 chữ số (không bắt buộc)'
                 {...register('phone')}
               />
               {errors.phone && <p className='text-xs text-destructive'>{errors.phone.message}</p>}
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='tenant-pass'>Password *</Label>
+              <Label htmlFor='tenant-pass'>Mật khẩu</Label>
               <Input
                 id='tenant-pass'
                 type='password'
-                placeholder='Min 8 characters'
+                placeholder='Tối thiểu 8 ký tự (để trống = tự động tạo)'
                 {...register('password')}
                 aria-invalid={!!errors.password}
               />
               {errors.password && <p className='text-xs text-destructive'>{errors.password.message}</p>}
               <p className='text-xs text-muted-foreground'>
-                Tenant can change their password after first login.
+                Để trống sẽ tự động tạo mật khẩu ngẫu nhiên. Mật khẩu sẽ hiển thị sau khi tạo thành công.
               </p>
             </div>
           </DialogBody>
 
           <DialogFooter>
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={createMutation.isPending}>
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating…' : 'Create Tenant'}
+              {createMutation.isPending ? 'Đang tạo…' : 'Tạo khách thuê'}
             </Button>
           </DialogFooter>
         </form>

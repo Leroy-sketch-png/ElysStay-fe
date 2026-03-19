@@ -31,11 +31,11 @@ import type { ContractDetailDto, TerminateContractRequest } from '@/types/api'
 // ─── Schema ─────────────────────────────────────────────
 
 const terminateSchema = z.object({
-  terminationDate: z.string().min(1, 'Termination date is required'),
+  terminationDate: z.string().min(1, 'Ngày chấm dứt là bắt buộc'),
   deductions: z
     .preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? 0 : v),
-      z.number().min(0, 'Cannot be negative'),
+      z.number().min(0, 'Không thể âm'),
     ),
   note: z.string().trim().max(500).optional().or(z.literal('')),
 })
@@ -76,7 +76,7 @@ export function TerminateContractDialog({
       terminateSchema.refine(
         (data) => data.deductions <= contract.depositAmount,
         {
-          message: `Deductions cannot exceed deposit (${formatCurrency(contract.depositAmount)})`,
+          message: `Khấu trừ không thể vượt tiền cọc (${formatCurrency(contract.depositAmount)})`,
           path: ['deductions'],
         },
       ),
@@ -105,7 +105,7 @@ export function TerminateContractDialog({
   const mutation = useMutation({
     mutationFn: (data: TerminateContractRequest) => terminateContract(contract.id, data),
     onSuccess: () => {
-      toast.success('Contract terminated', 'Room has been set back to Available.')
+      toast.success('Đã chấm dứt hợp đồng', 'Phòng đã được chuyển về Trống.')
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
@@ -114,7 +114,7 @@ export function TerminateContractDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to terminate contract', error.message)
+      toast.error('Chấm dứt hợp đồng thất bại', error.message)
     },
   })
 
@@ -131,10 +131,10 @@ export function TerminateContractDialog({
       <DialogContent>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Terminate Contract</DialogTitle>
+          <DialogTitle>Chấm dứt hợp đồng</DialogTitle>
           <DialogDescription>
-            Ending the contract for Room {contract.roomNumber} ({contract.tenantName}).
-            The room status will be set back to Available.
+            Kết thúc hợp đồng Phòng {contract.roomNumber} ({contract.tenantName}).
+            Trạng thái phòng sẽ chuyển về Trống.
           </DialogDescription>
         </DialogHeader>
 
@@ -142,7 +142,7 @@ export function TerminateContractDialog({
           <DialogBody className='space-y-5'>
             {/* Date */}
             <div className='space-y-2'>
-              <Label htmlFor='term-date'>Termination Date *</Label>
+              <Label htmlFor='term-date'>Ngày chấm dứt *</Label>
               <Input
                 id='term-date'
                 type='date'
@@ -157,7 +157,7 @@ export function TerminateContractDialog({
 
             {/* Deductions & Refund Preview */}
             <div className='space-y-2'>
-              <Label htmlFor='term-deductions'>Deductions from Deposit (VND)</Label>
+              <Label htmlFor='term-deductions'>Khấu trừ từ tiền cọc (VND)</Label>
               <Input
                 id='term-deductions'
                 type='number'
@@ -181,34 +181,34 @@ export function TerminateContractDialog({
             {/* Refund Calculation Preview */}
             <div className='rounded-lg bg-muted/50 p-4 space-y-2'>
               <div className='flex justify-between text-sm'>
-                <span className='text-muted-foreground'>Deposit Paid</span>
+                <span className='text-muted-foreground'>Tiền cọc đã nộp</span>
                 <span className='font-medium'>{formatCurrency(contract.depositAmount)}</span>
               </div>
               <div className='flex justify-between text-sm'>
-                <span className='text-muted-foreground'>Deductions</span>
+                <span className='text-muted-foreground'>Khấu trừ</span>
                 <span className='font-medium text-destructive'>
                   − {formatCurrency(watchedDeductions)}
                 </span>
               </div>
               <div className='border-t pt-2 flex justify-between text-sm font-semibold'>
-                <span>Refund to Tenant</span>
+                <span>Hoàn trả khách thuê</span>
                 <span className={refundAmount > 0 ? 'text-success' : 'text-muted-foreground'}>
                   {formatCurrency(refundAmount)}
                 </span>
               </div>
               {refundAmount === 0 && (
                 <p className='text-xs text-muted-foreground'>
-                  Full deposit will be forfeited — no refund payment will be created.
+                  Toàn bộ tiền cọc sẽ bị tịch thu — không tạo hoàn tiền.
                 </p>
               )}
             </div>
 
             {/* Note */}
             <div className='space-y-2'>
-              <Label htmlFor='term-note'>Reason / Note</Label>
+              <Label htmlFor='term-note'>Lý do / Ghi chú</Label>
               <Textarea
                 id='term-note'
-                placeholder='Reason for termination…'
+                placeholder='Lý do chấm dứt…'
                 rows={2}
                 {...register('note')}
               />
@@ -222,10 +222,10 @@ export function TerminateContractDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' variant='destructive' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Terminating…' : 'Terminate Contract'}
+              {mutation.isPending ? 'Đang chấm dứt…' : 'Chấm dứt hợp đồng'}
             </Button>
           </DialogFooter>
         </form>

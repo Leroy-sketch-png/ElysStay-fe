@@ -33,19 +33,19 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
   const unassignMutation = useMutation({
     mutationFn: (staffId: string) => unassignStaff(buildingId, staffId),
     onSuccess: () => {
-      toast.success('Staff unassigned from building')
+      toast.success('Đã gỡ nhân viên khỏi tòa nhà')
       queryClient.invalidateQueries({ queryKey: staffKeys.byBuilding(buildingId) })
       setRemoveTarget(null)
     },
     onError: (error: Error) => {
-      toast.error('Failed to unassign staff', error.message)
+      toast.error('Gỡ nhân viên thất bại', error.message)
     },
   })
 
   const columns: Column<StaffAssignmentDto>[] = [
     {
       key: 'fullName',
-      header: 'Name',
+      header: 'Tên',
       render: (row) => (
         <div>
           <p className='font-medium'>{row.fullName}</p>
@@ -55,12 +55,12 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
     },
     {
       key: 'phone',
-      header: 'Phone',
+      header: 'Điện thoại',
       render: (row) => row.phone ?? '—',
     },
     {
       key: 'assignedAt',
-      header: 'Assigned',
+      header: 'Ngày giao',
       render: (row) => formatDate(row.assignedAt),
     },
     {
@@ -78,7 +78,7 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
             }}
           >
             <UserMinus className='size-4 mr-1' />
-            Unassign
+            Gỡ
           </Button>
         </div>
       ),
@@ -90,11 +90,11 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
     <div className='space-y-4'>
       <div className='flex items-center justify-between'>
         <p className='text-sm text-muted-foreground'>
-          Staff members assigned to manage this building.
+          Nhân viên được phân công quản lý tòa nhà.
         </p>
         <Button onClick={() => setAssignOpen(true)}>
           <Plus className='size-4' />
-          Assign Staff
+          Phân công
         </Button>
       </div>
 
@@ -103,7 +103,7 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
         data={staff ?? []}
         loading={isLoading}
         rowKey={(row) => row.staffId}
-        emptyMessage='No staff assigned to this building.'
+        emptyMessage='Tòa nhà chưa có nhân viên nào.'
         emptyIcon={<Users className='size-10' />}
       />
 
@@ -119,9 +119,9 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
       <ConfirmDialog
         open={!!removeTarget}
         onOpenChange={(open) => !open && setRemoveTarget(null)}
-        title='Unassign Staff'
-        description={`Remove "${removeTarget?.fullName}" from this building? They will no longer have access to manage it.`}
-        confirmLabel='Unassign'
+        title='Gỡ nhân viên'
+        description={`Gỡ "${removeTarget?.fullName}" khỏi tòa nhà? Họ sẽ không còn quyền quản lý tòa nhà này.`}
+        confirmLabel='Gỡ'
         variant='destructive'
         loading={unassignMutation.isPending}
         onConfirm={() => removeTarget && unassignMutation.mutate(removeTarget.staffId)}

@@ -39,28 +39,28 @@ export default function InvoiceDetailPage() {
   const sendMutation = useMutation({
     mutationFn: () => sendInvoice(id),
     onSuccess: () => {
-      toast.success('Invoice sent', 'Status changed to Sent.')
+      toast.success('Đã gửi hóa đơn', 'Trạng thái đã chuyển sang Đã gửi.')
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(id) })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
-      toast.error('Failed to send invoice', error.message)
+      toast.error('Gửi hóa đơn thất bại', error.message)
     },
   })
 
   const voidMutation = useMutation({
     mutationFn: () => voidInvoice(id),
     onSuccess: () => {
-      toast.success('Invoice voided')
+      toast.success('Đã hủy hóa đơn')
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(id) })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
-      toast.error('Failed to void invoice', error.message)
+      toast.error('Hủy hóa đơn thất bại', error.message)
     },
   })
 
@@ -86,13 +86,13 @@ export default function InvoiceDetailPage() {
       <PageContainer>
         <div className='flex flex-col items-center justify-center py-20 text-center'>
           <FileText className='size-12 text-muted-foreground mb-4' />
-          <h2 className='text-lg font-semibold'>Invoice not found</h2>
+          <h2 className='text-lg font-semibold'>Không tìm thấy hóa đơn</h2>
           <p className='mt-1 text-sm text-muted-foreground'>
-            This invoice may have been deleted or you don&apos;t have access.
+            Hóa đơn này có thể đã bị xóa hoặc bạn không có quyền truy cập.
           </p>
           <Button variant='outline' className='mt-4' onClick={() => router.push('/billing/invoices')}>
             <ArrowLeft className='size-4' />
-            Back to Invoices
+            Quay lại Hóa đơn
           </Button>
         </div>
       </PageContainer>
@@ -115,14 +115,14 @@ export default function InvoiceDetailPage() {
 
   return (
     <PageContainer
-      title={`Invoice — ${billingPeriod}`}
+      title={`Hóa đơn — ${billingPeriod}`}
       description={`${invoice.roomNumber} • ${invoice.tenantName}`}
-      breadcrumbs={<Breadcrumbs items={[{ label: 'Invoices', href: '/billing/invoices' }, { label: billingPeriod }]} />}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Hóa đơn', href: '/billing/invoices' }, { label: billingPeriod }]} />}
       actions={
         <div className='flex items-center gap-2 flex-wrap'>
           <Button variant='outline' onClick={() => router.push('/billing/invoices')}>
             <ArrowLeft className='size-4' />
-            Back
+            Quay lại
           </Button>
           {canSend && (
             <Button
@@ -131,13 +131,13 @@ export default function InvoiceDetailPage() {
               disabled={sendMutation.isPending}
             >
               <Send className='size-4' />
-              {sendMutation.isPending ? 'Sending…' : 'Send Invoice'}
+              {sendMutation.isPending ? 'Đang gửi…' : 'Gửi hóa đơn'}
             </Button>
           )}
           {canRecordPayment && (
             <Button onClick={() => setPaymentOpen(true)}>
               <DollarSign className='size-4' />
-              Record Payment
+              Ghi nhận thanh toán
             </Button>
           )}
           {canVoid && (
@@ -147,7 +147,7 @@ export default function InvoiceDetailPage() {
               disabled={voidMutation.isPending}
             >
               <Ban className='size-4' />
-              {voidMutation.isPending ? 'Voiding…' : 'Void'}
+              {voidMutation.isPending ? 'Đang hủy…' : 'Hủy bỏ'}
             </Button>
           )}
         </div>
@@ -158,7 +158,7 @@ export default function InvoiceDetailPage() {
         <div className='mb-6 flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4'>
           <CalendarDays className='size-5 text-destructive shrink-0' />
           <p className='text-sm font-medium text-destructive'>
-            This invoice is overdue. Due date was {formatDate(invoice.dueDate)}.
+            Hóa đơn đã quá hạn. Hạn thanh toán là {formatDate(invoice.dueDate)}.
           </p>
         </div>
       )}
@@ -171,7 +171,7 @@ export default function InvoiceDetailPage() {
               <Receipt className='size-5 text-primary' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Status</p>
+              <p className='text-sm text-muted-foreground'>Trạng thái</p>
               <div className='mt-0.5'><InvoiceStatusBadge status={invoice.status} /></div>
             </div>
           </CardContent>
@@ -182,7 +182,7 @@ export default function InvoiceDetailPage() {
               <DollarSign className='size-5 text-success' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Total Amount</p>
+              <p className='text-sm text-muted-foreground'>Tổng cộng</p>
               <p className='text-xl font-bold'>{formatCurrency(invoice.totalAmount)}</p>
             </div>
           </CardContent>
@@ -193,7 +193,7 @@ export default function InvoiceDetailPage() {
               <DollarSign className='size-5 text-info' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Paid Amount</p>
+              <p className='text-sm text-muted-foreground'>Đã thanh toán</p>
               <p className='text-xl font-bold'>{formatCurrency(invoice.paidAmount)}</p>
             </div>
           </CardContent>
@@ -204,7 +204,7 @@ export default function InvoiceDetailPage() {
               <DollarSign className={`size-5 ${amountDue > 0 ? 'text-warning' : 'text-success'}`} />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Amount Due</p>
+              <p className='text-sm text-muted-foreground'>Còn nợ</p>
               <p className={`text-xl font-bold ${amountDue > 0 ? 'text-warning' : 'text-success'}`}>
                 {formatCurrency(amountDue)}
               </p>
@@ -219,22 +219,22 @@ export default function InvoiceDetailPage() {
           <CardHeader>
             <CardTitle className='text-base flex items-center gap-2'>
               <Building2 className='size-4' />
-              Property
+              Tài sản
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            <InfoRow label='Building'>
+            <InfoRow label='Tòa nhà'>
               <Link href={`/buildings/${invoice.buildingId}`} className='text-sm font-medium hover:underline'>
                 {invoice.buildingName}
               </Link>
             </InfoRow>
-            <InfoRow label='Room'>
+            <InfoRow label='Phòng'>
               <Link href={`/rooms/${invoice.roomId}`} className='text-sm font-medium hover:underline'>
                 {invoice.roomNumber}
               </Link>
             </InfoRow>
-            <InfoRow label='Billing Period' value={billingPeriod} />
-            <InfoRow label='Due Date' value={formatDate(invoice.dueDate)} />
+            <InfoRow label='Kỳ thanh toán' value={billingPeriod} />
+            <InfoRow label='Hạn thanh toán' value={formatDate(invoice.dueDate)} />
           </CardContent>
         </Card>
 
@@ -242,22 +242,22 @@ export default function InvoiceDetailPage() {
           <CardHeader>
             <CardTitle className='text-base flex items-center gap-2'>
               <User className='size-4' />
-              Tenant
+              Khách thuê
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            <InfoRow label='Name'>
+            <InfoRow label='Tên'>
               <Link href={`/tenants/${invoice.tenantUserId}`} className='text-sm font-medium hover:underline'>
                 {invoice.tenantName}
               </Link>
             </InfoRow>
-            <InfoRow label='Contract'>
+            <InfoRow label='Hợp đồng'>
               <Link href={`/contracts/${invoice.contractId}`} className='text-sm font-medium hover:underline'>
-                View Contract
+                Xem hợp đồng
               </Link>
             </InfoRow>
-            <InfoRow label='Created' value={formatDate(invoice.createdAt)} />
-            {invoice.note && <InfoRow label='Note' value={invoice.note} />}
+            <InfoRow label='Ngày tạo' value={formatDate(invoice.createdAt)} />
+            {invoice.note && <InfoRow label='Ghi chú' value={invoice.note} />}
           </CardContent>
         </Card>
       </div>
@@ -265,17 +265,17 @@ export default function InvoiceDetailPage() {
       {/* Line Items */}
       <Card>
         <CardHeader>
-          <CardTitle className='text-base'>Line Items</CardTitle>
-          <CardDescription>Breakdown of charges for this billing period.</CardDescription>
+          <CardTitle className='text-base'>Chi tiết mục</CardTitle>
+          <CardDescription>Các khoản phí trong kỳ thanh toán này.</CardDescription>
         </CardHeader>
         <CardContent>
-            <table className='w-full text-sm' aria-label='Invoice line items'>
+            <table className='w-full text-sm' aria-label='Chi tiết hóa đơn'>
             <thead>
               <tr className='border-b'>
-                <th className='text-left font-medium py-2'>Description</th>
-                <th className='text-right font-medium py-2'>Qty / Reading</th>
-                <th className='text-right font-medium py-2'>Unit Price</th>
-                <th className='text-right font-medium py-2'>Amount</th>
+                <th className='text-left font-medium py-2'>Mô tả</th>
+                <th className='text-right font-medium py-2'>SL / Chỉ số</th>
+                <th className='text-right font-medium py-2'>Đơn giá</th>
+                <th className='text-right font-medium py-2'>Thành tiền</th>
               </tr>
             </thead>
             <tbody>
@@ -286,7 +286,7 @@ export default function InvoiceDetailPage() {
                       <span className='font-medium'>{item.description}</span>
                       {item.previousReading != null && item.currentReading != null && (
                         <div className='text-xs text-muted-foreground'>
-                          Reading: {item.previousReading.toLocaleString()} → {item.currentReading.toLocaleString()}
+                          Chỉ số: {item.previousReading.toLocaleString()} → {item.currentReading.toLocaleString()}
                         </div>
                       )}
                     </div>
@@ -300,7 +300,7 @@ export default function InvoiceDetailPage() {
             <tfoot>
               {/* Subtotal */}
               <tr className='border-t'>
-                <td colSpan={3} className='text-right py-2 text-muted-foreground'>Subtotal</td>
+                <td colSpan={3} className='text-right py-2 text-muted-foreground'>Tạm tính</td>
                 <td className='text-right py-2 font-medium'>
                   {formatCurrency(invoice.rentAmount + invoice.serviceAmount)}
                 </td>
@@ -308,7 +308,7 @@ export default function InvoiceDetailPage() {
               {/* Penalty */}
               {invoice.penaltyAmount > 0 && (
                 <tr>
-                  <td colSpan={3} className='text-right py-1 text-muted-foreground'>Penalty</td>
+                  <td colSpan={3} className='text-right py-1 text-muted-foreground'>Phạt</td>
                   <td className='text-right py-1 text-destructive'>
                     +{formatCurrency(invoice.penaltyAmount)}
                   </td>
@@ -317,7 +317,7 @@ export default function InvoiceDetailPage() {
               {/* Discount */}
               {invoice.discountAmount > 0 && (
                 <tr>
-                  <td colSpan={3} className='text-right py-1 text-muted-foreground'>Discount</td>
+                  <td colSpan={3} className='text-right py-1 text-muted-foreground'>Giảm giá</td>
                   <td className='text-right py-1 text-success'>
                     -{formatCurrency(invoice.discountAmount)}
                   </td>
@@ -325,17 +325,17 @@ export default function InvoiceDetailPage() {
               )}
               {/* Total */}
               <tr className='border-t'>
-                <td colSpan={3} className='text-right py-2 font-semibold'>Total</td>
+                <td colSpan={3} className='text-right py-2 font-semibold'>Tổng cộng</td>
                 <td className='text-right py-2 font-bold text-lg'>{formatCurrency(invoice.totalAmount)}</td>
               </tr>
               {/* Paid */}
               <tr>
-                <td colSpan={3} className='text-right py-1 text-muted-foreground'>Paid</td>
+                <td colSpan={3} className='text-right py-1 text-muted-foreground'>Đã trả</td>
                 <td className='text-right py-1 text-success'>-{formatCurrency(invoice.paidAmount)}</td>
               </tr>
               {/* Amount Due */}
               <tr className='border-t'>
-                <td colSpan={3} className='text-right py-2 font-semibold'>Amount Due</td>
+                <td colSpan={3} className='text-right py-2 font-semibold'>Còn nợ</td>
                 <td className={`text-right py-2 font-bold text-lg ${amountDue > 0 ? 'text-warning' : 'text-success'}`}>
                   {formatCurrency(amountDue)}
                 </td>
@@ -351,19 +351,19 @@ export default function InvoiceDetailPage() {
           <CardHeader>
             <CardTitle className='text-base flex items-center gap-2'>
               <DollarSign className='size-4' />
-              Payment History
+              Lịch sử thanh toán
             </CardTitle>
-            <CardDescription>{invoice.payments.length} payment(s) recorded</CardDescription>
+            <CardDescription>{invoice.payments.length} khoản thanh toán đã ghi</CardDescription>
           </CardHeader>
           <CardContent>
-            <table className='w-full text-sm' aria-label='Payment history'>
+            <table className='w-full text-sm' aria-label='Lịch sử thanh toán'>
               <thead>
                 <tr className='border-b'>
-                  <th className='text-left font-medium py-2'>Date</th>
-                  <th className='text-left font-medium py-2'>Method</th>
-                  <th className='text-left font-medium py-2'>Reference</th>
-                  <th className='text-left font-medium py-2'>Recorded By</th>
-                  <th className='text-right font-medium py-2'>Amount</th>
+                  <th className='text-left font-medium py-2'>Ngày</th>
+                  <th className='text-left font-medium py-2'>Phương thức</th>
+                  <th className='text-left font-medium py-2'>Tham chiếu</th>
+                  <th className='text-left font-medium py-2'>Người ghi</th>
+                  <th className='text-right font-medium py-2'>Số tiền</th>
                 </tr>
               </thead>
               <tbody>
@@ -386,7 +386,7 @@ export default function InvoiceDetailPage() {
         <Card className='mt-6'>
           <CardContent className='py-8 text-center'>
             <DollarSign className='size-8 text-muted-foreground mx-auto mb-2' />
-            <p className='text-sm text-muted-foreground'>No payments recorded yet.</p>
+            <p className='text-sm text-muted-foreground'>Chưa có thanh toán nào.</p>
           </CardContent>
         </Card>
       )}
@@ -395,9 +395,9 @@ export default function InvoiceDetailPage() {
       <ConfirmDialog
         open={sendConfirmOpen}
         onOpenChange={setSendConfirmOpen}
-        title='Send Invoice'
-        description='This will change the invoice status from Draft to Sent and notify the tenant. This action cannot be undone.'
-        confirmLabel='Send Invoice'
+        title='Gửi hóa đơn'
+        description='Thao tác này sẽ chuyển trạng thái hóa đơn từ Nháp sang Đã gửi và thông báo cho khách thuê. Không thể hoàn tác.'
+        confirmLabel='Gửi hóa đơn'
         variant='default'
         loading={sendMutation.isPending}
         onConfirm={() => {
@@ -411,9 +411,9 @@ export default function InvoiceDetailPage() {
       <ConfirmDialog
         open={voidConfirmOpen}
         onOpenChange={setVoidConfirmOpen}
-        title='Void Invoice'
-        description='This will permanently void the invoice. This action cannot be undone. Any outstanding balance will be written off.'
-        confirmLabel='Void Invoice'
+        title='Hủy hóa đơn'
+        description='Thao tác này sẽ hủy vĩnh viễn hóa đơn. Không thể hoàn tác. Số dư còn lại sẽ bị xóa.'
+        confirmLabel='Hủy hóa đơn'
         variant='destructive'
         loading={voidMutation.isPending}
         onConfirm={() => {

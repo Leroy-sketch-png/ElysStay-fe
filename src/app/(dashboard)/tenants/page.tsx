@@ -44,12 +44,12 @@ export default function TenantsPage() {
     mutationFn: ({ id, data }: { id: string; data: ChangeUserStatusRequest }) =>
       changeTenantStatus(id, data),
     onSuccess: () => {
-      const action = statusTarget?.status === 'Active' ? 'deactivated' : 'activated'
-      toast.success(`Tenant ${action}`)
+      const action = statusTarget?.status === 'Active' ? 'vô hiệu hóa' : 'kích hoạt'
+      toast.success(`Khách thuê đã được ${action}`)
       queryClient.invalidateQueries({ queryKey: tenantKeys.all })
       setStatusTarget(null)
     },
-    onError: (error: Error) => toast.error('Failed to update status', error.message),
+    onError: (error: Error) => toast.error('Không thể cập nhật trạng thái', error.message),
   })
 
   // ─── Search Handler ─────────────────────────────────────
@@ -77,7 +77,7 @@ export default function TenantsPage() {
   const columns: Column<UserDto>[] = [
     {
       key: 'name',
-      header: 'Tenant',
+      header: 'Khách thuê',
       render: (row) => (
         <div>
           <p className='font-medium'>{row.fullName}</p>
@@ -87,17 +87,17 @@ export default function TenantsPage() {
     },
     {
       key: 'phone',
-      header: 'Phone',
+      header: 'SĐT',
       render: (row) => row.phone || <span className='text-muted-foreground'>—</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (row) => <UserStatusBadge status={row.status} />,
     },
     {
       key: 'createdAt',
-      header: 'Created',
+      header: 'Ngày tạo',
       render: (row) => formatDate(row.createdAt),
     },
     {
@@ -113,7 +113,7 @@ export default function TenantsPage() {
               router.push(`/tenants/${row.id}`)
             }}
           >
-            View
+            Xem
           </Button>
           <Button
             variant='ghost'
@@ -124,7 +124,7 @@ export default function TenantsPage() {
               setStatusTarget(row)
             }}
           >
-            {row.status === 'Active' ? 'Deactivate' : 'Activate'}
+            {row.status === 'Active' ? 'Vô hiệu hóa' : 'Kích hoạt'}
           </Button>
         </div>
       ),
@@ -138,12 +138,12 @@ export default function TenantsPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Tenants'
-      description='Manage tenant accounts and profiles.'
+      title='Khách thuê'
+      description='Quản lý tài khoản và hồ sơ khách thuê.'
       actions={
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className='size-4' />
-          Add Tenant
+          Thêm khách thuê
         </Button>
       }
     >
@@ -152,20 +152,20 @@ export default function TenantsPage() {
         <div className='relative flex-1 min-w-[200px] max-w-md'>
           <Search className='absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
           <Input
-            placeholder='Search by name or email…'
+            placeholder='Tìm theo tên hoặc email…'
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={handleKeyDown}
             className='pl-9'
-            aria-label='Search tenants by name or email'
+            aria-label='Tìm khách thuê theo tên hoặc email'
           />
         </div>
         <Button variant='secondary' onClick={handleSearch}>
-          Search
+          Tìm kiếm
         </Button>
         {hasActiveSearch && (
           <Button variant='ghost' onClick={handleClearSearch}>
-            Clear
+            Xóa
           </Button>
         )}
       </div>
@@ -174,10 +174,10 @@ export default function TenantsPage() {
       {isError && (
         <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
-          <p className='font-medium text-destructive'>Failed to load tenants</p>
-          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+          <p className='font-medium text-destructive'>Không thể tải khách thuê</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'Đã xảy ra lỗi không mong muốn.'}</p>
           <Button variant='outline' className='mt-4' onClick={() => queryClient.invalidateQueries({ queryKey: tenantKeys.list(filters) })}>
-            Try Again
+            Thử lại
           </Button>
         </div>
       )}
@@ -186,9 +186,9 @@ export default function TenantsPage() {
       {!isError && !isLoading && data && data.data.length === 0 && !hasActiveSearch ? (
         <EmptyState
           icon={<Users className='size-12' />}
-          title='No tenants yet'
-          description='Create your first tenant to start managing contracts and billing.'
-          actionLabel='Add Tenant'
+          title='Chưa có khách thuê'
+          description='Thêm khách thuê đầu tiên để quản lý hợp đồng và thanh toán.'
+          actionLabel='Thêm khách thuê'
           onAction={() => setCreateOpen(true)}
         />
       ) : !isError ? (
@@ -199,7 +199,7 @@ export default function TenantsPage() {
             loading={isLoading}
             rowKey={(row) => row.id}
             onRowClick={(row) => router.push(`/tenants/${row.id}`)}
-            emptyMessage='No tenants match your search.'
+            emptyMessage='Không tìm thấy khách thuê phù hợp.'
             emptyIcon={<Users className='size-10' />}
           />
           {data?.pagination && data.pagination.totalPages > 1 && (
@@ -226,13 +226,13 @@ export default function TenantsPage() {
       <ConfirmDialog
         open={!!statusTarget}
         onOpenChange={(open) => !open && setStatusTarget(null)}
-        title={statusTarget?.status === 'Active' ? 'Deactivate Tenant' : 'Activate Tenant'}
+        title={statusTarget?.status === 'Active' ? 'Vô hiệu hóa khách thuê' : 'Kích hoạt khách thuê'}
         description={
           statusTarget?.status === 'Active'
-            ? `Are you sure you want to deactivate "${statusTarget?.fullName}"? They will not be able to log in.`
-            : `Reactivate "${statusTarget?.fullName}"? They will be able to log in again.`
+            ? `Bạn có chắc muốn vô hiệu hóa "${statusTarget?.fullName}"? Họ sẽ không thể đăng nhập.`
+            : `Kích hoạt lại "${statusTarget?.fullName}"? Họ sẽ có thể đăng nhập lại.`
         }
-        confirmLabel={statusTarget?.status === 'Active' ? 'Deactivate' : 'Activate'}
+        confirmLabel={statusTarget?.status === 'Active' ? 'Vô hiệu hóa' : 'Kích hoạt'}
         variant={statusTarget?.status === 'Active' ? 'destructive' : 'default'}
         loading={statusMutation.isPending}
         onConfirm={() =>

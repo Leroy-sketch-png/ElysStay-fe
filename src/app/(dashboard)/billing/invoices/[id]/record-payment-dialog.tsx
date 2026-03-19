@@ -37,14 +37,14 @@ type PaymentFormData = {
 // ─── Payment Methods ────────────────────────────────────
 
 const paymentMethods = [
-  { value: '', label: 'Select payment method…' },
-  { value: 'Cash', label: 'Cash' },
-  { value: 'BankTransfer', label: 'Bank Transfer' },
+  { value: '', label: 'Chọn phương thức…' },
+  { value: 'Cash', label: 'Tiền mặt' },
+  { value: 'BankTransfer', label: 'Chuyển khoản' },
   { value: 'MoMo', label: 'MoMo' },
   { value: 'ZaloPay', label: 'ZaloPay' },
   { value: 'VNPay', label: 'VNPay' },
-  { value: 'Card', label: 'Card' },
-  { value: 'Other', label: 'Other' },
+  { value: 'Card', label: 'Thẻ' },
+  { value: 'Other', label: 'Khác' },
 ]
 
 // ─── Props ──────────────────────────────────────────────
@@ -65,8 +65,8 @@ export function RecordPaymentDialog({
   const amountDue = invoice.totalAmount - invoice.paidAmount
   const paymentSchema = z.object({
     amount: z.number()
-      .positive('Amount must be positive')
-      .max(amountDue, `Payment cannot exceed the remaining balance of ${formatCurrency(amountDue)}`),
+      .positive('Số tiền phải dương')
+      .max(amountDue, `Thanh toán không được vượt quá số dư còn lại ${formatCurrency(amountDue)}`),
     paymentMethod: z.string().optional(),
     note: z.string().max(500).optional().or(z.literal('')),
   })
@@ -105,10 +105,10 @@ export function RecordPaymentDialog({
     mutationFn: (data: RecordPaymentRequest) => recordPayment(invoice.id, data),
     onSuccess: () => {
       toast.success(
-        'Payment recorded',
+        'Đã ghi nhận thanh toán',
         willFullyPay
-          ? 'Invoice is now fully paid.'
-          : `${formatCurrency(remainingAfter)} remaining.`,
+          ? 'Hóa đơn đã thanh toán đầy đủ.'
+          : `Còn lại ${formatCurrency(remainingAfter)}.`,
       )
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(invoice.id) })
@@ -118,7 +118,7 @@ export function RecordPaymentDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to record payment', error.message)
+      toast.error('Ghi nhận thanh toán thất bại', error.message)
     },
   })
 
@@ -135,9 +135,9 @@ export function RecordPaymentDialog({
       <DialogContent>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Record Payment</DialogTitle>
+          <DialogTitle>Ghi nhận thanh toán</DialogTitle>
           <DialogDescription>
-            Recording payment for Room {invoice.roomNumber} —{' '}
+            Ghi nhận thanh toán cho Phòng {invoice.roomNumber} —{' '}
             {formatBillingPeriod(invoice.billingYear, invoice.billingMonth)}
           </DialogDescription>
         </DialogHeader>
@@ -147,17 +147,17 @@ export function RecordPaymentDialog({
             {/* Invoice Summary */}
             <div className='rounded-lg bg-muted/50 p-4 space-y-2'>
               <div className='flex justify-between text-sm'>
-                <span className='text-muted-foreground'>Total Invoice</span>
+                <span className='text-muted-foreground'>Tổng hóa đơn</span>
                 <span className='font-medium'>{formatCurrency(invoice.totalAmount)}</span>
               </div>
               <div className='flex justify-between text-sm'>
-                <span className='text-muted-foreground'>Already Paid</span>
+                <span className='text-muted-foreground'>Đã thanh toán</span>
                 <span className='font-medium text-success'>
                   − {formatCurrency(invoice.paidAmount)}
                 </span>
               </div>
               <div className='border-t pt-2 flex justify-between text-sm font-semibold'>
-                <span>Amount Due</span>
+                <span>Còn nợ</span>
                 <span className='text-warning'>
                   {formatCurrency(amountDue)}
                 </span>
@@ -166,7 +166,7 @@ export function RecordPaymentDialog({
 
             {/* Amount */}
             <div className='space-y-2'>
-              <Label htmlFor='pay-amount'>Payment Amount (VND) *</Label>
+              <Label htmlFor='pay-amount'>Số tiền thanh toán (VND) *</Label>
               <Input
                 id='pay-amount'
                 type='number'
@@ -185,10 +185,10 @@ export function RecordPaymentDialog({
                   size='sm'
                   onClick={() => reset({ ...watch(), amount: amountDue })}
                 >
-                  Full Amount
+                  Toàn bộ
                 </Button>
                 <span className='text-xs text-muted-foreground'>
-                  Click to pay the full remaining amount
+                  Nhấn để thanh toán toàn bộ số còn lại
                 </span>
               </div>
             </div>
@@ -197,9 +197,9 @@ export function RecordPaymentDialog({
             {watchedAmount > 0 && (
               <div className='rounded-lg border p-3 space-y-1'>
                 <div className='flex justify-between text-sm'>
-                  <span className='text-muted-foreground'>After this payment</span>
+                  <span className='text-muted-foreground'>Sau khi thanh toán</span>
                   <span className={willFullyPay ? 'text-success font-medium' : ''}>
-                    {willFullyPay ? 'Fully Paid' : `${formatCurrency(remainingAfter)} remaining`}
+                    {willFullyPay ? 'Đã thanh toán đủ' : `Còn lại ${formatCurrency(remainingAfter)}`}
                   </span>
                 </div>
               </div>
@@ -207,7 +207,7 @@ export function RecordPaymentDialog({
 
             {/* Payment Method */}
             <div className='space-y-2'>
-              <Label htmlFor='pay-method'>Payment Method</Label>
+              <Label htmlFor='pay-method'>Phương thức</Label>
               <Select id='pay-method' {...register('paymentMethod')}>
                 {paymentMethods.map((pm) => (
                   <option key={pm.value} value={pm.value}>{pm.label}</option>
@@ -217,10 +217,10 @@ export function RecordPaymentDialog({
 
             {/* Note */}
             <div className='space-y-2'>
-              <Label htmlFor='pay-note'>Note</Label>
+              <Label htmlFor='pay-note'>Ghi chú</Label>
               <Textarea
                 id='pay-note'
-                placeholder='Transaction reference or remarks…'
+                placeholder='Tham chiếu giao dịch hoặc ghi chú…'
                 rows={2}
                 {...register('note')}
               />
@@ -234,10 +234,10 @@ export function RecordPaymentDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Recording…' : 'Record Payment'}
+              {mutation.isPending ? 'Đang ghi…' : 'Ghi nhận'}
             </Button>
           </DialogFooter>
         </form>

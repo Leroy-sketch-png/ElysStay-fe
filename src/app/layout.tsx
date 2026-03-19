@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ElysStay — Rental Management",
-  description: "Smart rental property management system for landlords, staff, and tenants",
+  title: "ElysStay — Quản lý cho thuê",
+  description: "Hệ thống quản lý cho thuê thông minh dành cho chủ nhà, nhân viên và khách thuê",
 };
 
 export default function RootLayout({
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="vi" suppressHydrationWarning>
       <head>
         {/* Prevent flash of wrong theme */}
         <script

@@ -1,11 +1,11 @@
 import type { InvoiceStatus, ReservationStatus, RoomStatus } from '@/types/api'
 
 export const ROOM_STATUS_OPTIONS: { label: string; value: RoomStatus | '' }[] = [
-  { label: 'All statuses', value: '' },
-  { label: 'Available', value: 'Available' },
-  { label: 'Booked', value: 'Booked' },
-  { label: 'Occupied', value: 'Occupied' },
-  { label: 'Maintenance', value: 'Maintenance' },
+  { label: 'Tất cả trạng thái', value: '' },
+  { label: 'Trống', value: 'Available' },
+  { label: 'Đã đặt', value: 'Booked' },
+  { label: 'Đang ở', value: 'Occupied' },
+  { label: 'Bảo trì', value: 'Maintenance' },
 ]
 
 export const MANUAL_ROOM_STATUS_TOGGLE: Readonly<Record<'Available' | 'Maintenance', 'Available' | 'Maintenance'>> = {
@@ -22,13 +22,13 @@ export function getNextManualRoomStatus(status: RoomStatus) {
 }
 
 export const INVOICE_STATUS_OPTIONS: { label: string; value: InvoiceStatus | '' }[] = [
-  { label: 'All Statuses', value: '' },
-  { label: 'Draft', value: 'Draft' },
-  { label: 'Sent', value: 'Sent' },
-  { label: 'Partially Paid', value: 'PartiallyPaid' },
-  { label: 'Paid', value: 'Paid' },
-  { label: 'Overdue', value: 'Overdue' },
-  { label: 'Void', value: 'Void' },
+  { label: 'Tất cả trạng thái', value: '' },
+  { label: 'Nháp', value: 'Draft' },
+  { label: 'Đã gửi', value: 'Sent' },
+  { label: 'Trả một phần', value: 'PartiallyPaid' },
+  { label: 'Đã thanh toán', value: 'Paid' },
+  { label: 'Quá hạn', value: 'Overdue' },
+  { label: 'Hủy bỏ', value: 'Void' },
 ]
 
 export function canSendInvoice(status: InvoiceStatus) {
@@ -48,12 +48,12 @@ export function isInvoiceClosed(status: InvoiceStatus) {
 }
 
 export const RESERVATION_STATUS_OPTIONS: { label: string; value: ReservationStatus | '' }[] = [
-  { label: 'All statuses', value: '' },
-  { label: 'Pending', value: 'Pending' },
-  { label: 'Confirmed', value: 'Confirmed' },
-  { label: 'Converted', value: 'Converted' },
-  { label: 'Cancelled', value: 'Cancelled' },
-  { label: 'Expired', value: 'Expired' },
+  { label: 'Tất cả trạng thái', value: '' },
+  { label: 'Chờ duyệt', value: 'Pending' },
+  { label: 'Đã xác nhận', value: 'Confirmed' },
+  { label: 'Đã chuyển đổi', value: 'Converted' },
+  { label: 'Đã hủy', value: 'Cancelled' },
+  { label: 'Hết hạn', value: 'Expired' },
 ]
 
 export function canConfirmReservation(status: ReservationStatus) {
@@ -64,16 +64,20 @@ export function canCancelReservation(status: ReservationStatus) {
   return status === 'Pending' || status === 'Confirmed'
 }
 
+export function canConvertReservation(status: ReservationStatus) {
+  return status === 'Confirmed'
+}
+
 export function canManageReservation(status: ReservationStatus) {
-  return canConfirmReservation(status) || canCancelReservation(status)
+  return canConfirmReservation(status) || canCancelReservation(status) || canConvertReservation(status)
 }
 
 // ─── Expense Categories ──────────────────────────────────
 // Must match backend AllowedCategories in ExpenseValidators.cs
 
 export const EXPENSE_CATEGORIES = [
-  'Repair', 'Maintenance', 'Utilities', 'Cleaning', 'Insurance',
-  'Tax', 'Management', 'Equipment', 'Supplies', 'Other',
+  'Sửa chữa', 'Bảo trì', 'Tiện ích', 'Vệ sinh', 'Bảo hiểm',
+  'Thuế', 'Quản lý', 'Thiết bị', 'Vật tư', 'Khác',
 ] as const
 
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number]

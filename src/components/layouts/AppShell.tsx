@@ -46,42 +46,42 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Buildings', href: '/buildings', icon: Building2, roles: ['Owner', 'Staff'] },
-  { label: 'Rooms', href: '/rooms', icon: DoorOpen, roles: ['Owner', 'Staff'] },
-  { label: 'Tenants', href: '/tenants', icon: Users, roles: ['Owner', 'Staff'] },
-  { label: 'Reservations', href: '/reservations', icon: CalendarClock, roles: ['Owner', 'Staff'] },
-  { label: 'Contracts', href: '/contracts', icon: FileText, roles: ['Owner', 'Staff'] },
-  { label: 'Invoices', href: '/billing/invoices', icon: Receipt },
-  { label: 'Payments', href: '/billing/payments', icon: CreditCard },
-  { label: 'Meters', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
-  { label: 'Expenses', href: '/expenses', icon: DollarSign, roles: ['Owner', 'Staff'] },
-  { label: 'Maintenance', href: '/maintenance', icon: Wrench },
-  { label: 'Notifications', href: '/notifications', icon: Bell },
-  { label: 'P&L Report', href: '/reports/pnl', icon: BarChart3, roles: ['Owner'] },
-  { label: 'Staff', href: '/staff', icon: UserCog, roles: ['Owner'] },
+  { label: 'Tổng quan', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Tòa nhà', href: '/buildings', icon: Building2, roles: ['Owner', 'Staff'] },
+  { label: 'Phòng', href: '/rooms', icon: DoorOpen, roles: ['Owner', 'Staff'] },
+  { label: 'Khách thuê', href: '/tenants', icon: Users, roles: ['Owner', 'Staff'] },
+  { label: 'Đặt cọc', href: '/reservations', icon: CalendarClock, roles: ['Owner', 'Staff'] },
+  { label: 'Hợp đồng', href: '/contracts', icon: FileText, roles: ['Owner', 'Staff'] },
+  { label: 'Hóa đơn', href: '/billing/invoices', icon: Receipt },
+  { label: 'Thanh toán', href: '/billing/payments', icon: CreditCard },
+  { label: 'Đồng hồ', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
+  { label: 'Chi phí', href: '/expenses', icon: DollarSign, roles: ['Owner', 'Staff'] },
+  { label: 'Bảo trì', href: '/maintenance', icon: Wrench },
+  { label: 'Thông báo', href: '/notifications', icon: Bell },
+  { label: 'Báo cáo L/L', href: '/reports/pnl', icon: BarChart3, roles: ['Owner'] },
+  { label: 'Nhân viên', href: '/staff', icon: UserCog, roles: ['Owner'] },
 ]
 
 // ─── Header Breadcrumbs ─────────────────────────────────
 
 const ROUTE_LABELS: Record<string, string> = {
-  dashboard: 'Dashboard',
-  buildings: 'Buildings',
-  rooms: 'Rooms',
-  tenants: 'Tenants',
-  contracts: 'Contracts',
-  billing: 'Billing',
-  invoices: 'Invoices',
-  payments: 'Payments',
-  'meter-readings': 'Meter Readings',
-  expenses: 'Expenses',
-  maintenance: 'Maintenance',
-  reservations: 'Reservations',
-  notifications: 'Notifications',
-  settings: 'Settings',
-  staff: 'Staff',
-  reports: 'Reports',
-  pnl: 'P&L Report',
+  dashboard: 'Tổng quan',
+  buildings: 'Tòa nhà',
+  rooms: 'Phòng',
+  tenants: 'Khách thuê',
+  contracts: 'Hợp đồng',
+  billing: 'Thanh toán',
+  invoices: 'Hóa đơn',
+  payments: 'Thanh toán',
+  'meter-readings': 'Đồng hồ',
+  expenses: 'Chi phí',
+  maintenance: 'Bảo trì',
+  reservations: 'Đặt cọc',
+  notifications: 'Thông báo',
+  settings: 'Cài đặt',
+  staff: 'Nhân viên',
+  reports: 'Báo cáo',
+  pnl: 'Báo cáo L/L',
 }
 
 function HeaderBreadcrumbs({ pathname }: { pathname: string }) {
@@ -90,7 +90,7 @@ function HeaderBreadcrumbs({ pathname }: { pathname: string }) {
 
   const crumbs = segments.map((segment, i) => {
     const isId = /^[0-9a-f-]{36}$/.test(segment) // UUID detection
-    const label = isId ? 'Details' : ROUTE_LABELS[segment] || segment
+    const label = isId ? 'Chi tiết' : ROUTE_LABELS[segment] || segment
     const href = '/' + segments.slice(0, i + 1).join('/')
     return { label, href, isLast: i === segments.length - 1 }
   })
@@ -242,7 +242,7 @@ export function AppShell({ children }: AppShellProps) {
           <button
             onClick={toggleCollapsed}
             className='flex w-full items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer'
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Mở rộng' : 'Thu gọn'}
           >
             <ChevronLeft
               className={cn('size-5 transition-transform', collapsed && 'rotate-180')}
@@ -262,7 +262,7 @@ export function AppShell({ children }: AppShellProps) {
           <button
             onClick={() => setMobileOpen(true)}
             className='md:hidden p-2 text-muted-foreground hover:text-foreground cursor-pointer'
-            aria-label='Open navigation menu'
+            aria-label='Mở menu điều hướng'
             aria-expanded={mobileOpen}
           >
             <Menu className='size-5' />
@@ -279,7 +279,7 @@ export function AppShell({ children }: AppShellProps) {
                 setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'dark' : 'light')
               }
               className='p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer'
-              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Chuyển sang chế độ ${theme === 'dark' ? 'sáng' : 'tối'}`}
             >
               {theme === 'dark' ? (
                 <Sun className='size-[18px]' />
@@ -301,14 +301,14 @@ export function AppShell({ children }: AppShellProps) {
               <Link
                 href='/settings'
                 className='p-2 text-muted-foreground hover:text-foreground transition-colors'
-                title='Settings'
+                title='Cài đặt'
               >
                 <Settings className='size-5' />
               </Link>
               <button
                 onClick={logout}
                 className='p-2 text-muted-foreground hover:text-destructive transition-colors cursor-pointer'
-                title='Sign out'
+                title='Đăng xuất'
               >
                 <LogOut className='size-5' />
               </button>

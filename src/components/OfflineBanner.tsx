@@ -24,7 +24,7 @@ export function OfflineBanner() {
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         >
           <WifiOff className='size-4' />
-          <span>You are offline. Some features may be unavailable.</span>
+          <span>Bạn đang ngoại tuyến. Một số tính năng có thể không khả dụng.</span>
         </motion.div>
       )}
     </AnimatePresence>

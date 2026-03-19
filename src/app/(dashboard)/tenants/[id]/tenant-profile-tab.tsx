@@ -47,11 +47,11 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
   const updateMutation = useMutation({
     mutationFn: (data: UpdateTenantProfileRequest) => updateTenantProfile(userId, data),
     onSuccess: () => {
-      toast.success('Profile updated')
+      toast.success('Đã cập nhật hồ sơ')
       queryClient.invalidateQueries({ queryKey: tenantProfileKeys.detail(userId) })
       setEditing(false)
     },
-    onError: (error: Error) => toast.error('Failed to update profile', error.message),
+    onError: (error: Error) => toast.error('Cập nhật hồ sơ thất bại', error.message),
   })
 
   const handleSave = () => {
@@ -106,25 +106,25 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
         <div>
-          <CardTitle className='text-base'>Citizen ID Profile (CCCD)</CardTitle>
+          <CardTitle className='text-base'>Hồ sơ CCCD</CardTitle>
           <CardDescription>
-            Identity information from the citizen identification card.
+            Thông tin căn cước công dân.
           </CardDescription>
         </div>
         {!editing ? (
           <Button variant='outline' size='sm' onClick={() => setEditing(true)}>
             <Pencil className='size-3.5' />
-            Edit
+            Sửa
           </Button>
         ) : (
           <div className='flex items-center gap-2'>
             <Button variant='outline' size='sm' onClick={handleCancel} disabled={updateMutation.isPending}>
               <X className='size-3.5' />
-              Cancel
+              Hủy
             </Button>
             <Button size='sm' onClick={handleSave} disabled={updateMutation.isPending}>
               <Save className='size-3.5' />
-              {updateMutation.isPending ? 'Saving…' : 'Save'}
+              {updateMutation.isPending ? 'Đang lưu…' : 'Lưu'}
             </Button>
           </div>
         )}
@@ -133,61 +133,61 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
         {!hasData && !editing ? (
           <div className='flex flex-col items-center py-10 text-center'>
             <CreditCard className='size-10 text-muted-foreground mb-3' />
-            <p className='text-sm text-muted-foreground'>No ID information recorded yet.</p>
+            <p className='text-sm text-muted-foreground'>Chưa có thông tin CCCD.</p>
             <p className='text-xs text-muted-foreground mt-1'>
-              Click Edit to enter the tenant&apos;s citizen ID details.
+              Nhấn Sửa để nhập thông tin căn cước.
             </p>
           </div>
         ) : (
           <div className='grid gap-4 sm:grid-cols-2'>
             <ProfileField
-              label='ID Number (CCCD)'
+              label='Số CCCD'
               value={form.idNumber}
               editing={editing}
               onChange={(v) => updateField('idNumber', v)}
-              placeholder='12-digit number'
+              placeholder='Số 12 chữ số'
               maxLength={12}
             />
             <ProfileField
-              label='Date of Birth'
+              label='Ngày sinh'
               value={form.dateOfBirth}
               editing={editing}
               onChange={(v) => updateField('dateOfBirth', v)}
               type='date'
             />
             <ProfileField
-              label='Gender'
+              label='Giới tính'
               value={form.gender}
               editing={editing}
               onChange={(v) => updateField('gender', v)}
               fieldType='select'
               selectOptions={[
-                { value: 'Male', label: 'Male' },
-                { value: 'Female', label: 'Female' },
+                { value: 'Male', label: 'Nam' },
+                { value: 'Female', label: 'Nữ' },
               ]}
-              placeholder='Select gender'
+              placeholder='Chọn giới tính'
             />
             <ProfileField
-              label='Permanent Address'
+              label='Địa chỉ thường trú'
               value={form.permanentAddress}
               editing={editing}
               onChange={(v) => updateField('permanentAddress', v)}
-              placeholder='Hometown address'
+              placeholder='Địa chỉ nguyên quán'
               className='sm:col-span-2'
             />
             <ProfileField
-              label='Issued Date'
+              label='Ngày cấp'
               value={form.issuedDate}
               editing={editing}
               onChange={(v) => updateField('issuedDate', v)}
               type='date'
             />
             <ProfileField
-              label='Issued Place'
+              label='Nơi cấp'
               value={form.issuedPlace}
               editing={editing}
               onChange={(v) => updateField('issuedPlace', v)}
-              placeholder='Issuing authority'
+              placeholder='Cơ quan cấp'
             />
           </div>
         )}

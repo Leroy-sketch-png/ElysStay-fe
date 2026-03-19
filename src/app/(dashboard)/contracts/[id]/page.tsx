@@ -56,13 +56,13 @@ export default function ContractDetailPage() {
       <PageContainer>
         <div className='flex flex-col items-center justify-center py-20 text-center'>
           <FileText className='size-12 text-muted-foreground mb-4' />
-          <h2 className='text-lg font-semibold'>Contract not found</h2>
+          <h2 className='text-lg font-semibold'>Không tìm thấy hợp đồng</h2>
           <p className='mt-1 text-sm text-muted-foreground'>
-            This contract may have been deleted or you don&apos;t have access.
+            Hợp đồng này có thể đã bị xóa hoặc bạn không có quyền truy cập.
           </p>
           <Button variant='outline' className='mt-4' onClick={() => router.push('/contracts')}>
             <ArrowLeft className='size-4' />
-            Back to Contracts
+            Quay lại Hợp đồng
           </Button>
         </div>
       </PageContainer>
@@ -81,28 +81,28 @@ export default function ContractDetailPage() {
 
   return (
     <PageContainer
-      title={`Contract — Room ${contract.roomNumber}`}
+      title={`Hợp đồng — Phòng ${contract.roomNumber}`}
       description={`${contract.buildingName} • ${contract.tenantName}`}
-      breadcrumbs={<Breadcrumbs items={[{ label: 'Contracts', href: '/contracts' }, { label: `Room ${contract.roomNumber}` }]} />}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Hợp đồng', href: '/contracts' }, { label: `Phòng ${contract.roomNumber}` }]} />}
       actions={
         <div className='flex items-center gap-2 flex-wrap'>
           <Button variant='outline' onClick={() => router.push('/contracts')}>
             <ArrowLeft className='size-4' />
-            Back
+            Quay lại
           </Button>
           {isActive && (
             <>
               <Button variant='outline' onClick={() => setEditOpen(true)}>
                 <Pencil className='size-4' />
-                Edit
+                Sửa
               </Button>
               <Button variant='outline' onClick={() => setRenewOpen(true)}>
                 <RefreshCw className='size-4' />
-                Renew
+                Gia hạn
               </Button>
               <Button variant='destructive' onClick={() => setTerminateOpen(true)}>
                 <Ban className='size-4' />
-                Terminate
+                Chấm dứt
               </Button>
             </>
           )}
@@ -114,8 +114,8 @@ export default function ContractDetailPage() {
         <div className='mb-6 flex items-center gap-3 rounded-lg border border-warning/20 bg-warning/5 p-4'>
           <AlertTriangle className='size-5 text-warning shrink-0' />
           <p className='text-sm font-medium text-warning'>
-            This contract expires in {daysUntilEnd} day{daysUntilEnd !== 1 ? 's' : ''}.
-            Consider renewing or terminating the contract.
+            Hợp đồng sẽ hết hạn sau {daysUntilEnd} ngày{daysUntilEnd !== 1 ? '' : ''}.
+            Hãy cân nhắc gia hạn hoặc chấm dứt hợp đồng.
           </p>
         </div>
       )}
@@ -124,7 +124,7 @@ export default function ContractDetailPage() {
         <div className='mb-6 flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4'>
           <AlertTriangle className='size-5 text-destructive shrink-0' />
           <p className='text-sm font-medium text-destructive'>
-            This contract has passed its end date. Please renew or terminate it.
+            Hợp đồng đã quá ngày kết thúc. Vui lòng gia hạn hoặc chấm dứt.
           </p>
         </div>
       )}
@@ -137,7 +137,7 @@ export default function ContractDetailPage() {
               <BadgeCheck className='size-5 text-primary' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Status</p>
+              <p className='text-sm text-muted-foreground'>Trạng thái</p>
               <div className='mt-0.5'><ContractStatusBadge status={contract.status} /></div>
             </div>
           </CardContent>
@@ -148,7 +148,7 @@ export default function ContractDetailPage() {
               <DollarSign className='size-5 text-success' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Monthly Rent</p>
+              <p className='text-sm text-muted-foreground'>Tiền thuê/tháng</p>
               <p className='text-xl font-bold'>{formatCurrency(contract.monthlyRent)}</p>
             </div>
           </CardContent>
@@ -159,7 +159,7 @@ export default function ContractDetailPage() {
               <DollarSign className='size-5 text-info' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Deposit</p>
+              <p className='text-sm text-muted-foreground'>Tiền cọc</p>
               <div>
                 <p className='text-xl font-bold'>{formatCurrency(contract.depositAmount)}</p>
                 <DepositStatusBadge status={contract.depositStatus} />
@@ -173,7 +173,7 @@ export default function ContractDetailPage() {
               <CalendarDays className='size-5 text-warning' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Contract Period</p>
+              <p className='text-sm text-muted-foreground'>Thời hạn hợp đồng</p>
               <p className='text-sm font-semibold'>
                 {formatDate(contract.startDate)} — {formatDate(contract.endDate)}
               </p>
@@ -189,26 +189,26 @@ export default function ContractDetailPage() {
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-base'>
               <Building2 className='size-4' />
-              Property & Tenant
+              Tài sản & Khách thuê
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            <InfoRow label='Building'>
+            <InfoRow label='Tòa nhà'>
               <Link href={`/buildings/${contract.buildingId}`} className='text-sm font-medium hover:underline'>
                 {contract.buildingName}
               </Link>
             </InfoRow>
-            <InfoRow label='Room'>
+            <InfoRow label='Phòng'>
               <Link href={`/rooms/${contract.roomId}`} className='text-sm font-medium hover:underline'>
                 {contract.roomNumber}
               </Link>
             </InfoRow>
-            <InfoRow label='Main Tenant'>
+            <InfoRow label='Khách thuê chính'>
               <Link href={`/tenants/${contract.tenantUserId}`} className='text-sm font-medium hover:underline'>
                 {contract.tenantName}
               </Link>
             </InfoRow>
-            <InfoRow label='Move-in Date' value={formatDate(contract.moveInDate)} />
+            <InfoRow label='Ngày dọn vào' value={formatDate(contract.moveInDate)} />
           </CardContent>
         </Card>
 
@@ -217,16 +217,16 @@ export default function ContractDetailPage() {
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-base'>
               <Clock className='size-4' />
-              Contract Terms
+              Điều khoản hợp đồng
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            <InfoRow label='Start Date' value={formatDate(contract.startDate)} />
-            <InfoRow label='End Date' value={formatDate(contract.endDate)} />
-            <InfoRow label='Monthly Rent' value={formatCurrency(contract.monthlyRent)} />
-            <InfoRow label='Deposit' value={formatCurrency(contract.depositAmount)} />
-            <InfoRow label='Created' value={formatDate(contract.createdAt)} />
-            {contract.note && <InfoRow label='Note' value={contract.note} />}
+            <InfoRow label='Ngày bắt đầu' value={formatDate(contract.startDate)} />
+            <InfoRow label='Ngày kết thúc' value={formatDate(contract.endDate)} />
+            <InfoRow label='Tiền thuê/tháng' value={formatCurrency(contract.monthlyRent)} />
+            <InfoRow label='Tiền cọc' value={formatCurrency(contract.depositAmount)} />
+            <InfoRow label='Ngày tạo' value={formatDate(contract.createdAt)} />
+            {contract.note && <InfoRow label='Ghi chú' value={contract.note} />}
           </CardContent>
         </Card>
 
@@ -236,24 +236,24 @@ export default function ContractDetailPage() {
             <CardHeader>
               <CardTitle className='flex items-center gap-2 text-base text-destructive'>
                 <Ban className='size-4' />
-                Termination Details
+                Chi tiết chấm dứt
               </CardTitle>
               <CardDescription>
-                This contract was terminated on {formatDate(contract.terminationDate ?? '')}.
+                Hợp đồng đã được chấm dứt vào {formatDate(contract.terminationDate ?? '')}.
               </CardDescription>
             </CardHeader>
             <CardContent className='space-y-3'>
               {contract.terminationDate && (
-                <InfoRow label='Termination Date' value={formatDate(contract.terminationDate)} />
+                <InfoRow label='Ngày chấm dứt' value={formatDate(contract.terminationDate)} />
               )}
               {contract.terminationNote && (
-                <InfoRow label='Reason / Note' value={contract.terminationNote} />
+                <InfoRow label='Lý do / Ghi chú' value={contract.terminationNote} />
               )}
               <InfoRow
-                label='Refund Amount'
+                label='Số tiền hoàn'
                 value={contract.refundAmount != null ? formatCurrency(contract.refundAmount) : '—'}
               />
-              <InfoRow label='Deposit Status'>
+              <InfoRow label='Trạng thái cọc'>
                 <DepositStatusBadge status={contract.depositStatus} />
               </InfoRow>
             </CardContent>
@@ -276,13 +276,13 @@ export default function ContractDetailPage() {
               <Receipt className='size-5 text-info' />
             </div>
             <div>
-              <p className='font-medium text-sm'>Invoice History</p>
-              <p className='text-sm text-muted-foreground'>View all invoices generated for this contract</p>
+              <p className='font-medium text-sm'>Lịch sử hóa đơn</p>
+              <p className='text-sm text-muted-foreground'>Xem tất cả hóa đơn của hợp đồng này</p>
             </div>
           </div>
           <Button variant='outline' size='sm' asChild>
             <Link href={`/billing/invoices?contractId=${id}`}>
-              View Invoices
+              Xem hóa đơn
             </Link>
           </Button>
         </CardContent>

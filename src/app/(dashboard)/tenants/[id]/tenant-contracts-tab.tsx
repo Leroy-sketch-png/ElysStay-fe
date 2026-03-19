@@ -29,7 +29,7 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
   const columns: Column<ContractDto>[] = [
     {
       key: 'room',
-      header: 'Room',
+      header: 'Phòng',
       render: (row) => (
         <div>
           <p className='font-medium'>{row.roomNumber}</p>
@@ -39,7 +39,7 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
     },
     {
       key: 'period',
-      header: 'Period',
+      header: 'Thời hạn',
       render: (row) => (
         <span className='text-sm'>
           {formatDate(row.startDate)} — {formatDate(row.endDate)}
@@ -48,17 +48,17 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
     },
     {
       key: 'rent',
-      header: 'Rent',
+      header: 'Tiền thuê',
       render: (row) => formatCurrency(row.monthlyRent),
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (row) => <ContractStatusBadge status={row.status} />,
     },
     {
       key: 'deposit',
-      header: 'Deposit',
+      header: 'Tiền cọc',
       render: (row) => <DepositStatusBadge status={row.depositStatus} />,
     },
     {
@@ -73,7 +73,7 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
             router.push(`/contracts/${row.id}`)
           }}
         >
-          View
+          Xem
         </Button>
       ),
       headerClassName: 'w-[80px]',
@@ -83,7 +83,7 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='text-base'>Contract History</CardTitle>
+        <CardTitle className='text-base'>Lịch sử hợp đồng</CardTitle>
       </CardHeader>
       <CardContent>
         <DataTable
@@ -93,7 +93,7 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
           loadingRows={3}
           rowKey={(row) => row.id}
           onRowClick={(row) => router.push(`/contracts/${row.id}`)}
-          emptyMessage='No contracts found for this tenant.'
+          emptyMessage='Khách thuê chưa có hợp đồng nào.'
           emptyIcon={<FileText className='size-10' />}
         />
       </CardContent>

@@ -33,6 +33,11 @@ export interface UserProfileDto extends UserDto {
   updatedAt: string
 }
 
+/** Returned after admin-creating a user. Includes the password exactly once. */
+export interface CreateUserResultDto extends UserDto {
+  temporaryPassword: string
+}
+
 // ─── Dashboard ──────────────────────────────────────────
 
 export interface OwnerDashboardDto {
@@ -328,7 +333,7 @@ export interface CreateTenantRequest {
   email: string
   fullName: string
   phone?: string
-  password: string
+  password?: string
 }
 
 // ─── Meter Reading ──────────────────────────────────────

@@ -36,16 +36,16 @@ type ReadFilter = 'all' | 'unread' | 'read'
 
 function getNotificationTypeLabel(type: NotificationType): string {
   const map: Record<NotificationType, string> = {
-    INVOICE_SENT: 'Invoice',
-    INVOICE_VOIDED: 'Invoice',
-    PAYMENT_RECORDED: 'Payment',
-    ISSUE: 'Maintenance',
-    InvoiceGenerated: 'Invoice',
-    PaymentReceived: 'Payment',
-    ContractExpiring: 'Contract',
-    MaintenanceUpdate: 'Maintenance',
-    ReservationUpdate: 'Reservation',
-    SystemAlert: 'System',
+    INVOICE_SENT: 'Hóa đơn',
+    INVOICE_VOIDED: 'Hóa đơn',
+    PAYMENT_RECORDED: 'Thanh toán',
+    ISSUE: 'Bảo trì',
+    InvoiceGenerated: 'Hóa đơn',
+    PaymentReceived: 'Thanh toán',
+    ContractExpiring: 'Hợp đồng',
+    MaintenanceUpdate: 'Bảo trì',
+    ReservationUpdate: 'Đặt cọc',
+    SystemAlert: 'Hệ thống',
   }
   return map[type]
 }
@@ -199,9 +199,9 @@ function FilterTabs({
   unreadCount: number
 }) {
   const tabs: { key: ReadFilter; label: string; count?: number }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'unread', label: 'Unread', count: unreadCount },
-    { key: 'read', label: 'Read' },
+    { key: 'all', label: 'Tất cả' },
+    { key: 'unread', label: 'Chưa đọc', count: unreadCount },
+    { key: 'read', label: 'Đã đọc' },
   ]
 
   return (
@@ -271,7 +271,7 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all })
     },
     onError: () => {
-      toast.error('Failed to mark notification as read')
+      toast.error('Không thể đánh dấu thông báo đã đọc')
     },
     onSettled: () => setMarkingId(null),
   })
@@ -280,10 +280,10 @@ export default function NotificationsPage() {
     mutationFn: markAllNotificationsRead,
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all })
-      toast.success(`Marked ${result.markedRead} notification(s) as read`)
+      toast.success(`Đã đánh dấu ${result.markedRead} thông báo là đã đọc`)
     },
     onError: () => {
-      toast.error('Failed to mark all as read')
+      toast.error('Không thể đánh dấu tất cả đã đọc')
     },
   })
 
@@ -301,8 +301,8 @@ export default function NotificationsPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Notifications'
-      description='Stay on top of updates across your properties'
+      title='Thông báo'
+      description='Cập nhật từ các tòa nhà của bạn'
       actions={
         unreadCount > 0 ? (
           <Button
@@ -316,7 +316,7 @@ export default function NotificationsPage() {
             ) : (
               <CheckCheck className='size-4' />
             )}
-            Mark all read
+            Đánh dấu tất cả đã đọc
           </Button>
         ) : undefined
       }
@@ -343,9 +343,9 @@ export default function NotificationsPage() {
       ) : isError ? (
         <EmptyState
           icon={<BellOff className='size-8 text-destructive' />}
-          title='Failed to load notifications'
-          description='An error occurred while fetching your notifications.'
-          actionLabel='Retry'
+          title='Không thể tải thông báo'
+          description='Đã xảy ra lỗi khi tải thông báo của bạn.'
+          actionLabel='Thử lại'
           onAction={() =>
             queryClient.invalidateQueries({ queryKey: notificationKeys.all })
           }
@@ -355,17 +355,17 @@ export default function NotificationsPage() {
           icon={<Inbox className='size-8 text-muted-foreground' />}
           title={
             readFilter === 'unread'
-              ? 'All caught up!'
+              ? 'Đã đọc hết!'
               : readFilter === 'read'
-                ? 'No read notifications'
-                : 'No notifications yet'
+                ? 'Không có thông báo đã đọc'
+                : 'Chưa có thông báo'
           }
           description={
             readFilter === 'unread'
-              ? "You've read all your notifications. Nice work."
+              ? 'Bạn đã đọc hết tất cả thông báo. Tuyệt vời!'
               : readFilter === 'read'
-                ? "You haven't marked any notifications as read yet."
-                : "When something happens across your properties, you'll see it here."
+                ? 'Bạn chưa đánh dấu thông báo nào là đã đọc.'
+                : 'Khi có sự kiện mới từ các tòa nhà, bạn sẽ thấy tại đây.'
           }
         />
       ) : (

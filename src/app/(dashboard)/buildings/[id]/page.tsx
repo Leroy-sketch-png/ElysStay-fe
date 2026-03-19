@@ -51,13 +51,13 @@ export default function BuildingDetailPage() {
       <PageContainer>
         <div className='flex flex-col items-center justify-center py-20 text-center'>
           <Building2 className='size-12 text-muted-foreground mb-4' />
-          <h2 className='text-lg font-semibold'>Building not found</h2>
+          <h2 className='text-lg font-semibold'>Không tìm thấy tòa nhà</h2>
           <p className='mt-1 text-sm text-muted-foreground'>
-            This building may have been deleted or you don&apos;t have access.
+            Tòa nhà này có thể đã bị xóa hoặc bạn không có quyền truy cập.
           </p>
           <Button variant='outline' className='mt-4' onClick={() => router.push('/buildings')}>
             <ArrowLeft className='size-4' />
-            Back to Buildings
+            Quay lại Tòa nhà
           </Button>
         </div>
       </PageContainer>
@@ -70,16 +70,16 @@ export default function BuildingDetailPage() {
     <PageContainer
       title={building.name}
       description={building.address}
-      breadcrumbs={<Breadcrumbs items={[{ label: 'Buildings', href: '/buildings' }, { label: building.name }]} />}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Tòa nhà', href: '/buildings' }, { label: building.name }]} />}
       actions={
         <div className='flex items-center gap-2'>
           <Button variant='outline' onClick={() => router.push('/buildings')}>
             <ArrowLeft className='size-4' />
-            Back
+            Quay lại
           </Button>
           <Button variant='outline' onClick={() => setEditOpen(true)}>
             <Pencil className='size-4' />
-            Edit
+            Sửa
           </Button>
         </div>
       }
@@ -92,7 +92,7 @@ export default function BuildingDetailPage() {
               <DoorOpen className='size-5 text-primary' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Total Rooms</p>
+              <p className='text-sm text-muted-foreground'>Tổng phòng</p>
               <p className='text-2xl font-bold'>{building.totalRooms}</p>
             </div>
           </CardContent>
@@ -103,7 +103,7 @@ export default function BuildingDetailPage() {
               <Layers className='size-5 text-success' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Occupancy</p>
+              <p className='text-sm text-muted-foreground'>Công suất</p>
               <p className='text-2xl font-bold'>{occupancyPercent}%</p>
             </div>
           </CardContent>
@@ -114,7 +114,7 @@ export default function BuildingDetailPage() {
               <Layers className='size-5 text-info' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Floors</p>
+              <p className='text-sm text-muted-foreground'>Số tầng</p>
               <p className='text-2xl font-bold'>{building.totalFloors}</p>
             </div>
           </CardContent>
@@ -125,8 +125,8 @@ export default function BuildingDetailPage() {
               <CalendarDays className='size-5 text-warning' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Invoice Due</p>
-              <p className='text-2xl font-bold'>Day {building.invoiceDueDay}</p>
+              <p className='text-sm text-muted-foreground'>Hạn hóa đơn</p>
+              <p className='text-2xl font-bold'>Ngày {building.invoiceDueDay}</p>
             </div>
           </CardContent>
         </Card>
@@ -146,15 +146,15 @@ export default function BuildingDetailPage() {
         <TabsList>
           <TabsTrigger value='rooms'>
             <DoorOpen className='size-4 mr-1.5' />
-            Rooms
+            Phòng
           </TabsTrigger>
           <TabsTrigger value='services'>
             <Settings className='size-4 mr-1.5' />
-            Services
+            Dịch vụ
           </TabsTrigger>
           <TabsTrigger value='staff'>
             <Users className='size-4 mr-1.5' />
-            Staff
+            Nhân viên
           </TabsTrigger>
         </TabsList>
 

@@ -117,49 +117,49 @@ export default function InvoicesPage() {
 
       if (genCount > 0) {
         toast.success(
-          `${genCount} invoice(s) generated`,
+          `${genCount} hóa đơn đã tạo`,
           skipCount > 0 || warnCount > 0
-            ? `${skipCount} skipped, ${warnCount} warnings`
+            ? `${skipCount} bỏ qua, ${warnCount} cảnh báo`
             : undefined,
         )
       } else if (skipCount > 0) {
-        toast.info('No new invoices', 'All contracts already have invoices for this period.')
+        toast.info('Không có hóa đơn mới', 'Tất cả hợp đồng đã có hóa đơn cho kỳ này.')
       } else {
-        toast.info('No invoices to generate', 'No active contracts found.')
+        toast.info('Không có hóa đơn để tạo', 'Không tìm thấy hợp đồng hiệu lực.')
       }
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
-      toast.error('Failed to generate invoices', error.message)
+      toast.error('Không thể tạo hóa đơn', error.message)
     },
   })
 
   const sendMutation = useMutation({
     mutationFn: (id: string) => sendInvoice(id),
     onSuccess: () => {
-      toast.success('Invoice sent')
+      toast.success('Hóa đơn đã gửi')
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
-      toast.error('Failed to send invoice', error.message)
+      toast.error('Không thể gửi hóa đơn', error.message)
     },
   })
 
   const batchSendMutation = useMutation({
     mutationFn: () => batchSendInvoices({ invoiceIds: selectedIds }),
     onSuccess: (result) => {
-      toast.success(`${result?.sentCount ?? 0} invoice(s) sent`)
+      toast.success(`${result?.sentCount ?? 0} hóa đơn đã gửi`)
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       setSelectedIds([])
     },
     onError: (error: Error) => {
-      toast.error('Failed to send invoices', error.message)
+      toast.error('Không thể gửi hóa đơn', error.message)
     },
   })
 
@@ -190,7 +190,7 @@ export default function InvoicesPage() {
       },
       {
         key: 'roomNumber',
-        header: 'Room',
+        header: 'Phòng',
         render: (row) => (
           <div>
             <span className='font-medium'>{row.roomNumber}</span>
@@ -200,17 +200,17 @@ export default function InvoicesPage() {
       },
       {
         key: 'tenantName',
-        header: 'Tenant',
+        header: 'Khách thuê',
         render: (row) => row.tenantName,
       },
       {
         key: 'totalAmount',
-        header: 'Total',
+        header: 'Tổng',
         render: (row) => formatCurrency(row.totalAmount),
       },
       {
         key: 'paidAmount',
-        header: 'Paid',
+        header: 'Đã trả',
         render: (row) => (
           <span className={row.paidAmount < row.totalAmount ? 'text-muted-foreground' : 'text-success'}>
             {formatCurrency(row.paidAmount)}
@@ -219,12 +219,12 @@ export default function InvoicesPage() {
       },
       {
         key: 'dueDate',
-        header: 'Due',
+        header: 'Hạn',
         render: (row) => formatDate(row.dueDate),
       },
       {
         key: 'status',
-        header: 'Status',
+        header: 'Trạng thái',
         render: (row) => <InvoiceStatusBadge status={row.status} />,
       },
       {
@@ -239,7 +239,7 @@ export default function InvoicesPage() {
                 e.stopPropagation()
                 router.push(`/billing/invoices/${row.id}`)
               }}
-              aria-label='View invoice'
+              aria-label='Xem hóa đơn'
             >
               <Eye className='size-4' />
             </Button>
@@ -252,7 +252,7 @@ export default function InvoicesPage() {
                   setSendTarget(row.id)
                 }}
                 disabled={sendMutation.isPending}
-                aria-label='Send invoice'
+                aria-label='Gửi hóa đơn'
               >
                 <Send className='size-4' />
               </Button>
@@ -287,21 +287,21 @@ export default function InvoicesPage() {
   if (buildingsData && (buildingsData.data ?? []).length === 0) {
     return (
       <PageTransition>
-      <PageContainer title='Invoices' description='Generate and manage monthly invoices.'>
+      <PageContainer title='Hóa đơn' description='Tạo và quản lý hóa đơn hàng tháng.'>
         <EmptyState
           icon={<Building2 className='size-12' />}
-          title='No buildings yet'
-          description='Add your first building to start managing invoices.'
-          actionLabel='Go to Buildings'
+          title='Chưa có tòa nhà'
+          description='Thêm tòa nhà đầu tiên để quản lý hóa đơn.'
+          actionLabel='Đến trang Tòa nhà'
           actionHref='/buildings'
         />
       {/* Batch Send Confirm Dialog */}
       <ConfirmDialog
         open={batchSendOpen}
         onOpenChange={setBatchSendOpen}
-        title='Send Selected Invoices'
-        description={`Are you sure you want to send ${selectedIds.length} selected invoice${selectedIds.length > 1 ? 's' : ''} to tenants?`}
-        confirmLabel='Send All'
+        title='Gửi hóa đơn đã chọn'
+        description={`Bạn có chắc muốn gửi ${selectedIds.length} hóa đơn đã chọn cho khách thuê?`}
+        confirmLabel='Gửi tất cả'
         loading={batchSendMutation.isPending}
         onConfirm={() => {
           batchSendMutation.mutate(undefined, { onSettled: () => setBatchSendOpen(false) })
@@ -312,9 +312,9 @@ export default function InvoicesPage() {
       <ConfirmDialog
         open={!!sendTarget}
         onOpenChange={(open) => { if (!open) setSendTarget(null) }}
-        title='Send Invoice'
-        description='This will mark the invoice as Sent and notify the tenant. Continue?'
-        confirmLabel='Send'
+        title='Gửi hóa đơn'
+        description='Thao tác này sẽ đánh dấu hóa đơn là Đã gửi và thông báo cho khách thuê. Tiếp tục?'
+        confirmLabel='Gửi'
         loading={sendMutation.isPending}
         onConfirm={() => {
           if (sendTarget) {
@@ -332,14 +332,14 @@ export default function InvoicesPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Invoices'
-      description='Generate and manage monthly invoices.'
+      title='Hóa đơn'
+      description='Tạo và quản lý hóa đơn hàng tháng.'
       actions={
         <div className='flex items-center gap-2'>
           {hasActiveFilters && (
             <Button variant='outline' onClick={clearFilters}>
               <Filter className='size-4' />
-              Reset Filters
+              Đặt lại bộ lọc
             </Button>
           )}
           {selectedIds.length > 0 && (
@@ -353,7 +353,7 @@ export default function InvoicesPage() {
               ) : (
                 <Send className='size-4' />
               )}
-              Send Selected ({selectedIds.length})
+              Gửi đã chọn ({selectedIds.length})
             </Button>
           )}
           <div className='relative group'>
@@ -364,18 +364,18 @@ export default function InvoicesPage() {
               {generateMutation.isPending ? (
                 <>
                   <Loader2 className='size-4 animate-spin' />
-                  Generating…
+                  Đang tạo…
                 </>
               ) : (
                 <>
                   <Plus className='size-4' />
-                  Generate Invoices
+                  Tạo hóa đơn
                 </>
               )}
             </Button>
             {!selectedBuildingId && (
               <span className='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md border'>
-                Select a building first
+                Chọn tòa nhà trước
               </span>
             )}
           </div>
@@ -387,13 +387,13 @@ export default function InvoicesPage() {
         <div className='mb-4 flex items-center gap-3 rounded-lg border border-info/20 bg-info/5 p-3'>
           <FileText className='size-4 text-info shrink-0' />
           <p className='text-sm'>
-            Showing invoices for a specific contract.{' '}
+            Đang hiển thị hóa đơn cho một hợp đồng cụ thể.{' '}
             <button
               type='button'
               className='text-primary underline cursor-pointer'
               onClick={clearFilters}
             >
-              Show all invoices
+              Hiển thị tất cả hóa đơn
             </button>
           </p>
         </div>
@@ -405,7 +405,7 @@ export default function InvoicesPage() {
           <div className='grid gap-4 sm:grid-cols-4'>
             {/* Building */}
             <div className='space-y-2'>
-              <Label htmlFor='inv-building'>Building</Label>
+              <Label htmlFor='inv-building'>Tòa nhà</Label>
               {buildingsLoading ? (
                 <Skeleton className='h-10' />
               ) : (
@@ -414,7 +414,7 @@ export default function InvoicesPage() {
                   value={selectedBuildingId}
                   onChange={(e) => setSelectedBuildingId(e.target.value)}
                 >
-                  <option value=''>All buildings</option>
+                  <option value=''>Tất cả tòa nhà</option>
                   {(buildingsData?.data ?? []).map((b) => (
                     <option key={b.id} value={b.id}>{b.name}</option>
                   ))}
@@ -424,7 +424,7 @@ export default function InvoicesPage() {
 
             {/* Year */}
             <div className='space-y-2'>
-              <Label htmlFor='inv-year'>Year</Label>
+              <Label htmlFor='inv-year'>Năm</Label>
               <Select
                 id='inv-year'
                 value={billingYear}
@@ -438,7 +438,7 @@ export default function InvoicesPage() {
 
             {/* Month */}
             <div className='space-y-2'>
-              <Label htmlFor='inv-month'>Month</Label>
+              <Label htmlFor='inv-month'>Tháng</Label>
               <Select
                 id='inv-month'
                 value={billingMonth}
@@ -454,7 +454,7 @@ export default function InvoicesPage() {
 
             {/* Status */}
             <div className='space-y-2'>
-              <Label htmlFor='inv-status'>Status</Label>
+              <Label htmlFor='inv-status'>Trạng thái</Label>
               <Select
                 id='inv-status'
                 value={statusFilter}
@@ -471,7 +471,7 @@ export default function InvoicesPage() {
 
       {/* Period Info */}
       <div className='mb-4 text-sm text-muted-foreground'>
-        Billing Period: <span className='font-medium'>{formatBillingPeriod(billingYear, billingMonth)}</span>
+        Kỳ thanh toán: <span className='font-medium'>{formatBillingPeriod(billingYear, billingMonth)}</span>
       </div>
 
       {/* Error State */}
@@ -479,14 +479,14 @@ export default function InvoicesPage() {
         <Card className='mb-6 border-destructive/50'>
           <CardContent className='py-6 text-center'>
             <AlertTriangle className='size-8 text-destructive mx-auto mb-2' />
-            <p className='font-medium text-destructive'>Failed to load invoices</p>
+            <p className='font-medium text-destructive'>Không thể tải hóa đơn</p>
             <p className='text-sm text-muted-foreground'>{(error as Error).message}</p>
             <Button
               variant='outline'
               className='mt-4'
               onClick={() => queryClient.invalidateQueries({ queryKey: invoiceKeys.all })}
             >
-              Retry
+              Thử lại
             </Button>
           </CardContent>
         </Card>
@@ -507,22 +507,22 @@ export default function InvoicesPage() {
       {!invoicesLoading && !error && invoices.length === 0 && (
         <EmptyState
           icon={<FileText className='size-6' />}
-          title='No invoices found'
+          title='Không tìm thấy hóa đơn'
           description={
             hasActiveFilters
-              ? 'No invoices match the current building, period, or status filters.'
-              : `No invoices for ${formatBillingPeriod(billingYear, billingMonth)}. Click "Generate Invoices" to create them.`
+              ? 'Không có hóa đơn phù hợp với bộ lọc tòa nhà, kỳ hoặc trạng thái hiện tại.'
+              : `Không có hóa đơn cho ${formatBillingPeriod(billingYear, billingMonth)}. Nhấn "Tạo hóa đơn" để tạo mới.`
           }
         >
           {!hasActiveFilters && (
             <Button onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
               <Plus className='size-4' />
-              Generate Invoices
+              Tạo hóa đơn
             </Button>
           )}
           {hasActiveFilters && (
             <Button variant='outline' onClick={clearFilters}>
-              Clear Filters
+              Xóa bộ lọc
             </Button>
           )}
         </EmptyState>

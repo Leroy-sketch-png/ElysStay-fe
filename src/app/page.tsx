@@ -14,23 +14,23 @@ import {
 const FEATURES = [
   {
     icon: Building2,
-    title: 'Property Management',
-    description: 'Manage buildings, rooms, and services with real-time occupancy tracking.',
+    title: 'Quản lý tài sản',
+    description: 'Quản lý tòa nhà, phòng và dịch vụ với theo dõi công suất thời gian thực.',
   },
   {
     icon: Shield,
-    title: 'Secure Access',
-    description: 'Role-based access for owners, staff, and tenants with enterprise-grade auth.',
+    title: 'Bảo mật nhiều lớp',
+    description: 'Phân quyền theo vai trò cho chủ nhà, nhân viên và khách thuê với xác thực doanh nghiệp.',
   },
   {
     icon: BarChart3,
-    title: 'Financial Reports',
-    description: 'Track revenue, expenses, and P&L with automated invoice generation.',
+    title: 'Báo cáo tài chính',
+    description: 'Theo dõi doanh thu, chi phí và lãi lỗ với hóa đơn tự động.',
   },
   {
     icon: Clock,
-    title: 'Smart Automation',
-    description: 'Automated billing cycles, contract renewals, and maintenance tracking.',
+    title: 'Tự động thông minh',
+    description: 'Tự động lập hóa đơn, gia hạn hợp đồng và theo dõi bảo trì.',
   },
 ]
 
@@ -50,7 +50,7 @@ export default function HomePage() {
       <div className='flex h-screen items-center justify-center bg-background'>
         <div className='flex flex-col items-center gap-4'>
           <div className='size-12 rounded-full border-4 border-primary border-t-transparent animate-spin motion-reduce:animate-none' />
-          <p className='text-sm text-muted-foreground animate-pulse motion-reduce:animate-none'>Loading ElysStay…</p>
+          <p className='text-sm text-muted-foreground animate-pulse motion-reduce:animate-none'>Đang tải ElysStay…</p>
         </div>
       </div>
     )
@@ -82,22 +82,22 @@ export default function HomePage() {
             {/* Badge */}
             <div className='mb-6 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm'>
               <Building2 className='size-4' />
-              Smart Rental Management
+              Quản lý cho thuê thông minh
             </div>
 
             {/* Title */}
             <h1 className='text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-tight'>
-              Manage Your
+              Quản lý
               <br />
               <span className='bg-gradient-to-r from-white/90 via-white to-white/70 bg-clip-text text-transparent'>
-                Properties Smarter
+                Tài sản thông minh hơn
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className='mx-auto mt-6 max-w-xl text-lg text-white/80 leading-relaxed'>
-              The complete platform for landlords, staff, and tenants. 
-              Automate billing, track maintenance, and grow your rental business.
+              Nền tảng toàn diện cho chủ nhà, nhân viên và khách thuê.
+              Tự động lập hóa đơn, theo dõi bảo trì và phát triển kinh doanh.
             </p>
 
             {/* CTA */}
@@ -107,7 +107,7 @@ export default function HomePage() {
                 onClick={login}
                 className='group relative inline-flex items-center gap-2 rounded-md bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-lg transition-colors duration-150 hover:shadow-xl cursor-pointer'
               >
-                Get Started
+                Bắt đầu
                 <ChevronRight className='size-4 transition-transform motion-reduce:transition-none group-hover:translate-x-0.5' />
               </button>
               <button
@@ -115,7 +115,7 @@ export default function HomePage() {
                 onClick={login}
                 className='inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/10 px-8 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-colors duration-150 hover:bg-white/20 cursor-pointer'
               >
-                Sign In
+                Đăng nhập
               </button>
             </div>
           </div>
@@ -133,11 +133,11 @@ export default function HomePage() {
       <section className='mx-auto max-w-6xl px-6 py-16 sm:py-24'>
         <div className='text-center mb-12'>
           <h2 className='text-2xl sm:text-3xl font-bold tracking-tight'>
-            Everything you need to
-            <span className='text-primary'> run your properties</span>
+            Tất cả những gì bạn cần để
+            <span className='text-primary'> vận hành tài sản</span>
           </h2>
           <p className='mt-3 text-muted-foreground max-w-lg mx-auto'>
-            From tenant onboarding to financial reporting — one platform for your entire rental workflow.
+            Từ tiếp nhận khách thuê đến báo cáo tài chính — một nền tảng cho toàn bộ quy trình.
           </p>
         </div>
 
@@ -168,7 +168,7 @@ export default function HomePage() {
             <span className='font-semibold'>ElysStay</span>
           </div>
           <p className='text-sm text-muted-foreground'>
-            © {new Date().getFullYear()} ElysStay. Smart rental management.
+            © {new Date().getFullYear()} ElysStay. Quản lý cho thuê thông minh.
           </p>
         </div>
       </footer>

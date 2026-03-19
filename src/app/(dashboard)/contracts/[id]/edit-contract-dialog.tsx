@@ -28,8 +28,8 @@ import type { ContractDetailDto, UpdateContractRequest } from '@/types/api'
 // ─── Schema ─────────────────────────────────────────────
 
 const editSchema = z.object({
-  endDate: z.string().min(1, 'End date is required'),
-  monthlyRent: z.number().positive('Rent must be positive'),
+  endDate: z.string().min(1, 'Ngày kết thúc là bắt buộc'),
+  monthlyRent: z.number().positive('Tiền thuê phải lớn hơn 0'),
   note: z.string().max(500).optional().or(z.literal('')),
 })
 
@@ -77,14 +77,14 @@ export function EditContractDialog({
   const mutation = useMutation({
     mutationFn: (data: UpdateContractRequest) => updateContract(contract.id, data),
     onSuccess: () => {
-      toast.success('Contract updated')
+      toast.success('Đã cập nhật hợp đồng')
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to update contract', error.message)
+      toast.error('Cập nhật hợp đồng thất bại', error.message)
     },
   })
 
@@ -97,7 +97,7 @@ export function EditContractDialog({
     if ((data.note ?? '') !== (contract.note ?? '')) payload.note = data.note || undefined
 
     if (Object.keys(payload).length === 0) {
-      toast.info('No changes', 'Nothing was modified.')
+      toast.info('Không có thay đổi', 'Không có gì được sửa.')
       onOpenChange(false)
       return
     }
@@ -110,10 +110,10 @@ export function EditContractDialog({
       <DialogContent>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Edit Contract</DialogTitle>
+          <DialogTitle>Sửa hợp đồng</DialogTitle>
           <DialogDescription>
-            Update terms for Room {contract.roomNumber} ({contract.tenantName}).
-            Room assignment and main tenant cannot be changed.
+            Cập nhật điều khoản cho Phòng {contract.roomNumber} ({contract.tenantName}).
+            Không thể thay đổi phòng và khách chính.
           </DialogDescription>
         </DialogHeader>
 
@@ -121,7 +121,7 @@ export function EditContractDialog({
           <DialogBody className='space-y-5'>
             {/* End Date */}
             <div className='space-y-2'>
-              <Label htmlFor='edit-end'>End Date *</Label>
+              <Label htmlFor='edit-end'>Ngày kết thúc *</Label>
               <Input
                 id='edit-end'
                 type='date'
@@ -136,7 +136,7 @@ export function EditContractDialog({
 
             {/* Monthly Rent */}
             <div className='space-y-2'>
-              <Label htmlFor='edit-rent'>Monthly Rent (VND) *</Label>
+              <Label htmlFor='edit-rent'>Tiền thuê/tháng (VND) *</Label>
               <Input
                 id='edit-rent'
                 type='number'
@@ -152,17 +152,17 @@ export function EditContractDialog({
 
             {/* Note */}
             <div className='space-y-2'>
-              <Label htmlFor='edit-note'>Note</Label>
+              <Label htmlFor='edit-note'>Ghi chú</Label>
               <Textarea
                 id='edit-note'
-                placeholder='Any additional notes…'
+                placeholder='Ghi chú bổ sung…'
                 rows={2}
                 {...register('note')}
               />
             </div>
 
             <p className='text-xs text-muted-foreground'>
-              Room and tenant cannot be changed (CT-03). To reassign, terminate this contract and create a new one.
+              Phòng và khách thuê không thể thay đổi (CT-03). Để chuyển, hãy chấm dứt và tạo hợp đồng mới.
             </p>
           </DialogBody>
 
@@ -173,10 +173,10 @@ export function EditContractDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Saving…' : 'Save Changes'}
+              {mutation.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
             </Button>
           </DialogFooter>
         </form>

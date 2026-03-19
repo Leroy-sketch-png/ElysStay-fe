@@ -22,8 +22,8 @@ interface ErrorStateProps {
 }
 
 export function ErrorState({
-  title = 'Something went wrong',
-  description = 'An unexpected error occurred. Please try again.',
+  title = 'Có lỗi xảy ra',
+  description = 'Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.',
   statusCode,
   onRetry,
   onBack,
@@ -63,20 +63,20 @@ export function ErrorState({
           {onRetry && (
             <Button onClick={onRetry} size='sm'>
               <RefreshCw className='size-4' />
-              Try Again
+              Thử lại
             </Button>
           )}
           {onBack && (
             <Button variant='outline' size='sm' onClick={onBack}>
               <ArrowLeft className='size-4' />
-              Go Back
+              Quay lại
             </Button>
           )}
           {showHomeLink && (
             <Button variant='ghost' size='sm' asChild>
               <a href='/dashboard'>
                 <Home className='size-4' />
-                Dashboard
+                Tổng quan
               </a>
             </Button>
           )}

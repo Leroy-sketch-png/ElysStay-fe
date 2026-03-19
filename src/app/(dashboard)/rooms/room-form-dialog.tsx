@@ -28,22 +28,22 @@ import type { RoomDto, CreateRoomRequest, UpdateRoomRequest } from '@/types/api'
 
 function roomSchema(maxFloors: number) {
   return z.object({
-    roomNumber: z.string().trim().min(1, 'Room number is required').max(20),
+    roomNumber: z.string().trim().min(1, 'Số phòng là bắt buộc').max(20),
     floor: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-      z.number().int().min(1, 'Floor must be at least 1').max(maxFloors, `Max ${maxFloors} floors`),
+      z.number().int().min(1, 'Tầng phải từ 1').max(maxFloors, `Tối đa ${maxFloors} tầng`),
     ),
     area: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-      z.number().min(1, 'Area must be positive'),
+      z.number().min(1, 'Diện tích phải lớn hơn 0'),
     ),
     price: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-      z.number().positive('Price must be positive'),
+      z.number().positive('Giá phải lớn hơn 0'),
     ),
     maxOccupants: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-      z.number().int().min(1, 'At least 1 occupant').max(20),
+      z.number().int().min(1, 'Ít nhất 1 người').max(20),
     ),
     description: z.string().trim().max(2000).optional().or(z.literal('')),
   })
@@ -112,7 +112,7 @@ export function RoomFormDialog({
   const createMutation = useMutation({
     mutationFn: (data: CreateRoomRequest) => createRoom(buildingId, data),
     onSuccess: () => {
-      toast.success('Room created')
+      toast.success('Đã tạo phòng')
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.byBuilding(buildingId) })
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(buildingId) })
@@ -120,9 +120,9 @@ export function RoomFormDialog({
     },
     onError: (error: Error & { status?: number }) => {
       if ((error as { status?: number }).status === 409) {
-        toast.error('Duplicate room number', 'A room with that number already exists in this building.')
+        toast.error('Trùng số phòng', 'Phòng với số này đã tồn tại trong tòa nhà.')
       } else {
-        toast.error('Failed to create room', error.message)
+        toast.error('Tạo phòng thất bại', error.message)
       }
     },
   })
@@ -130,13 +130,13 @@ export function RoomFormDialog({
   const updateMutation = useMutation({
     mutationFn: (data: UpdateRoomRequest) => updateRoom(room!.id, data),
     onSuccess: () => {
-      toast.success('Room updated')
+      toast.success('Đã cập nhật phòng')
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.byBuilding(buildingId) })
       queryClient.invalidateQueries({ queryKey: roomKeys.detail(room!.id) })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Failed to update room', error.message),
+    onError: (error: Error) => toast.error('Cập nhật phòng thất bại', error.message),
   })
 
   const onSubmit = (data: RoomFormData) => {
@@ -162,11 +162,11 @@ export function RoomFormDialog({
       <DialogContent size='md'>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Room' : 'Add Room'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Sửa phòng' : 'Thêm phòng'}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? 'Update room details. Status changes use a separate action.'
-              : `Add a new room to this building (max ${totalFloors} floors).`}
+              ? 'Cập nhật thông tin phòng. Đổi trạng thái dùng thao tác riêng.'
+              : `Thêm phòng mới cho tòa nhà (tối đa ${totalFloors} tầng).`}
           </DialogDescription>
         </DialogHeader>
 
@@ -174,17 +174,17 @@ export function RoomFormDialog({
           <DialogBody className='space-y-4'>
             <div className='grid grid-cols-2 gap-4'>
               <div className='space-y-2'>
-                <Label htmlFor='room-number'>Room Number *</Label>
+                <Label htmlFor='room-number'>Số phòng *</Label>
                 <Input
                   id='room-number'
-                  placeholder='e.g. 101'
+                  placeholder='VD: 101'
                   {...register('roomNumber')}
                   aria-invalid={!!errors.roomNumber}
                 />
                 {errors.roomNumber && <p className='text-xs text-destructive'>{errors.roomNumber.message}</p>}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='room-floor'>Floor *</Label>
+                <Label htmlFor='room-floor'>Tầng *</Label>
                 <Input
                   id='room-floor'
                   type='number'
@@ -199,7 +199,7 @@ export function RoomFormDialog({
 
             <div className='grid grid-cols-3 gap-4'>
               <div className='space-y-2'>
-                <Label htmlFor='room-area'>Area (m²) *</Label>
+                <Label htmlFor='room-area'>Diện tích (m²) *</Label>
                 <Input
                   id='room-area'
                   type='number'
@@ -211,7 +211,7 @@ export function RoomFormDialog({
                 {errors.area && <p className='text-xs text-destructive'>{errors.area.message}</p>}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='room-price'>Price (VND) *</Label>
+                <Label htmlFor='room-price'>Giá (VND) *</Label>
                 <Input
                   id='room-price'
                   type='number'
@@ -223,7 +223,7 @@ export function RoomFormDialog({
                 {errors.price && <p className='text-xs text-destructive'>{errors.price.message}</p>}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='room-max'>Max Occupants *</Label>
+                <Label htmlFor='room-max'>Sức chứa tối đa *</Label>
                 <Input
                   id='room-max'
                   type='number'
@@ -237,11 +237,11 @@ export function RoomFormDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='room-desc'>Description</Label>
+              <Label htmlFor='room-desc'>Mô tả</Label>
               <Textarea
                 id='room-desc'
                 rows={3}
-                placeholder='Optional room details…'
+                placeholder='Thông tin phòng (không bắt buộc)…'
                 {...register('description')}
               />
             </div>
@@ -249,10 +249,10 @@ export function RoomFormDialog({
 
           <DialogFooter>
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isPending}>
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={isPending}>
-              {isPending ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Room'}
+              {isPending ? 'Đang lưu…' : isEdit ? 'Lưu thay đổi' : 'Tạo phòng'}
             </Button>
           </DialogFooter>
         </form>

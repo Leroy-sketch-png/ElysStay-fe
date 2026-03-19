@@ -36,10 +36,10 @@ import type { PaymentDto, PaymentType } from '@/types/api'
 // ─── Type filter options ────────────────────────────────
 
 const TYPE_OPTIONS: { label: string; value: PaymentType | '' }[] = [
-  { label: 'All types', value: '' },
-  { label: 'Rent Payment', value: 'RentPayment' },
-  { label: 'Deposit In', value: 'DepositIn' },
-  { label: 'Deposit Refund', value: 'DepositRefund' },
+  { label: 'Tất cả loại', value: '' },
+  { label: 'Tiền thuê', value: 'RentPayment' },
+  { label: 'Tiền cọc vào', value: 'DepositIn' },
+  { label: 'Hoàn cọc', value: 'DepositRefund' },
 ]
 
 // ─── Page ───────────────────────────────────────────────
@@ -111,17 +111,17 @@ export default function PaymentsPage() {
   const columns: Column<PaymentDto>[] = [
     {
       key: 'paidAt',
-      header: 'Date',
+      header: 'Ngày',
       render: (p) => <span className='text-sm'>{formatDate(p.paidAt)}</span>,
     },
     {
       key: 'type',
-      header: 'Type',
+      header: 'Loại',
       render: (p) => <PaymentTypeBadge type={p.type} />,
     },
     {
       key: 'amount',
-      header: 'Amount',
+      header: 'Số tiền',
       render: (p) => (
         <span
           className={
@@ -135,7 +135,7 @@ export default function PaymentsPage() {
     },
     {
       key: 'method',
-      header: 'Method',
+      header: 'Phương thức',
       render: (p) => (
         <span className='text-sm text-muted-foreground capitalize'>
           {p.paymentMethod || '—'}
@@ -144,12 +144,12 @@ export default function PaymentsPage() {
     },
     {
       key: 'recorder',
-      header: 'Recorded By',
+      header: 'Người ghi nhận',
       render: (p) => <span className='text-sm'>{p.recorderName || '—'}</span>,
     },
     {
       key: 'note',
-      header: 'Note',
+      header: 'Ghi chú',
       render: (p) => (
         <span className='text-sm text-muted-foreground truncate max-w-[200px] block'>
           {p.note || '—'}
@@ -166,7 +166,7 @@ export default function PaymentsPage() {
             className='text-primary hover:underline text-sm flex items-center gap-1'
             onClick={(e) => e.stopPropagation()}
           >
-            Invoice
+            Hóa đơn
             <ExternalLink className='size-3' />
           </Link>
         ) : null,
@@ -178,12 +178,12 @@ export default function PaymentsPage() {
   if (buildings && (buildings.data ?? []).length === 0) {
     return (
       <PageTransition>
-      <PageContainer title='Payments' description='Payment history across all buildings'>
+      <PageContainer title='Thanh toán' description='Lịch sử thanh toán tất cả tòa nhà'>
         <EmptyState
           icon={<Building2 className='size-12' />}
-          title='No buildings yet'
-          description='Add your first building to view payment history.'
-          actionLabel='Go to Buildings'
+          title='Chưa có tòa nhà'
+          description='Thêm tòa nhà đầu tiên để xem lịch sử thanh toán.'
+          actionLabel='Đến trang Tòa nhà'
           actionHref='/buildings'
         />
       </PageContainer>
@@ -194,13 +194,13 @@ export default function PaymentsPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Payments'
-      description='Payment history across all buildings'
+      title='Thanh toán'
+      description='Lịch sử thanh toán tất cả tòa nhà'
       actions={
         hasActiveFilters ? (
           <Button variant='outline' size='sm' onClick={clearFilters}>
             <X className='size-4' />
-            Clear filters
+            Xóa bộ lọc
           </Button>
         ) : undefined
       }
@@ -215,7 +215,7 @@ export default function PaymentsPage() {
               setPage(1)
             }}
           >
-            <option value=''>All buildings</option>
+            <option value=''>Tất cả tòa nhà</option>
             {buildings?.data?.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
@@ -240,7 +240,7 @@ export default function PaymentsPage() {
         </div>
         <div className='flex items-end gap-2'>
           <div className='w-36'>
-            <Label className='text-xs'>From</Label>
+            <Label className='text-xs'>Từ</Label>
             <Input
               type='date'
               value={fromDate}
@@ -251,7 +251,7 @@ export default function PaymentsPage() {
             />
           </div>
           <div className='w-36'>
-            <Label className='text-xs'>To</Label>
+            <Label className='text-xs'>Đến</Label>
             <Input
               type='date'
               value={toDate}
@@ -274,8 +274,8 @@ export default function PaymentsPage() {
       {isError && !hasInvalidDateRange && (
         <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
-          <p className='font-medium text-destructive'>Failed to load payments</p>
-          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+          <p className='font-medium text-destructive'>Không thể tải thanh toán</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'Đã xảy ra lỗi không mong đợi.'}</p>
         </div>
       )}
 
@@ -284,25 +284,25 @@ export default function PaymentsPage() {
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
           <Card>
             <CardContent className='p-4'>
-              <p className='text-sm text-muted-foreground'>Filtered Net Total</p>
+              <p className='text-sm text-muted-foreground'>Tổng ròng theo bộ lọc</p>
               <p className='text-xl font-bold'>{formatCurrency(paymentSummary.totalAmount)}</p>
             </CardContent>
           </Card>
           <Card className='border-success/20 bg-success/5'>
             <CardContent className='p-4'>
-              <p className='text-sm text-muted-foreground'>Filtered Rent Payments</p>
+              <p className='text-sm text-muted-foreground'>Tiền thuê theo bộ lọc</p>
               <p className='text-xl font-bold text-success'>{formatCurrency(paymentSummary.rentPayments)}</p>
             </CardContent>
           </Card>
           <Card className='border-info/20 bg-info/5'>
             <CardContent className='p-4'>
-              <p className='text-sm text-muted-foreground'>Filtered Deposits In</p>
+              <p className='text-sm text-muted-foreground'>Tiền cọc vào theo bộ lọc</p>
               <p className='text-xl font-bold text-info'>{formatCurrency(paymentSummary.depositsIn)}</p>
             </CardContent>
           </Card>
           <Card className='border-warning/20 bg-warning/5'>
             <CardContent className='p-4'>
-              <p className='text-sm text-muted-foreground'>Filtered Deposits Refunded</p>
+              <p className='text-sm text-muted-foreground'>Tiền cọc hoàn theo bộ lọc</p>
               <p className='text-xl font-bold text-warning'>{formatCurrency(paymentSummary.depositsRefunded)}</p>
             </CardContent>
           </Card>
@@ -317,7 +317,7 @@ export default function PaymentsPage() {
         data={payments}
         rowKey={(p) => p.id}
         loading={isLoading}
-        emptyMessage='No payments found.'
+        emptyMessage='Không tìm thấy thanh toán.'
         emptyIcon={<CreditCard className='size-6' />}
       />
 

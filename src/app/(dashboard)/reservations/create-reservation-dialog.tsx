@@ -47,16 +47,16 @@ function getMinExpiryValue(): string {
 }
 
 const reservationSchema = z.object({
-  buildingId: z.string().min(1, 'Building is required'),
-  roomId: z.string().min(1, 'Room is required'),
-  tenantUserId: z.string().min(1, 'Tenant is required'),
+  buildingId: z.string().min(1, 'Vui lòng chọn tòa nhà'),
+  roomId: z.string().min(1, 'Vui lòng chọn phòng'),
+  tenantUserId: z.string().min(1, 'Vui lòng chọn khách thuê'),
   depositAmount: z.preprocess(
     (value) => {
       if (value === '' || value === null || value === undefined) return undefined
       if (typeof value === 'number' && Number.isNaN(value)) return undefined
       return value
     },
-    z.number({ error: 'Enter a valid amount' }).positive('Deposit must be greater than 0').optional(),
+    z.number({ error: 'Nhập số tiền hợp lệ' }).positive('Số tiền cọc phải lớn hơn 0').optional(),
   ),
   expiresAt: z.string().optional(),
   note: z.string().trim().max(500).optional(),
@@ -65,7 +65,7 @@ const reservationSchema = z.object({
   const expiresAt = new Date(data.expiresAt)
   return !Number.isNaN(expiresAt.getTime()) && expiresAt > new Date()
 }, {
-  message: 'Expiry date must be in the future',
+  message: 'Ngày hết hạn phải ở tương lai',
   path: ['expiresAt'],
 })
 
@@ -161,14 +161,14 @@ export function CreateReservationDialog({
         note: data.note || undefined,
       }),
     onSuccess: () => {
-      toast.success('Reservation created')
+      toast.success('Đã tạo đặt cọc')
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to create reservation', error.message)
+      toast.error('Không thể tạo đặt cọc', error.message)
     },
   })
 
@@ -179,9 +179,9 @@ export function CreateReservationDialog({
       <DialogContent size='lg'>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>New Reservation</DialogTitle>
+          <DialogTitle>Đặt cọc mới</DialogTitle>
           <DialogDescription>
-            Reserve a room for a tenant. The room will be marked as Booked.
+            Đặt cọc phòng cho khách thuê. Phòng sẽ được đánh dấu là Đã đặt.
           </DialogDescription>
         </DialogHeader>
 
@@ -189,9 +189,9 @@ export function CreateReservationDialog({
           <DialogBody className='space-y-4'>
             {/* Building */}
             <div className='space-y-1.5'>
-              <Label htmlFor='buildingId'>Building *</Label>
+              <Label htmlFor='buildingId'>Tòa nhà *</Label>
               <Select {...register('buildingId')}>
-                <option value=''>Select building…</option>
+                <option value=''>Chọn tòa nhà…</option>
                 {buildings.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
@@ -205,14 +205,14 @@ export function CreateReservationDialog({
 
             {/* Room */}
             <div className='space-y-1.5'>
-              <Label htmlFor='roomId'>Available Room *</Label>
+              <Label htmlFor='roomId'>Phòng trống *</Label>
               <Select {...register('roomId')} disabled={!watchedBuildingId}>
                 <option value=''>
-                  {watchedBuildingId ? 'Select room…' : 'Select building first'}
+                  {watchedBuildingId ? 'Chọn phòng…' : 'Chọn tòa nhà trước'}
                 </option>
                 {rooms.map((r) => (
                   <option key={r.id} value={r.id}>
-                    Room {r.roomNumber} — {formatCurrency(r.price)}/mo
+                    Phòng {r.roomNumber} — {formatCurrency(r.price)}/tháng
                   </option>
                 ))}
               </Select>
@@ -221,16 +221,16 @@ export function CreateReservationDialog({
               )}
               {selectedRoom && (
                 <p className='text-xs text-muted-foreground'>
-                  Default deposit: {formatCurrency(selectedRoom.price * 0.5)} (50% of room price)
+                  Tiền cọc mặc định: {formatCurrency(selectedRoom.price * 0.5)} (50% giá phòng)
                 </p>
               )}
             </div>
 
             {/* Tenant */}
             <div className='space-y-1.5'>
-              <Label htmlFor='tenantUserId'>Tenant *</Label>
+              <Label htmlFor='tenantUserId'>Khách thuê *</Label>
               <Select {...register('tenantUserId')}>
-                <option value=''>Select tenant…</option>
+                <option value=''>Chọn khách thuê…</option>
                 {tenants.map((t) => (
                   <option key={t.id} value={t.id}>
                     {t.fullName} ({t.email})
@@ -245,7 +245,7 @@ export function CreateReservationDialog({
             <div className='grid grid-cols-2 gap-4'>
               {/* Deposit Amount (optional) */}
               <div className='space-y-1.5'>
-                <Label htmlFor='depositAmount'>Deposit Amount</Label>
+                <Label htmlFor='depositAmount'>Số tiền đặt cọc</Label>
                 <Input
                   type='number'
                   step='1000'
@@ -255,27 +255,27 @@ export function CreateReservationDialog({
                     setValueAs: (value) => value === '' ? undefined : Number(value),
                   })}
                 />
-                <p className='text-xs text-muted-foreground'>Leave empty for default (50% room price)</p>
+                <p className='text-xs text-muted-foreground'>Để trống sẽ dùng mặc định (50% giá phòng)</p>
               </div>
 
               {/* Expiry (optional) */}
               <div className='space-y-1.5'>
-                <Label htmlFor='expiresAt'>Expires At</Label>
+                <Label htmlFor='expiresAt'>Hết hạn</Label>
                 <Input
                   type='datetime-local'
                   min={getMinExpiryValue()}
                   {...register('expiresAt')}
                 />
-                <p className='text-xs text-muted-foreground'>Default: 7 days</p>
+                <p className='text-xs text-muted-foreground'>Mặc định: 7 ngày</p>
               </div>
             </div>
 
             {/* Note */}
             <div className='space-y-1.5'>
-              <Label htmlFor='note'>Note</Label>
+              <Label htmlFor='note'>Ghi chú</Label>
               <Textarea
                 rows={2}
-                placeholder='Optional note about this reservation…'
+                placeholder='Ghi chú về đặt cọc này (không bắt buộc)…'
                 {...register('note')}
               />
             </div>
@@ -288,10 +288,10 @@ export function CreateReservationDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Creating…' : 'Create Reservation'}
+              {mutation.isPending ? 'Đang tạo…' : 'Tạo đặt cọc'}
             </Button>
           </DialogFooter>
         </form>

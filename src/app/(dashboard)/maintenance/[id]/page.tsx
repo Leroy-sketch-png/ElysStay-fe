@@ -39,14 +39,14 @@ import { EditIssueDialog } from './edit-issue-dialog'
 
 const ALLOWED_TRANSITIONS: Record<IssueStatus, { status: IssueStatus; label: string; icon: typeof PlayCircle; variant?: 'default' | 'outline' | 'destructive' }[]> = {
   New: [
-    { status: 'InProgress', label: 'Start Work', icon: PlayCircle, variant: 'default' },
-    { status: 'Closed', label: 'Close', icon: XCircle, variant: 'outline' },
+    { status: 'InProgress', label: 'Bắt đầu', icon: PlayCircle, variant: 'default' },
+    { status: 'Closed', label: 'Đóng', icon: XCircle, variant: 'outline' },
   ],
   InProgress: [
-    { status: 'Resolved', label: 'Mark Resolved', icon: CheckCircle, variant: 'default' },
+    { status: 'Resolved', label: 'Đã giải quyết', icon: CheckCircle, variant: 'default' },
   ],
   Resolved: [
-    { status: 'Closed', label: 'Close', icon: XCircle, variant: 'outline' },
+    { status: 'Closed', label: 'Đóng', icon: XCircle, variant: 'outline' },
   ],
   Closed: [],
 }
@@ -71,12 +71,12 @@ export default function IssueDetailPage() {
     mutationFn: (newStatus: IssueStatus) =>
       changeIssueStatus(id, { status: newStatus }),
     onSuccess: (updated) => {
-      toast.success('Status updated', `Issue is now ${updated?.status ?? 'updated'}.`)
+      toast.success('Đã cập nhật trạng thái', `Vấn đề hiện đang ${updated?.status ?? 'đã cập nhật'}.`)
       queryClient.invalidateQueries({ queryKey: issueKeys.all })
       queryClient.invalidateQueries({ queryKey: issueKeys.detail(id) })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
-    onError: (error: Error) => toast.error('Failed to update status', error.message),
+    onError: (error: Error) => toast.error('Cập nhật trạng thái thất bại', error.message),
   })
 
   const availableTransitions = issue ? (ALLOWED_TRANSITIONS[issue.status] ?? []) : []
@@ -84,7 +84,7 @@ export default function IssueDetailPage() {
   // ─── Loading ───────────────────────────────────────────
   if (isLoading) {
     return (
-      <PageContainer title='Issue Details'>
+      <PageContainer title='Chi tiết vấn đề'>
         <div className='space-y-4'>
           <Skeleton className='h-8 w-48' />
           <Skeleton className='h-52 w-full' />
@@ -95,15 +95,15 @@ export default function IssueDetailPage() {
 
   if (!issue) {
     return (
-      <PageContainer title='Issue Not Found'>
+      <PageContainer title='Không tìm thấy vấn đề'>
         <div className='py-12 text-center'>
-          <p className='text-muted-foreground'>This issue could not be found.</p>
+          <p className='text-muted-foreground'>Không tìm thấy vấn đề này.</p>
           <Button
             variant='outline'
             className='mt-4'
             onClick={() => router.push('/maintenance')}
           >
-            Back to Issues
+            Quay lại Bảo trì
           </Button>
         </div>
       </PageContainer>
@@ -118,18 +118,18 @@ export default function IssueDetailPage() {
   return (
     <PageContainer
       title={issue.title}
-      description={`Reported ${timeAgo(issue.createdAt)}`}
-      breadcrumbs={<Breadcrumbs items={[{ label: 'Maintenance', href: '/maintenance' }, { label: issue.title }]} />}
+      description={`Báo cáo ${timeAgo(issue.createdAt)}`}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Bảo trì', href: '/maintenance' }, { label: issue.title }]} />}
       actions={
         <div className='flex items-center gap-2'>
           <Button variant='outline' onClick={() => router.push('/maintenance')}>
             <ArrowLeft className='size-4' />
-            Back
+            Quay lại
           </Button>
           {isOpen && (
             <Button variant='outline' onClick={() => setEditOpen(true)}>
               <Pencil className='size-4' />
-              Edit
+              Sửa
             </Button>
           )}
         </div>
@@ -141,7 +141,7 @@ export default function IssueDetailPage() {
           <CardContent className='flex items-center gap-3 py-3'>
             <AlertTriangle className='size-5 text-destructive' />
             <p className='text-sm font-medium text-destructive'>
-              High priority issue — requires immediate attention.
+              Vấn đề ưu tiên cao — cần xử lý ngay.
             </p>
           </CardContent>
         </Card>
@@ -161,7 +161,7 @@ export default function IssueDetailPage() {
             disabled={statusMutation.isPending}
           >
             <t.icon className='size-4' />
-            {statusMutation.isPending ? 'Updating…' : t.label}
+            {statusMutation.isPending ? 'Đang cập nhật…' : t.label}
           </Button>
         ))}
       </div>
@@ -171,7 +171,7 @@ export default function IssueDetailPage() {
         {/* Description Card */}
         <Card className='md:col-span-2'>
           <CardHeader>
-            <CardTitle>Description</CardTitle>
+            <CardTitle>Mô tả</CardTitle>
           </CardHeader>
           <CardContent>
             <p className='whitespace-pre-wrap text-sm leading-relaxed'>
@@ -183,7 +183,7 @@ export default function IssueDetailPage() {
         {/* Location Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Location</CardTitle>
+            <CardTitle>Vị trí</CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
             <div className='flex items-center gap-3'>
@@ -192,7 +192,7 @@ export default function IssueDetailPage() {
                 <Link href={`/buildings/${issue.buildingId}`} className='text-sm font-medium hover:underline'>
                   {issue.buildingName}
                 </Link>
-                <p className='text-xs text-muted-foreground'>Building</p>
+                <p className='text-xs text-muted-foreground'>Tòa nhà</p>
               </div>
             </div>
             {issue.roomNumber && issue.roomId && (
@@ -200,9 +200,9 @@ export default function IssueDetailPage() {
                 <DoorOpen className='size-4 text-muted-foreground' />
                 <div>
                   <Link href={`/rooms/${issue.roomId}`} className='text-sm font-medium hover:underline'>
-                    Room {issue.roomNumber}
+                    Phòng {issue.roomNumber}
                   </Link>
-                  <p className='text-xs text-muted-foreground'>Room</p>
+                  <p className='text-xs text-muted-foreground'>Phòng</p>
                 </div>
               </div>
             )}
@@ -212,14 +212,14 @@ export default function IssueDetailPage() {
         {/* People Card */}
         <Card>
           <CardHeader>
-            <CardTitle>People</CardTitle>
+            <CardTitle>Người liên quan</CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
             <div className='flex items-center gap-3'>
               <User className='size-4 text-muted-foreground' />
               <div>
                 <p className='text-sm font-medium'>{issue.reporterName ?? '—'}</p>
-                <p className='text-xs text-muted-foreground'>Reported by</p>
+                <p className='text-xs text-muted-foreground'>Người báo</p>
               </div>
             </div>
             <div className='flex items-center gap-3'>
@@ -227,10 +227,10 @@ export default function IssueDetailPage() {
               <div>
                 <p className='text-sm font-medium'>
                   {issue.assigneeName ?? (
-                    <span className='text-muted-foreground'>Unassigned</span>
+                    <span className='text-muted-foreground'>Chưa giao</span>
                   )}
                 </p>
-                <p className='text-xs text-muted-foreground'>Assigned to</p>
+                <p className='text-xs text-muted-foreground'>Được giao cho</p>
               </div>
             </div>
           </CardContent>
@@ -239,7 +239,7 @@ export default function IssueDetailPage() {
         {/* Timeline Card */}
         <Card className='md:col-span-2'>
           <CardHeader>
-            <CardTitle>Timeline</CardTitle>
+            <CardTitle>Dòng thời gian</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='grid gap-4 sm:grid-cols-2'>
@@ -247,14 +247,14 @@ export default function IssueDetailPage() {
                 <Clock className='size-4 text-muted-foreground' />
                 <div>
                   <p className='text-sm font-medium'>{formatDate(issue.createdAt)}</p>
-                  <p className='text-xs text-muted-foreground'>Created</p>
+                  <p className='text-xs text-muted-foreground'>Ngày tạo</p>
                 </div>
               </div>
               <div className='flex items-center gap-3'>
                 <Clock className='size-4 text-muted-foreground' />
                 <div>
                   <p className='text-sm font-medium'>{formatDate(issue.updatedAt)}</p>
-                  <p className='text-xs text-muted-foreground'>Last Updated</p>
+                  <p className='text-xs text-muted-foreground'>Cập nhật lần cuối</p>
                 </div>
               </div>
             </div>
@@ -273,13 +273,13 @@ export default function IssueDetailPage() {
       <ConfirmDialog
         open={!!confirmAction}
         onOpenChange={(open) => { if (!open) setConfirmAction(null) }}
-        title={`${confirmAction?.label ?? 'Update'} Issue`}
+        title={`${confirmAction?.label ?? 'Cập nhật'} vấn đề`}
         description={
           confirmAction?.status === 'Closed'
-            ? 'Closing this issue is permanent and cannot be undone. Are you sure?'
-            : `Are you sure you want to change the status to "${confirmAction?.status ?? ''}"?`
+            ? 'Đóng vấn đề này là vĩnh viễn và không thể hoàn tác. Bạn chắc chứ?'
+            : `Bạn có chắc muốn đổi trạng thái thành "${confirmAction?.status ?? ''}"?`
         }
-        confirmLabel={confirmAction?.label ?? 'Confirm'}
+        confirmLabel={confirmAction?.label ?? 'Xác nhận'}
         variant={confirmAction?.status === 'Closed' ? 'destructive' : 'default'}
         loading={statusMutation.isPending}
         onConfirm={() => {

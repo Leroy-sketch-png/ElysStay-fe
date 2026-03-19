@@ -71,7 +71,7 @@ export default function MaintenanceIssuesPage() {
   const columns: Column<MaintenanceIssueDto>[] = [
     {
       key: 'title',
-      header: 'Issue',
+      header: 'Vấn đề',
       render: (row) => (
         <div className='max-w-[300px]'>
           <p className='font-medium truncate'>{row.title}</p>
@@ -81,13 +81,13 @@ export default function MaintenanceIssuesPage() {
     },
     {
       key: 'building',
-      header: 'Location',
+      header: 'Vị trí',
       render: (row) => (
         <div>
           <span className='text-sm'>{row.buildingName}</span>
           {row.roomNumber && (
             <span className='text-xs text-muted-foreground ml-2'>
-              Room {row.roomNumber}
+              Phòng {row.roomNumber}
             </span>
           )}
         </div>
@@ -95,27 +95,27 @@ export default function MaintenanceIssuesPage() {
     },
     {
       key: 'reporter',
-      header: 'Reported By',
+      header: 'Người báo',
       render: (row) => row.reporterName ?? '—',
     },
     {
       key: 'assignee',
-      header: 'Assigned To',
-      render: (row) => row.assigneeName ?? <span className='text-muted-foreground'>Unassigned</span>,
+      header: 'Được giao',
+      render: (row) => row.assigneeName ?? <span className='text-muted-foreground'>Chưa giao</span>,
     },
     {
       key: 'priority',
-      header: 'Priority',
+      header: 'Độ ưu tiên',
       render: (row) => <PriorityBadge priority={row.priority} />,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (row) => <IssueStatusBadge status={row.status} />,
     },
     {
       key: 'createdAt',
-      header: 'Created',
+      header: 'Ngày tạo',
       render: (row) => formatDate(row.createdAt),
     },
     {
@@ -129,7 +129,7 @@ export default function MaintenanceIssuesPage() {
             e.stopPropagation()
             router.push(`/maintenance/${row.id}`)
           }}
-          aria-label='View issue'
+          aria-label='Xem vấn đề'
         >
           <Eye className='size-4' />
         </Button>
@@ -141,12 +141,12 @@ export default function MaintenanceIssuesPage() {
   if (buildingsData && buildings.length === 0) {
     return (
       <PageTransition>
-      <PageContainer title='Maintenance Issues' description='Track and manage building maintenance requests.'>
+      <PageContainer title='Bảo trì' description='Theo dõi và quản lý yêu cầu bảo trì.'>
         <EmptyState
           icon={<Building2 className='size-12' />}
-          title='No buildings yet'
-          description='Add your first building to track maintenance issues.'
-          actionLabel='Go to Buildings'
+          title='Chưa có tòa nhà'
+          description='Thêm tòa nhà đầu tiên để theo dõi vấn đề bảo trì.'
+          actionLabel='Đến trang Tòa nhà'
           actionHref='/buildings'
         />
       </PageContainer>
@@ -159,8 +159,8 @@ export default function MaintenanceIssuesPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Maintenance Issues'
-      description='Track and manage building maintenance requests.'
+      title='Bảo trì'
+      description='Theo dõi và quản lý yêu cầu bảo trì.'
       actions={
         <div className='flex items-center gap-2'>
           {hasActiveFilters && (
@@ -174,12 +174,12 @@ export default function MaintenanceIssuesPage() {
               }}
             >
               <X className='size-4' />
-              Clear filters
+              Xóa bộ lọc
             </Button>
           )}
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className='size-4' />
-            Report Issue
+            Báo vấn đề
           </Button>
         </div>
       }
@@ -187,13 +187,13 @@ export default function MaintenanceIssuesPage() {
       {/* Filters */}
       <div className='flex flex-wrap items-end gap-4'>
         <div className='space-y-1.5'>
-          <Label htmlFor='iss-building'>Building</Label>
+          <Label htmlFor='iss-building'>Tòa nhà</Label>
           <Select
             id='iss-building'
             value={selectedBuildingId}
             onChange={(e) => { setSelectedBuildingId(e.target.value); setPage(1) }}
           >
-            <option value=''>All Buildings</option>
+            <option value=''>Tất cả tòa nhà</option>
             {buildings.map((b) => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
@@ -201,31 +201,31 @@ export default function MaintenanceIssuesPage() {
         </div>
 
         <div className='space-y-1.5'>
-          <Label htmlFor='iss-status'>Status</Label>
+          <Label htmlFor='iss-status'>Trạng thái</Label>
           <Select
             id='iss-status'
             value={statusFilter}
             onChange={(e) => { setStatusFilter(e.target.value as IssueStatus | ''); setPage(1) }}
           >
-            <option value=''>All Statuses</option>
-            <option value='New'>New</option>
-            <option value='InProgress'>In Progress</option>
-            <option value='Resolved'>Resolved</option>
-            <option value='Closed'>Closed</option>
+            <option value=''>Tất cả trạng thái</option>
+            <option value='New'>Mới</option>
+            <option value='InProgress'>Đang xử lý</option>
+            <option value='Resolved'>Đã giải quyết</option>
+            <option value='Closed'>Đã đóng</option>
           </Select>
         </div>
 
         <div className='space-y-1.5'>
-          <Label htmlFor='iss-priority'>Priority</Label>
+          <Label htmlFor='iss-priority'>Độ ưu tiên</Label>
           <Select
             id='iss-priority'
             value={priorityFilter}
             onChange={(e) => { setPriorityFilter(e.target.value as PriorityLevel | ''); setPage(1) }}
           >
-            <option value=''>All Priorities</option>
-            <option value='Low'>Low</option>
-            <option value='Medium'>Medium</option>
-            <option value='High'>High</option>
+            <option value=''>Tất cả mức ưu tiên</option>
+            <option value='Low'>Thấp</option>
+            <option value='Medium'>Trung bình</option>
+            <option value='High'>Cao</option>
           </Select>
         </div>
       </div>
@@ -243,9 +243,9 @@ export default function MaintenanceIssuesPage() {
       {error && (
         <EmptyState
           icon={<Wrench className='size-8' />}
-          title='Unable to load maintenance issues'
+          title='Không thể tải vấn đề bảo trì'
           description={(error as Error).message}
-          actionLabel='Retry'
+          actionLabel='Thử lại'
           onAction={() => queryClient.invalidateQueries({ queryKey: issueKeys.all })}
         />
       )}
@@ -254,13 +254,13 @@ export default function MaintenanceIssuesPage() {
       {!isLoading && !error && issues.length === 0 && (
         <EmptyState
           icon={<Wrench className='size-8' />}
-          title='No maintenance issues'
+          title='Không có vấn đề bảo trì'
           description={
             statusFilter || priorityFilter || selectedBuildingId
-              ? 'No issues match your filters.'
-              : 'No maintenance issues have been reported yet.'
+              ? 'Không có vấn đề phù hợp với bộ lọc.'
+              : 'Chưa có vấn đề bảo trì nào được báo cáo.'
           }
-          actionLabel={hasActiveFilters ? 'Clear Filters' : undefined}
+          actionLabel={hasActiveFilters ? 'Xóa bộ lọc' : undefined}
           onAction={hasActiveFilters ? () => {
             setSelectedBuildingId('')
             setStatusFilter('')

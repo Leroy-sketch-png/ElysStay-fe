@@ -65,7 +65,7 @@ export default function ContractsPage() {
   const columns: Column<ContractDto>[] = [
     {
       key: 'room',
-      header: 'Room',
+      header: 'Phòng',
       render: (row) => (
         <div>
           <p className='font-medium'>{row.roomNumber}</p>
@@ -75,31 +75,31 @@ export default function ContractsPage() {
     },
     {
       key: 'tenant',
-      header: 'Tenant',
+      header: 'Khách thuê',
       render: (row) => <span className='text-sm'>{row.tenantName}</span>,
     },
     {
       key: 'period',
-      header: 'Period',
+      header: 'Thời hạn',
       render: (row) => (
         <div>
           <span className='text-sm'>
             {formatDate(row.startDate)} — {formatDate(row.endDate)}
           </span>
           {row.status === 'Active' && isExpiringSoon(row.endDate) && (
-            <p className='text-xs text-warning font-medium'>Expiring soon</p>
+            <p className='text-xs text-warning font-medium'>Sắp hết hạn</p>
           )}
         </div>
       ),
     },
     {
       key: 'rent',
-      header: 'Rent/mo',
+      header: 'Giá thuê/tháng',
       render: (row) => formatCurrency(row.monthlyRent),
     },
     {
       key: 'deposit',
-      header: 'Deposit',
+      header: 'Tiền cọc',
       render: (row) => (
         <div>
           <p className='text-sm'>{formatCurrency(row.depositAmount)}</p>
@@ -109,7 +109,7 @@ export default function ContractsPage() {
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (row) => <ContractStatusBadge status={row.status} />,
     },
     {
@@ -124,7 +124,7 @@ export default function ContractsPage() {
             router.push(`/contracts/${row.id}`)
           }}
         >
-          View
+          Xem
         </Button>
       ),
       headerClassName: 'w-[80px]',
@@ -137,12 +137,12 @@ export default function ContractsPage() {
   if (buildingsData && (buildingsData.data ?? []).length === 0) {
     return (
       <PageTransition>
-      <PageContainer title='Contracts' description='Manage rental contracts and agreements.'>
+      <PageContainer title='Hợp đồng' description='Quản lý hợp đồng thuê và thỏa thuận.'>
         <EmptyState
           icon={<Building2 className='size-12' />}
-          title='No buildings yet'
-          description='Add your first building to start managing contracts.'
-          actionLabel='Go to Buildings'
+          title='Chưa có tòa nhà'
+          description='Thêm tòa nhà đầu tiên để bắt đầu quản lý hợp đồng.'
+          actionLabel='Đến trang Tòa nhà'
           actionHref='/buildings'
         />
       </PageContainer>
@@ -154,12 +154,12 @@ export default function ContractsPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Contracts'
-      description='Manage rental contracts and agreements.'
+      title='Hợp đồng'
+      description='Quản lý hợp đồng thuê và thỏa thuận.'
       actions={
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className='size-4' />
-          New Contract
+          Hợp đồng mới
         </Button>
       }
     >
@@ -173,7 +173,7 @@ export default function ContractsPage() {
           }}
           className='w-52'
         >
-          <option value=''>All buildings</option>
+          <option value=''>Tất cả tòa nhà</option>
           {(buildingsData?.data ?? []).map((b) => (
             <option key={b.id} value={b.id}>{b.name}</option>
           ))}
@@ -187,9 +187,9 @@ export default function ContractsPage() {
           }}
           className='w-40'
         >
-          <option value=''>All statuses</option>
-          <option value='Active'>Active</option>
-          <option value='Terminated'>Terminated</option>
+          <option value=''>Tất cả trạng thái</option>
+          <option value='Active'>Hiệu lực</option>
+          <option value='Terminated'>Chấm dứt</option>
         </Select>
 
         {hasActiveFilters && (
@@ -201,7 +201,7 @@ export default function ContractsPage() {
               setFilters({ page: 1, pageSize: 20 })
             }}
           >
-            Clear filters
+            Xóa bộ lọc
           </Button>
         )}
       </div>
@@ -210,10 +210,10 @@ export default function ContractsPage() {
       {isError && (
         <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
-          <p className='font-medium text-destructive'>Failed to load contracts</p>
-          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+          <p className='font-medium text-destructive'>Không thể tải hợp đồng</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'Đã xảy ra lỗi không mong muốn.'}</p>
           <Button variant='outline' className='mt-4' onClick={() => queryClient.invalidateQueries({ queryKey: contractKeys.list(activeFilters) })}>
-            Try Again
+            Thử lại
           </Button>
         </div>
       )}
@@ -222,9 +222,9 @@ export default function ContractsPage() {
       {!isError && !isLoading && data && data.data.length === 0 && !hasActiveFilters ? (
         <EmptyState
           icon={<FileText className='size-12' />}
-          title='No contracts yet'
-          description='Create your first contract to start managing tenant agreements and billing.'
-          actionLabel='New Contract'
+          title='Chưa có hợp đồng'
+          description='Tạo hợp đồng đầu tiên để quản lý khách thuê và thanh toán.'
+          actionLabel='Hợp đồng mới'
           onAction={() => setCreateOpen(true)}
         />
       ) : !isError ? (
@@ -235,7 +235,7 @@ export default function ContractsPage() {
             loading={isLoading}
             rowKey={(row) => row.id}
             onRowClick={(row) => router.push(`/contracts/${row.id}`)}
-            emptyMessage='No contracts match your filters.'
+            emptyMessage='Không có hợp đồng phù hợp với bộ lọc.'
             emptyIcon={<FileText className='size-10' />}
           />
           {data?.pagination && data.pagination.totalPages > 1 && (

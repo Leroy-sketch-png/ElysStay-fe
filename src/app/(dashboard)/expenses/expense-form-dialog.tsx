@@ -41,21 +41,21 @@ function normalizeDateInputValue(value: string): string {
 }
 
 const expenseSchema = z.object({
-  buildingId: z.string().min(1, 'Building is required'),
+  buildingId: z.string().min(1, 'Vui lòng chọn tòa nhà'),
   roomId: z.string().optional().or(z.literal('')),
-  category: z.string().min(1, 'Category is required').max(100),
-  description: z.string().trim().min(1, 'Description is required').max(500),
+  category: z.string().min(1, 'Vui lòng chọn danh mục').max(100),
+  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(500),
   amount: z.preprocess(
     (value) => {
       if (value === '' || value === null || value === undefined) return undefined
       if (typeof value === 'number' && Number.isNaN(value)) return undefined
       return value
     },
-    z.number({ error: 'Enter a valid amount' }).positive('Amount must be positive'),
+    z.number({ error: 'Nhập số tiền hợp lệ' }).positive('Số tiền phải lớn hơn 0'),
   ),
-  expenseDate: z.string().min(1, 'Date is required'),
+  expenseDate: z.string().min(1, 'Ngày là bắt buộc'),
 }).refine((data) => data.expenseDate <= getTodayDate(), {
-  message: 'Expense date cannot be in the future',
+  message: 'Ngày chi phí không được ở tương lai',
   path: ['expenseDate'],
 })
 
@@ -150,13 +150,13 @@ export function ExpenseFormDialog({
         expenseDate: data.expenseDate,
       }),
     onSuccess: () => {
-      toast.success('Expense created')
+      toast.success('Chi phí đã tạo')
       queryClient.invalidateQueries({ queryKey: expenseKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Failed to create expense', error.message),
+    onError: (error: Error) => toast.error('Không thể tạo chi phí', error.message),
   })
 
   const updateMutation = useMutation({
@@ -168,13 +168,13 @@ export function ExpenseFormDialog({
         expenseDate: data.expenseDate,
       }),
     onSuccess: () => {
-      toast.success('Expense updated')
+      toast.success('Chi phí đã cập nhật')
       queryClient.invalidateQueries({ queryKey: expenseKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Failed to update expense', error.message),
+    onError: (error: Error) => toast.error('Không thể cập nhật chi phí', error.message),
   })
 
   const isPending = createMutation.isPending || updateMutation.isPending
@@ -194,11 +194,11 @@ export function ExpenseFormDialog({
       <DialogContent>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Sửa chi phí' : 'Thêm chi phí'}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? 'Update the expense details.'
-              : 'Record a new building expense.'}
+              ? 'Cập nhật thông tin chi phí.'
+              : 'Ghi nhận chi phí mới cho tòa nhà.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -206,14 +206,14 @@ export function ExpenseFormDialog({
           <DialogBody className='space-y-4'>
             {/* Building */}
             <div className='space-y-2'>
-              <Label htmlFor='exp-building'>Building *</Label>
+              <Label htmlFor='exp-building'>Tòa nhà *</Label>
               <Select
                 id='exp-building'
                 {...register('buildingId')}
                 disabled={isEdit}
                 aria-invalid={!!errors.buildingId}
               >
-                <option value=''>Select building…</option>
+                <option value=''>Chọn tòa nhà…</option>
                 {buildings.map((b) => (
                   <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
@@ -226,11 +226,11 @@ export function ExpenseFormDialog({
             {/* Room (optional) */}
             {watchedBuildingId && rooms.length > 0 && !isEdit && (
               <div className='space-y-2'>
-                <Label htmlFor='exp-room'>Room (optional)</Label>
+                <Label htmlFor='exp-room'>Phòng (không bắt buộc)</Label>
                 <Select id='exp-room' {...register('roomId')}>
-                  <option value=''>Building-level expense</option>
+                  <option value=''>Chi phí cấp tòa nhà</option>
                   {rooms.map((r) => (
-                    <option key={r.id} value={r.id}>Room {r.roomNumber}</option>
+                    <option key={r.id} value={r.id}>Phòng {r.roomNumber}</option>
                   ))}
                 </Select>
               </div>
@@ -238,13 +238,13 @@ export function ExpenseFormDialog({
 
             {/* Category */}
             <div className='space-y-2'>
-              <Label htmlFor='exp-category'>Category *</Label>
+              <Label htmlFor='exp-category'>Danh mục *</Label>
               <Select
                 id='exp-category'
                 {...register('category')}
                 aria-invalid={!!errors.category}
               >
-                <option value=''>Select category…</option>
+                <option value=''>Chọn danh mục…</option>
                 {EXPENSE_CATEGORIES.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
                 ))}
@@ -256,10 +256,10 @@ export function ExpenseFormDialog({
 
             {/* Description */}
             <div className='space-y-2'>
-              <Label htmlFor='exp-description'>Description *</Label>
+              <Label htmlFor='exp-description'>Mô tả *</Label>
               <Textarea
                 id='exp-description'
-                placeholder='What was the expense for?'
+                placeholder='Chi phí này dùng cho việc gì?'
                 rows={3}
                 {...register('description')}
                 aria-invalid={!!errors.description}
@@ -271,7 +271,7 @@ export function ExpenseFormDialog({
 
             {/* Amount */}
             <div className='space-y-2'>
-              <Label htmlFor='exp-amount'>Amount (VND) *</Label>
+              <Label htmlFor='exp-amount'>Số tiền (VND) *</Label>
               <Input
                 id='exp-amount'
                 type='number'
@@ -289,7 +289,7 @@ export function ExpenseFormDialog({
 
             {/* Date */}
             <div className='space-y-2'>
-              <Label htmlFor='exp-date'>Expense Date *</Label>
+              <Label htmlFor='exp-date'>Ngày chi *</Label>
               <Input
                 id='exp-date'
                 type='date'
@@ -310,12 +310,12 @@ export function ExpenseFormDialog({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={isPending}>
               {isPending
-                ? isEdit ? 'Saving…' : 'Creating…'
-                : isEdit ? 'Save Changes' : 'Add Expense'}
+                ? isEdit ? 'Đang lưu…' : 'Đang tạo…'
+                : isEdit ? 'Lưu thay đổi' : 'Thêm chi phí'}
             </Button>
           </DialogFooter>
         </form>

@@ -29,29 +29,30 @@ import { roomKeys, fetchRooms } from '@/lib/queries/rooms'
 import { tenantKeys, fetchTenants } from '@/lib/queries/tenants'
 import { paymentKeys } from '@/lib/queries/payments'
 import { invoiceKeys } from '@/lib/queries/invoices'
+import { reservationKeys } from '@/lib/queries/reservations'
 import { userKeys } from '@/lib/queries/users'
-import type { CreateContractRequest } from '@/types/api'
+import type { CreateContractRequest, ReservationDto } from '@/types/api'
 
 // ─── Validation ─────────────────────────────────────────
 
 const contractSchema = z.object({
-  buildingId: z.string().min(1, 'Select a building'),
-  roomId: z.string().min(1, 'Select a room'),
-  tenantUserId: z.string().min(1, 'Select a tenant'),
-  startDate: z.string().min(1, 'Start date is required'),
-  endDate: z.string().min(1, 'End date is required'),
-  moveInDate: z.string().min(1, 'Move-in date is required'),
-  monthlyRent: z.number({ error: 'Monthly rent is required' }).positive('Rent must be positive'),
-  depositAmount: z.number({ error: 'Deposit amount is required' }).min(0, 'Deposit cannot be negative'),
+  buildingId: z.string().min(1, 'Chọn tòa nhà'),
+  roomId: z.string().min(1, 'Chọn phòng'),
+  tenantUserId: z.string().min(1, 'Chọn khách thuê'),
+  startDate: z.string().min(1, 'Ngày bắt đầu là bắt buộc'),
+  endDate: z.string().min(1, 'Ngày kết thúc là bắt buộc'),
+  moveInDate: z.string().min(1, 'Ngày dọn vào là bắt buộc'),
+  monthlyRent: z.number({ error: 'Giá thuê hàng tháng là bắt buộc' }).positive('Giá thuê phải lớn hơn 0'),
+  depositAmount: z.number({ error: 'Tiền cọc là bắt buộc' }).min(0, 'Tiền cọc không được âm'),
   note: z.string().max(500).optional().or(z.literal('')),
 }).refine((data) => data.endDate > data.startDate, {
-  message: 'End date must be after start date',
+  message: 'Ngày kết thúc phải sau ngày bắt đầu',
   path: ['endDate'],
 }).refine((data) => !data.moveInDate || !data.startDate || data.moveInDate >= data.startDate, {
-  message: 'Move-in date cannot be before start date',
+  message: 'Ngày dọn vào không được trước ngày bắt đầu',
   path: ['moveInDate'],
 }).refine((data) => !data.moveInDate || !data.endDate || data.moveInDate <= data.endDate, {
-  message: 'Move-in date cannot be after end date',
+  message: 'Ngày dọn vào không được sau ngày kết thúc',
   path: ['moveInDate'],
 })
 
@@ -63,9 +64,11 @@ type ContractFormOutput = z.output<typeof contractSchema>
 interface ContractFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** Pre-fill from a confirmed reservation (conversion flow) */
+  fromReservation?: ReservationDto
 }
 
-export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogProps) {
+export function ContractFormDialog({ open, onOpenChange, fromReservation }: ContractFormDialogProps) {
   const queryClient = useQueryClient()
   const [selectedBuildingId, setSelectedBuildingId] = useState('')
 
@@ -94,11 +97,26 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
 
   const watchedBuildingId = watch('buildingId')
 
-  // Reset form on open
+  // Reset form on open — pre-fill if from reservation
   useEffect(() => {
     if (open) {
-      reset()
-      setSelectedBuildingId('')
+      if (fromReservation) {
+        reset({
+          buildingId: fromReservation.buildingId,
+          roomId: fromReservation.roomId,
+          tenantUserId: fromReservation.tenantUserId,
+          startDate: '',
+          endDate: '',
+          moveInDate: '',
+          monthlyRent: 0,
+          depositAmount: fromReservation.depositAmount,
+          note: fromReservation.note ?? '',
+        })
+        setSelectedBuildingId(fromReservation.buildingId)
+      } else {
+        reset()
+        setSelectedBuildingId('')
+      }
     }
   }, [open, reset])
 
@@ -118,9 +136,12 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
   })
 
   // ─── Data: Available Rooms ────────────────────────────
+  // When converting from reservation, the room is Booked (not Available).
+  // Fetch both Available and Booked rooms so the pre-filled room appears.
+  const roomStatus = fromReservation ? undefined : 'Available'
   const { data: roomsData } = useQuery({
-    queryKey: roomKeys.list({ buildingId: selectedBuildingId, status: 'Available', pageSize: DROPDOWN_PAGE_SIZE }),
-    queryFn: () => fetchRooms({ buildingId: selectedBuildingId, status: 'Available', pageSize: DROPDOWN_PAGE_SIZE }),
+    queryKey: roomKeys.list({ buildingId: selectedBuildingId, status: roomStatus, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchRooms({ buildingId: selectedBuildingId, status: roomStatus, pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: open && !!selectedBuildingId,
   })
 
@@ -153,19 +174,23 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
   const createMutation = useMutation({
     mutationFn: (data: CreateContractRequest) => createContract(data),
     onSuccess: () => {
-      toast.success('Contract created', 'Deposit payment has been recorded automatically.')
+      toast.success(
+        fromReservation ? 'Chuyển đổi thành hợp đồng thành công' : 'Tạo hợp đồng thành công',
+        'Thanh toán tiền cọc đã được ghi nhận tự động.',
+      )
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: paymentKeys.all })
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: reservationKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error & { status?: number }) => {
       if ((error as { status?: number }).status === 409) {
-        toast.error('Room already has an active contract', 'Only one active contract per room is allowed.')
+        toast.error('Phòng đã có hợp đồng', 'Mỗi phòng chỉ được phép có một hợp đồng đang hoạt động.')
       } else {
-        toast.error('Failed to create contract', error.message)
+        toast.error('Không thể tạo hợp đồng', error.message)
       }
     },
   })
@@ -174,6 +199,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
     createMutation.mutate({
       roomId: data.roomId,
       tenantUserId: data.tenantUserId,
+      reservationId: fromReservation?.id,
       startDate: data.startDate,
       endDate: data.endDate,
       moveInDate: data.moveInDate,
@@ -188,19 +214,30 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
       <DialogContent size='lg'>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>New Rental Contract</DialogTitle>
+          <DialogTitle>{fromReservation ? 'Chuyển đổi thành hợp đồng' : 'Hợp đồng thuê mới'}</DialogTitle>
           <DialogDescription>
-            Create a contract to assign a tenant to a room. The room status will change to Occupied and a deposit
-            payment will be recorded automatically.
+            {fromReservation
+              ? `Tạo hợp đồng từ đặt cọc của ${fromReservation.tenantName ?? 'khách thuê'}. Tiền cọc sẽ được chuyển tự động.`
+              : 'Tạo hợp đồng để gán khách thuê vào phòng. Phòng sẽ chuyển sang trạng thái Đang ở và thanh toán tiền cọc sẽ được tự động ghi nhận.'}
           </DialogDescription>
         </DialogHeader>
 
         <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-5'>
+            {/* Reservation info banner */}
+            {fromReservation && (
+              <div className='rounded-lg border bg-primary/5 border-primary/20 p-3'>
+                <p className='text-sm font-medium'>Chuyển đổi từ đặt cọc</p>
+                <p className='text-xs text-muted-foreground mt-1'>
+                  {fromReservation.tenantName} — {fromReservation.buildingName}, Phòng {fromReservation.roomNumber} — Cọc: {formatCurrency(fromReservation.depositAmount)}
+                </p>
+              </div>
+            )}
+
             {/* Building + Room Selection */}
             <div className='grid gap-4 sm:grid-cols-2'>
               <div className='space-y-2'>
-                <Label htmlFor='contract-building'>Building *</Label>
+                <Label htmlFor='contract-building'>Tòa nhà *</Label>
                 <Controller
                   name='buildingId'
                   control={control}
@@ -209,9 +246,10 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                       id='contract-building'
                       value={field.value}
                       onChange={field.onChange}
+                      disabled={!!fromReservation}
                       aria-invalid={!!errors.buildingId}
                     >
-                      <option value=''>Select building…</option>
+                      <option value=''>Chọn tòa nhà…</option>
                       {(buildingsData?.data ?? []).map((b) => (
                         <option key={b.id} value={b.id}>{b.name}</option>
                       ))}
@@ -222,7 +260,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
               </div>
 
               <div className='space-y-2'>
-                <Label htmlFor='contract-room'>Room *</Label>
+                <Label htmlFor='contract-room'>Phòng *</Label>
                 <Controller
                   name='roomId'
                   control={control}
@@ -231,20 +269,20 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                       id='contract-room'
                       value={field.value}
                       onChange={field.onChange}
-                      disabled={!selectedBuildingId}
+                      disabled={!selectedBuildingId || !!fromReservation}
                       aria-invalid={!!errors.roomId}
                     >
                       <option value=''>
                         {!selectedBuildingId
-                          ? 'Select building first'
+                          ? 'Chọn tòa nhà trước'
                           : availableRooms.length === 0
-                            ? 'No available rooms'
-                            : 'Select room…'
+                            ? 'Không có phòng trống'
+                            : 'Chọn phòng…'
                         }
                       </option>
                       {availableRooms.map((r) => (
                         <option key={r.id} value={r.id}>
-                          {r.roomNumber} — Floor {r.floor} — {formatCurrency(r.price)}/mo
+                          {r.roomNumber} — Tầng {r.floor} — {formatCurrency(r.price)}/tháng
                         </option>
                       ))}
                     </Select>
@@ -256,7 +294,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
 
             {/* Tenant Selection */}
             <div className='space-y-2'>
-              <Label htmlFor='contract-tenant'>Tenant *</Label>
+              <Label htmlFor='contract-tenant'>Khách thuê *</Label>
               <Controller
                 name='tenantUserId'
                 control={control}
@@ -265,9 +303,10 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                     id='contract-tenant'
                     value={field.value}
                     onChange={field.onChange}
+                    disabled={!!fromReservation}
                     aria-invalid={!!errors.tenantUserId}
                   >
-                    <option value=''>Select tenant…</option>
+                    <option value=''>Chọn khách thuê…</option>
                     {activeTenants.map((t) => (
                       <option key={t.id} value={t.id}>
                         {t.fullName} — {t.email}
@@ -282,7 +321,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
             {/* Dates */}
             <div className='grid gap-4 sm:grid-cols-3'>
               <div className='space-y-2'>
-                <Label htmlFor='contract-start'>Start Date *</Label>
+                <Label htmlFor='contract-start'>Ngày bắt đầu *</Label>
                 <Input
                   id='contract-start'
                   type='date'
@@ -292,7 +331,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                 {errors.startDate && <p className='text-xs text-destructive'>{errors.startDate.message}</p>}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='contract-end'>End Date *</Label>
+                <Label htmlFor='contract-end'>Ngày kết thúc *</Label>
                 <Input
                   id='contract-end'
                   type='date'
@@ -302,7 +341,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                 {errors.endDate && <p className='text-xs text-destructive'>{errors.endDate.message}</p>}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='contract-movein'>Move-in Date *</Label>
+                <Label htmlFor='contract-movein'>Ngày dọn vào *</Label>
                 <Input
                   id='contract-movein'
                   type='date'
@@ -316,7 +355,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
             {/* Pricing */}
             <div className='grid gap-4 sm:grid-cols-2'>
               <div className='space-y-2'>
-                <Label htmlFor='contract-rent'>Monthly Rent (VND) *</Label>
+                <Label htmlFor='contract-rent'>Giá thuê hàng tháng (VND) *</Label>
                 <Input
                   id='contract-rent'
                   type='number'
@@ -329,11 +368,11 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                 />
                 {errors.monthlyRent && <p className='text-xs text-destructive'>{errors.monthlyRent.message}</p>}
                 <p className='text-xs text-muted-foreground'>
-                  Locked at signing — won&apos;t change if room price changes later.
+                  Cố định khi ký — không thay đổi nếu giá phòng thay đổi sau.
                 </p>
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='contract-deposit'>Deposit Amount (VND) *</Label>
+                <Label htmlFor='contract-deposit'>Tiền cọc (VND) *</Label>
                 <Input
                   id='contract-deposit'
                   type='number'
@@ -346,17 +385,19 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                 />
                 {errors.depositAmount && <p className='text-xs text-destructive'>{errors.depositAmount.message}</p>}
                 <p className='text-xs text-muted-foreground'>
-                  A deposit-in payment will be recorded automatically.
+                  {fromReservation
+                    ? `Tiền cọc từ đặt cọc (${formatCurrency(fromReservation.depositAmount)}) sẽ được chuyển tự động.`
+                    : 'Thanh toán tiền cọc sẽ được tự động ghi nhận.'}
                 </p>
               </div>
             </div>
 
             {/* Note */}
             <div className='space-y-2'>
-              <Label htmlFor='contract-note'>Note</Label>
+              <Label htmlFor='contract-note'>Ghi chú</Label>
               <Textarea
                 id='contract-note'
-                placeholder='Any additional notes about this contract…'
+                placeholder='Ghi chú thêm về hợp đồng…'
                 rows={2}
                 {...register('note')}
               />
@@ -365,10 +406,10 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
 
           <DialogFooter>
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={createMutation.isPending}>
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Creating…' : 'Create Contract'}
+              {createMutation.isPending ? 'Đang tạo…' : fromReservation ? 'Tạo hợp đồng' : 'Tạo hợp đồng'}
             </Button>
           </DialogFooter>
         </form>

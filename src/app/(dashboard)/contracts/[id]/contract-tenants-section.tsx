@@ -33,8 +33,8 @@ import type { ContractTenantDto, AddContractTenantRequest } from '@/types/api'
 // ─── Add Roommate Schema ────────────────────────────────
 
 const addRoommateSchema = z.object({
-  tenantUserId: z.string().min(1, 'Select a tenant'),
-  moveInDate: z.string().min(1, 'Move-in date is required'),
+  tenantUserId: z.string().min(1, 'Chọn một khách thuê'),
+  moveInDate: z.string().min(1, 'Ngày dọn vào là bắt buộc'),
 })
 
 type AddRoommateFormData = z.infer<typeof addRoommateSchema>
@@ -60,20 +60,20 @@ export function ContractTenantsSection({
   const removeMutation = useMutation({
     mutationFn: (tenantId: string) => removeContractTenant(contractId, tenantId),
     onSuccess: () => {
-      toast.success('Roommate removed')
+      toast.success('Đã xóa người ở cùng')
       queryClient.invalidateQueries({ queryKey: contractKeys.detail(contractId) })
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       setRemovingTenant(null)
     },
     onError: (error: Error) => {
-      toast.error('Failed to remove roommate', error.message)
+      toast.error('Xóa người ở cùng thất bại', error.message)
       setRemovingTenant(null)
     },
   })
 
   const handleRemove = (tenant: ContractTenantDto) => {
     if (tenant.isMainTenant) {
-      toast.error('Cannot remove main tenant', 'Terminate the contract to remove the main tenant.')
+      toast.error('Không thể xóa khách chính', 'Chấm dứt hợp đồng để xóa khách chính.')
       return
     }
     setRemovingTenant(tenant)
@@ -89,23 +89,23 @@ export function ContractTenantsSection({
           <div>
             <CardTitle className='flex items-center gap-2 text-base'>
               <Users className='size-4' />
-              Tenants ({activeTenants.length})
+              Khách thuê ({activeTenants.length})
             </CardTitle>
             <CardDescription>
-              People living in this room under the current contract.
+              Những người đang sống trong phòng theo hợp đồng hiện tại.
             </CardDescription>
           </div>
           {isActive && (
             <Button size='sm' onClick={() => setAddOpen(true)}>
               <Plus className='size-4' />
-              Add Roommate
+              Thêm người ở
             </Button>
           )}
         </CardHeader>
         <CardContent>
           {activeTenants.length === 0 ? (
             <p className='text-sm text-muted-foreground py-4 text-center'>
-              No active tenants found.
+              Chưa có khách thuê.
             </p>
           ) : (
             <div className='divide-y'>
@@ -119,14 +119,14 @@ export function ContractTenantsSection({
                       <span className='text-sm font-medium'>{tenant.tenantName}</span>
                       {tenant.isMainTenant && (
                         <span className='text-[10px] font-medium uppercase tracking-wider text-primary bg-primary/10 px-1.5 py-0.5 rounded'>
-                          Main
+                          Chính
                         </span>
                       )}
                     </div>
                     <div className='flex items-center gap-3 text-xs text-muted-foreground'>
                       {tenant.tenantEmail && <span>{tenant.tenantEmail}</span>}
                       {tenant.tenantPhone && <span>{tenant.tenantPhone}</span>}
-                      <span>Moved in {formatDate(tenant.moveInDate)}</span>
+                      <span>Dọn vào {formatDate(tenant.moveInDate)}</span>
                     </div>
                   </div>
                   {isActive && !tenant.isMainTenant && (
@@ -150,7 +150,7 @@ export function ContractTenantsSection({
           {movedOutTenants.length > 0 && (
             <div className='mt-4 pt-4 border-t'>
               <p className='text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3'>
-                Previously lived here
+                Đã từng ở đây
               </p>
               <div className='space-y-2'>
                 {movedOutTenants.map((tenant) => (
@@ -179,13 +179,13 @@ export function ContractTenantsSection({
       <ConfirmDialog
         open={!!removingTenant}
         onOpenChange={(open) => { if (!open) setRemovingTenant(null) }}
-        title='Remove Roommate'
+        title='Xóa người ở cùng'
         description={
           removingTenant
-            ? `Remove ${removingTenant.tenantName} from this contract? They will be recorded as moved out.`
+            ? `Xóa ${removingTenant.tenantName} khỏi hợp đồng? Họ sẽ được ghi nhận là đã dọn ra.`
             : ''
         }
-        confirmLabel='Remove'
+        confirmLabel='Xóa'
         variant='destructive'
         loading={removeMutation.isPending}
         onConfirm={() => {
@@ -237,14 +237,14 @@ function AddRoommateDialog({
   const mutation = useMutation({
     mutationFn: (data: AddContractTenantRequest) => addContractTenant(contractId, data),
     onSuccess: () => {
-      toast.success('Roommate added')
+      toast.success('Đã thêm người ở cùng')
       queryClient.invalidateQueries({ queryKey: contractKeys.detail(contractId) })
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       reset({ tenantUserId: '', moveInDate: toLocalDateInputValue() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to add roommate', error.message)
+      toast.error('Thêm người ở cùng thất bại', error.message)
     },
   })
 
@@ -260,9 +260,9 @@ function AddRoommateDialog({
       <DialogContent>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Add Roommate</DialogTitle>
+          <DialogTitle>Thêm người ở cùng</DialogTitle>
           <DialogDescription>
-            Add an existing tenant as a roommate to this contract.
+            Thêm khách thuê hiện có vào hợp đồng này.
           </DialogDescription>
         </DialogHeader>
 
@@ -276,7 +276,7 @@ function AddRoommateDialog({
         >
           <DialogBody className='space-y-4'>
             <div className='space-y-2'>
-              <Label htmlFor='roommate-tenant'>Tenant *</Label>
+              <Label htmlFor='roommate-tenant'>Khách thuê *</Label>
               <Controller
                 name='tenantUserId'
                 control={control}
@@ -289,8 +289,8 @@ function AddRoommateDialog({
                   >
                     <option value=''>
                       {availableTenants.length === 0
-                        ? 'No available tenants'
-                        : 'Select tenant…'
+                        ? 'Không có khách thuê'
+                        : 'Chọn khách thuê…'
                       }
                     </option>
                     {availableTenants.map((t) => (
@@ -302,7 +302,7 @@ function AddRoommateDialog({
                 )}
               />
               {availableTenants.length === 0 && (
-                <p className='text-xs text-muted-foreground'>There are no eligible active tenants left to add to this contract.</p>
+                <p className='text-xs text-muted-foreground'>Không còn khách thuê đủ điều kiện để thêm vào hợp đồng.</p>
               )}
               {errors.tenantUserId && (
                 <p className='text-xs text-destructive'>{errors.tenantUserId.message}</p>
@@ -310,7 +310,7 @@ function AddRoommateDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='roommate-movein'>Move-in Date *</Label>
+              <Label htmlFor='roommate-movein'>Ngày dọn vào *</Label>
               <Input
                 id='roommate-movein'
                 type='date'
@@ -325,10 +325,10 @@ function AddRoommateDialog({
 
           <DialogFooter>
             <Button type='reset' variant='outline' disabled={mutation.isPending}>
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={mutation.isPending || availableTenants.length === 0}>
-              {mutation.isPending ? 'Adding…' : 'Add Roommate'}
+              {mutation.isPending ? 'Đang thêm…' : 'Thêm người ở'}
             </Button>
           </DialogFooter>
         </form>

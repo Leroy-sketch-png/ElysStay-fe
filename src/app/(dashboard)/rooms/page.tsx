@@ -48,7 +48,7 @@ export default function RoomsPage() {
   const columns: Column<RoomDto>[] = [
     {
       key: 'roomNumber',
-      header: 'Room',
+      header: 'Phòng',
       render: (row) => (
         <div>
           <p className='font-medium'>{row.roomNumber}</p>
@@ -60,31 +60,31 @@ export default function RoomsPage() {
     },
     {
       key: 'floor',
-      header: 'Floor',
+      header: 'Tầng',
       render: (row) => row.floor,
       className: 'text-center',
       headerClassName: 'text-center',
     },
     {
       key: 'area',
-      header: 'Area',
+      header: 'Diện tích',
       render: (row) => `${row.area} m²`,
     },
     {
       key: 'price',
-      header: 'Price',
+      header: 'Giá thuê',
       render: (row) => formatCurrency(row.price),
     },
     {
       key: 'maxOccupants',
-      header: 'Max',
-      render: (row) => `${row.maxOccupants} pax`,
+      header: 'Tối đa',
+      render: (row) => `${row.maxOccupants} người`,
       className: 'text-center',
       headerClassName: 'text-center',
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (row) => <RoomStatusBadge status={row.status} />,
     },
     {
@@ -100,7 +100,7 @@ export default function RoomsPage() {
               router.push(`/rooms/${row.id}`)
             }}
           >
-            View
+            Xem
           </Button>
         </div>
       ),
@@ -111,8 +111,8 @@ export default function RoomsPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Rooms'
-      description='All rooms across your buildings.'
+      title='Phòng'
+      description='Tất cả phòng trong các tòa nhà.'
       actions={hasActiveFilters ? (
         <Button
           variant='outline'
@@ -122,7 +122,7 @@ export default function RoomsPage() {
             setPage(1)
           }}
         >
-          Clear Filters
+          Xóa bộ lọc
         </Button>
       ) : undefined}
     >
@@ -133,7 +133,7 @@ export default function RoomsPage() {
           onChange={(e) => { setBuildingFilter(e.target.value); setPage(1) }}
           className='w-52'
         >
-          <option value=''>All buildings</option>
+          <option value=''>Tất cả tòa nhà</option>
           {(buildingsData?.data ?? []).map((b) => (
             <option key={b.id} value={b.id}>{b.name}</option>
           ))}
@@ -154,9 +154,9 @@ export default function RoomsPage() {
       {isError && (
         <EmptyState
           icon={<AlertTriangle className='size-8 text-destructive' />}
-          title='Failed to load rooms'
-          description={error?.message || 'An unexpected error occurred.'}
-          actionLabel='Retry'
+          title='Không thể tải phòng'
+          description={error?.message || 'Đã xảy ra lỗi không mong muốn.'}
+          actionLabel='Thử lại'
           onAction={() => queryClient.invalidateQueries({ queryKey: roomKeys.all })}
         />
       )}
@@ -167,9 +167,9 @@ export default function RoomsPage() {
           {!isLoading && (buildingsData?.data?.length ?? 0) === 0 ? (
             <EmptyState
               icon={<DoorOpen className='size-10' />}
-              title='No buildings yet'
-              description='Rooms belong to buildings. Create a building first so room inventory has a real home.'
-              actionLabel='Go to Buildings'
+              title='Chưa có tòa nhà'
+              description='Phòng thuộc về tòa nhà. Tạo tòa nhà trước để quản lý phòng.'
+              actionLabel='Đến trang Tòa nhà'
               onAction={() => router.push('/buildings')}
             />
           ) : (
@@ -179,7 +179,7 @@ export default function RoomsPage() {
             loading={isLoading}
             rowKey={(row) => row.id}
             onRowClick={(row) => router.push(`/rooms/${row.id}`)}
-            emptyMessage='No rooms found matching your filters.'
+            emptyMessage='Không tìm thấy phòng phù hợp với bộ lọc.'
             emptyIcon={<DoorOpen className='size-10' />}
           />
           )}

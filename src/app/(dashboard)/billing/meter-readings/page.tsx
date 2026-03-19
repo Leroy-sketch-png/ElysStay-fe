@@ -166,15 +166,15 @@ export default function MeterReadingsPage() {
     },
     onSuccess: () => {
       toast.success(
-        'Meter readings saved',
-        `${formatBillingPeriod(billingYear, billingMonth)} readings submitted successfully.`,
+        'Đã lưu chỉ số đồng hồ',
+        `Chỉ số ${formatBillingPeriod(billingYear, billingMonth)} đã ghi nhận thành công.`,
       )
       queryClient.invalidateQueries({ queryKey: meterReadingKeys.all })
       setEditedReadings({})
       setHasChanges(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to save readings', error.message)
+      toast.error('Không thể lưu chỉ số', error.message)
     },
   })
 
@@ -189,12 +189,12 @@ export default function MeterReadingsPage() {
   if (buildingsData && (buildingsData.data ?? []).length === 0) {
     return (
       <PageTransition>
-      <PageContainer title='Meter Readings' description='Record utility meter readings for billing.'>
+      <PageContainer title='Ghi chỉ số đồng hồ' description='Ghi nhận chỉ số đồng hồ tiện ích để tính hóa đơn.'>
         <EmptyState
           icon={<Building2 className='size-12' />}
-          title='No buildings yet'
-          description='Add your first building to record meter readings.'
-          actionLabel='Go to Buildings'
+          title='Chưa có tòa nhà'
+          description='Thêm tòa nhà đầu tiên để ghi chỉ số đồng hồ.'
+          actionLabel='Đến trang Tòa nhà'
           actionHref='/buildings'
         />
       </PageContainer>
@@ -205,8 +205,8 @@ export default function MeterReadingsPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Meter Readings'
-      description='Record utility meter readings for billing.'
+      title='Ghi chỉ số đồng hồ'
+      description='Ghi nhận chỉ số đồng hồ tiện ích để tính hóa đơn.'
       actions={
         <Button
           onClick={() => submitMutation.mutate()}
@@ -215,10 +215,10 @@ export default function MeterReadingsPage() {
           {submitMutation.isPending ? (
             <>
               <Loader2 className='size-4 animate-spin' />
-              Saving…
+              Đang lưu…
             </>
           ) : (
-            'Save Readings'
+            'Lưu chỉ số'
           )}
         </Button>
       }
@@ -229,7 +229,7 @@ export default function MeterReadingsPage() {
           <div className='grid gap-4 sm:grid-cols-3'>
             {/* Building */}
             <div className='space-y-2'>
-              <Label htmlFor='mr-building'>Building</Label>
+              <Label htmlFor='mr-building'>Tòa nhà</Label>
               {buildingsLoading ? (
                 <Skeleton className='h-10' />
               ) : (
@@ -238,7 +238,7 @@ export default function MeterReadingsPage() {
                   value={selectedBuildingId}
                   onChange={(e) => setSelectedBuildingId(e.target.value)}
                 >
-                  <option value=''>Select building…</option>
+                  <option value=''>Chọn tòa nhà…</option>
                   {(buildingsData?.data ?? []).map((b) => (
                     <option key={b.id} value={b.id}>{b.name}</option>
                   ))}
@@ -248,7 +248,7 @@ export default function MeterReadingsPage() {
 
             {/* Year */}
             <div className='space-y-2'>
-              <Label htmlFor='mr-year'>Year</Label>
+              <Label htmlFor='mr-year'>Năm</Label>
               <Select
                 id='mr-year'
                 value={billingYear}
@@ -262,7 +262,7 @@ export default function MeterReadingsPage() {
 
             {/* Month */}
             <div className='space-y-2'>
-              <Label htmlFor='mr-month'>Month</Label>
+              <Label htmlFor='mr-month'>Tháng</Label>
               <Select
                 id='mr-month'
                 value={billingMonth}
@@ -283,10 +283,10 @@ export default function MeterReadingsPage() {
       <div className='mb-6 flex items-start gap-3 rounded-lg border border-info/20 bg-info/5 p-4'>
         <Info className='size-5 text-info shrink-0 mt-0.5' />
         <div className='text-sm text-foreground'>
-          <p className='font-medium'>Billing Period: {formatBillingPeriod(billingYear, billingMonth)}</p>
+          <p className='font-medium'>Kỳ thanh toán: {formatBillingPeriod(billingYear, billingMonth)}</p>
           <p className='mt-1 text-info'>
-            Enter current meter readings below. Previous readings are auto-filled from last month.
-            Consumption = Current − Previous.
+            Nhập chỉ số đồng hồ hiện tại bên dưới. Chỉ số trước được tự động điền từ tháng trước.
+            Tiêu thụ = Hiện tại − Trước đó.
           </p>
         </div>
       </div>
@@ -294,17 +294,17 @@ export default function MeterReadingsPage() {
       {!selectedBuildingId && !buildingsLoading && !loadError && (
         <EmptyState
           icon={<Building2 className='size-8' />}
-          title='Select a building'
-          description='Choose a building before entering meter readings so the room and service grid is scoped intentionally.'
+          title='Chọn tòa nhà'
+          description='Chọn tòa nhà trước khi nhập chỉ số đồng hồ để lưới phòng và dịch vụ được phân định rõ ràng.'
         />
       )}
 
       {selectedBuildingId && loadError && (
         <EmptyState
           icon={<AlertTriangle className='size-8' />}
-          title='Unable to load meter readings'
-          description={loadError instanceof Error ? loadError.message : 'An unexpected error occurred while loading meter reading data.'}
-          actionLabel='Retry'
+          title='Không thể tải chỉ số đồng hồ'
+          description={loadError instanceof Error ? loadError.message : 'Đã xảy ra lỗi không mong đợi khi tải dữ liệu chỉ số đồng hồ.'}
+          actionLabel='Thử lại'
           onAction={() => {
             queryClient.invalidateQueries({ queryKey: buildingKeys.all })
             queryClient.invalidateQueries({ queryKey: roomKeys.all })
@@ -319,10 +319,10 @@ export default function MeterReadingsPage() {
         <Card>
           <CardContent className='py-12 text-center'>
             <Gauge className='size-12 text-muted-foreground mx-auto mb-4' />
-            <h3 className='font-semibold'>No Metered Services</h3>
+            <h3 className='font-semibold'>Không có dịch vụ đo đếm</h3>
             <p className='text-sm text-muted-foreground mt-1'>
-              This building has no metered services (e.g., electricity, water).
-              Add metered services to the building first.
+              Tòa nhà này chưa có dịch vụ đo đếm (ví dụ: điện, nước).
+              Hãy thêm dịch vụ đo đếm cho tòa nhà trước.
             </p>
           </CardContent>
         </Card>
@@ -332,9 +332,9 @@ export default function MeterReadingsPage() {
         <Card>
           <CardContent className='py-12 text-center'>
             <CalendarDays className='size-12 text-muted-foreground mx-auto mb-4' />
-            <h3 className='font-semibold'>No Occupied Rooms</h3>
+            <h3 className='font-semibold'>Không có phòng đang ở</h3>
             <p className='text-sm text-muted-foreground mt-1'>
-              This building has no rooms with active tenants.
+              Tòa nhà này chưa có phòng nào có người thuê.
             </p>
           </CardContent>
         </Card>
@@ -355,17 +355,17 @@ export default function MeterReadingsPage() {
             <CardHeader>
               <CardTitle className='text-base flex items-center gap-2'>
                 <Gauge className='size-4' />
-                Reading Entry ({rooms.length} rooms × {meteredServices.length} services)
+                Nhập chỉ số ({rooms.length} phòng × {meteredServices.length} dịch vụ)
               </CardTitle>
               <CardDescription>
-                Enter the current meter value for each room and service.
+                Nhập giá trị đồng hồ hiện tại cho mỗi phòng và dịch vụ.
               </CardDescription>
             </CardHeader>
             <CardContent className='overflow-x-auto'>
               <table className='w-full text-sm'>
                 <thead>
                   <tr className='border-b'>
-                    <th className='text-left font-medium py-2 px-3 min-w-28'>Room</th>
+                    <th className='text-left font-medium py-2 px-3 min-w-28'>Phòng</th>
                     {meteredServices.map((service) => (
                       <th key={service.id} className='text-left font-medium py-2 px-3 min-w-40'>
                         <div>{service.name}</div>
@@ -379,7 +379,7 @@ export default function MeterReadingsPage() {
                     <tr key={room.id} className='border-b last:border-0'>
                       <td className='py-3 px-3 font-medium'>
                         <div>{room.roomNumber}</div>
-                        <div className='text-xs text-muted-foreground'>Floor {room.floor}</div>
+                        <div className='text-xs text-muted-foreground'>Tầng {room.floor}</div>
                       </td>
                       {meteredServices.map((service) => {
                         const prevVal = getPreviousValue(room.id, service.id)
@@ -390,7 +390,7 @@ export default function MeterReadingsPage() {
                           <td key={service.id} className='py-3 px-3'>
                             <div className='space-y-1'>
                               <div className='flex items-center gap-2'>
-                                <span className='text-xs text-muted-foreground w-12'>Prev:</span>
+                                <span className='text-xs text-muted-foreground w-12'>Trước:</span>
                                 <span className='text-xs'>{prevVal.toLocaleString()}</span>
                               </div>
                               <Input
@@ -403,7 +403,7 @@ export default function MeterReadingsPage() {
                                 aria-label={`Current reading for ${room.roomNumber} ${service.name}`}
                               />
                               <div className='flex items-center gap-2'>
-                                <span className='text-xs text-muted-foreground w-12'>Used:</span>
+                                <span className='text-xs text-muted-foreground w-12'>Dùng:</span>
                                 <span className={`text-xs font-medium ${consumption < 0 ? 'text-destructive' : ''}`}>
                                   {consumption.toLocaleString()} {service.unit}
                                 </span>

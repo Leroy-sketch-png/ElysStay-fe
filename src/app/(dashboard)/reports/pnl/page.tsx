@@ -27,13 +27,13 @@ import type { PnlMonthDto } from '@/types/api'
 // ─── Month names ────────────────────────────────────────
 
 const MONTH_NAMES = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6',
+  'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12',
 ]
 
 const MONTH_FULL = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+  'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12',
 ]
 
 // ─── Year options ───────────────────────────────────────
@@ -98,7 +98,7 @@ function MonthRow({ month, now, selectedYear }: { month: PnlMonthDto; now: Date;
       <td className='px-4 py-3 text-sm font-medium'>
         {MONTH_FULL[month.month - 1]}
         {isCurrent && (
-          <span className='ml-2 text-xs text-primary'>(current)</span>
+          <span className='ml-2 text-xs text-primary'>(hiện tại)</span>
         )}
       </td>
       <td className='px-4 py-3 text-sm text-right'>{formatCurrency(month.operationalIncome)}</td>
@@ -182,7 +182,7 @@ export default function PnlReportPage() {
       return val
     }
 
-    const header = ['Month', 'Income', 'Deposits In', 'Deposits Out', 'Expenses', 'Net Operational', 'Net Cash Flow']
+    const header = ['Tháng', 'Doanh thu', 'Cọc vào', 'Cọc ra', 'Chi phí', 'Thuần vận hành', 'Dòng tiền ròng']
     const rows = months.map((m) => [
       escapeCsv(MONTH_FULL[m.month - 1]),
       m.operationalIncome.toFixed(2),
@@ -193,7 +193,7 @@ export default function PnlReportPage() {
       m.netCashFlow.toFixed(2),
     ])
     rows.push([
-      'Total',
+      'Tổng',
       totals.operationalIncome.toFixed(2),
       totals.depositsReceived.toFixed(2),
       totals.depositsRefunded.toFixed(2),
@@ -215,13 +215,13 @@ export default function PnlReportPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Profit & Loss Report'
-      description={`Financial summary for ${selectedYear}`}
+      title='Báo cáo Lãi & Lỗ'
+      description={`Tổng kết tài chính năm ${selectedYear}`}
       actions={
         months.length > 0 ? (
           <Button variant='outline' size='sm' onClick={handleExportCsv}>
             <Download className='size-4' />
-            Export CSV
+            Xuất CSV
           </Button>
         ) : undefined
       }
@@ -233,7 +233,7 @@ export default function PnlReportPage() {
             value={selectedBuildingId}
             onChange={(e) => setSelectedBuildingId(e.target.value)}
           >
-            <option value=''>All buildings</option>
+            <option value=''>Tất cả tòa nhà</option>
             {buildings.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
@@ -258,9 +258,9 @@ export default function PnlReportPage() {
       {loadError ? (
         <EmptyState
           icon={<AlertTriangle className='size-8' />}
-          title='Unable to load P&L report'
-          description={loadError instanceof Error ? loadError.message : 'An unexpected error occurred while loading the report.'}
-          actionLabel='Retry'
+          title='Không thể tải báo cáo L/L'
+          description={loadError instanceof Error ? loadError.message : 'Đã xảy ra lỗi khi tải báo cáo.'}
+          actionLabel='Thử lại'
           onAction={() => {
             queryClient.invalidateQueries({ queryKey: buildingKeys.all })
             queryClient.invalidateQueries({ queryKey: reportKeys.all })
@@ -269,9 +269,9 @@ export default function PnlReportPage() {
       ) : buildings.length === 0 && !isLoading ? (
         <EmptyState
           icon={<Building2 className='size-8' />}
-          title='No buildings available'
-          description='Create a building before relying on owner-level profit and loss reporting.'
-          actionLabel='Go to Buildings'
+          title='Chưa có tòa nhà'
+          description='Tạo tòa nhà trước khi sử dụng báo cáo lãi lỗ.'
+          actionLabel='Đến trang Tòa nhà'
           onAction={() => router.push('/buildings')}
         />
       ) : isLoading ? (
@@ -283,25 +283,25 @@ export default function PnlReportPage() {
       ) : (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
           <SummaryCard
-            label='Operational Income'
+            label='Doanh thu vận hành'
             value={formatCurrency(totals.operationalIncome)}
             icon={<TrendingUp className='size-5' />}
             variant='success'
           />
           <SummaryCard
-            label='Total Expenses'
+            label='Tổng chi phí'
             value={formatCurrency(totals.expenses)}
             icon={<TrendingDown className='size-5' />}
             variant='destructive'
           />
           <SummaryCard
-            label='Net Operational'
+            label='Thuần vận hành'
             value={formatCurrency(totals.netOperational)}
             icon={<ArrowUpDown className='size-5' />}
             variant={totals.netOperational >= 0 ? 'success' : 'destructive'}
           />
           <SummaryCard
-            label='Net Cash Flow'
+            label='Dòng tiền ròng'
             value={formatCurrency(totals.netCashFlow)}
             icon={<ArrowUpDown className='size-5' />}
             variant={totals.netCashFlow >= 0 ? 'success' : 'destructive'}
@@ -312,8 +312,8 @@ export default function PnlReportPage() {
       {!loadError && buildings.length > 0 && !isLoading && months.length === 0 ? (
         <EmptyState
           icon={<TrendingDown className='size-8' />}
-          title='No P&L activity for this selection'
-          description='There is no income, deposit, or expense data for the selected building and year yet.'
+          title='Không có dữ liệu L/L cho lựa chọn này'
+          description='Chưa có dữ liệu doanh thu, cọc hoặc chi phí cho tòa nhà và năm đã chọn.'
         />
       ) : !loadError && buildings.length > 0 ? (
       <Card>
@@ -323,25 +323,25 @@ export default function PnlReportPage() {
               <thead>
                 <tr className='border-b bg-muted/50'>
                   <th className='px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                    Month
+                    Tháng
                   </th>
                   <th className='px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                    Income
+                    Doanh thu
                   </th>
                   <th className='px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                    Deposits In
+                    Cọc vào
                   </th>
                   <th className='px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                    Deposits Out
+                    Cọc ra
                   </th>
                   <th className='px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                    Expenses
+                    Chi phí
                   </th>
                   <th className='px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                    Net Op.
+                    Thuần VH
                   </th>
                   <th className='px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider'>
-                    Cash Flow
+                    Dòng tiền
                   </th>
                 </tr>
               </thead>
@@ -363,7 +363,7 @@ export default function PnlReportPage() {
               {!isLoading && months.length > 0 && (
                 <tfoot>
                   <tr className='border-t-2 bg-muted/30 font-semibold'>
-                    <td className='px-4 py-3 text-sm'>Total</td>
+                    <td className='px-4 py-3 text-sm'>Tổng</td>
                     <td className='px-4 py-3 text-sm text-right'>
                       {formatCurrency(totals.operationalIncome)}
                     </td>

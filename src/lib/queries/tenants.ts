@@ -2,6 +2,7 @@ import { api, toQueryString, requireData, type PagedResponse } from '@/lib/api-c
 import type {
   UserDto,
   CreateTenantRequest,
+  CreateUserResultDto,
   ChangeUserStatusRequest,
 } from '@/types/api'
 
@@ -39,8 +40,8 @@ export async function fetchTenantById(id: string): Promise<UserDto> {
 
 // ─── Mutations ──────────────────────────────────────────
 
-export async function createTenant(data: CreateTenantRequest): Promise<UserDto> {
-  const res = await api.post<UserDto>('/users/tenants', data)
+export async function createTenant(data: CreateTenantRequest): Promise<CreateUserResultDto> {
+  const res = await api.post<CreateUserResultDto>('/users/tenants', data)
   return requireData(res)
 }
 

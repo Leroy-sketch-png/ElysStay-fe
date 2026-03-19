@@ -27,16 +27,16 @@ import type { BuildingDto, CreateBuildingRequest, UpdateBuildingRequest } from '
 // ─── Validation ─────────────────────────────────────────
 
 const buildingSchema = z.object({
-  name: z.string().trim().min(1, 'Name is required').max(200, 'Name too long'),
-  address: z.string().trim().min(1, 'Address is required').max(500, 'Address too long'),
-  description: z.string().trim().max(2000, 'Description too long').optional().or(z.literal('')),
+  name: z.string().trim().min(1, 'Tên là bắt buộc').max(200, 'Tên quá dài'),
+  address: z.string().trim().min(1, 'Địa chỉ là bắt buộc').max(500, 'Địa chỉ quá dài'),
+  description: z.string().trim().max(2000, 'Mô tả quá dài').optional().or(z.literal('')),
   totalFloors: z.preprocess(
     (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-    z.number().int().min(1, 'At least 1 floor').max(100, 'Max 100 floors'),
+    z.number().int().min(1, 'Tối thiểu 1 tầng').max(100, 'Tối đa 100 tầng'),
   ),
   invoiceDueDay: z.preprocess(
     (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-    z.number().int().min(1, 'Min day 1').max(28, 'Max day 28'),
+    z.number().int().min(1, 'Ngày tối thiểu 1').max(28, 'Ngày tối đa 28'),
   ),
 })
 
@@ -103,27 +103,27 @@ export function BuildingFormDialog({
   const createMutation = useMutation({
     mutationFn: (data: CreateBuildingRequest) => createBuilding(data),
     onSuccess: () => {
-      toast.success('Building created', 'Your building and default services are ready.')
+      toast.success('Tòa nhà đã tạo', 'Tòa nhà và dịch vụ mặc định đã sẵn sàng.')
       queryClient.invalidateQueries({ queryKey: buildingKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to create building', error.message)
+      toast.error('Không thể tạo tòa nhà', error.message)
     },
   })
 
   const updateMutation = useMutation({
     mutationFn: (data: UpdateBuildingRequest) => updateBuilding(building!.id, data),
     onSuccess: () => {
-      toast.success('Building updated')
+      toast.success('Tòa nhà đã cập nhật')
       queryClient.invalidateQueries({ queryKey: buildingKeys.all })
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(building!.id) })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to update building', error.message)
+      toast.error('Không thể cập nhật tòa nhà', error.message)
     },
   })
 
@@ -150,11 +150,11 @@ export function BuildingFormDialog({
       <DialogContent size='md'>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Building' : 'Add Building'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Sửa tòa nhà' : 'Thêm tòa nhà'}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? 'Update your building information.'
-              : 'Enter details for your new building. 5 default services will be created automatically.'}
+              ? 'Cập nhật thông tin tòa nhà.'
+              : 'Nhập thông tin tòa nhà mới. 5 dịch vụ mặc định sẽ được tạo tự động.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -162,36 +162,36 @@ export function BuildingFormDialog({
           <DialogBody className='space-y-4'>
             {/* Name */}
             <div className='space-y-2'>
-              <Label htmlFor='name'>Building Name *</Label>
-              <Input id='name' placeholder='e.g. Sunrise Apartments' {...register('name')} aria-invalid={!!errors.name} />
+              <Label htmlFor='name'>Tên tòa nhà *</Label>
+              <Input id='name' placeholder='Ví dụ: Chung cư Sunrise' {...register('name')} aria-invalid={!!errors.name} />
               {errors.name && <p className='text-xs text-destructive'>{errors.name.message}</p>}
             </div>
 
             {/* Address */}
             <div className='space-y-2'>
-              <Label htmlFor='address'>Address *</Label>
-              <Input id='address' placeholder='e.g. 123 Nguyen Van Linh, Da Nang' {...register('address')} aria-invalid={!!errors.address} />
+              <Label htmlFor='address'>Địa chỉ *</Label>
+              <Input id='address' placeholder='Ví dụ: 123 Nguyễn Văn Linh, Đà Nẵng' {...register('address')} aria-invalid={!!errors.address} />
               {errors.address && <p className='text-xs text-destructive'>{errors.address.message}</p>}
             </div>
 
             {/* Description */}
             <div className='space-y-2'>
-              <Label htmlFor='description'>Description</Label>
-              <Textarea id='description' placeholder='Optional notes about this building…' rows={3} {...register('description')} aria-invalid={!!errors.description} />
+              <Label htmlFor='description'>Mô tả</Label>
+              <Textarea id='description' placeholder='Ghi chú về tòa nhà (không bắt buộc)…' rows={3} {...register('description')} aria-invalid={!!errors.description} />
               {errors.description && <p className='text-xs text-destructive'>{errors.description.message}</p>}
             </div>
 
             {/* Row: Floors + Invoice Due Day */}
             <div className='grid grid-cols-2 gap-4'>
               <div className='space-y-2'>
-                <Label htmlFor='totalFloors'>Total Floors *</Label>
+                <Label htmlFor='totalFloors'>Số tầng *</Label>
                 <Input id='totalFloors' type='number' min={1} max={100} {...register('totalFloors', { valueAsNumber: true })} aria-invalid={!!errors.totalFloors} />
                 {errors.totalFloors && <p className='text-xs text-destructive'>{errors.totalFloors.message}</p>}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='invoiceDueDay'>Invoice Due Day *</Label>
+                <Label htmlFor='invoiceDueDay'>Ngày hạn hóa đơn *</Label>
                 <Input id='invoiceDueDay' type='number' min={1} max={28} {...register('invoiceDueDay', { valueAsNumber: true })} aria-invalid={!!errors.invoiceDueDay} />
-                <p className='text-xs text-muted-foreground'>Day of month (1-28)</p>
+                <p className='text-xs text-muted-foreground'>Ngày trong tháng (1-28)</p>
                 {errors.invoiceDueDay && <p className='text-xs text-destructive'>{errors.invoiceDueDay.message}</p>}
               </div>
             </div>
@@ -199,10 +199,10 @@ export function BuildingFormDialog({
 
           <DialogFooter>
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isPending}>
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={isPending}>
-              {isPending ? (isEdit ? 'Saving…' : 'Creating…') : isEdit ? 'Save Changes' : 'Create Building'}
+              {isPending ? (isEdit ? 'Đang lưu…' : 'Đang tạo…') : isEdit ? 'Lưu thay đổi' : 'Tạo tòa nhà'}
             </Button>
           </DialogFooter>
         </form>

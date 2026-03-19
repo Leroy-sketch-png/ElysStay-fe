@@ -44,16 +44,16 @@ export default function BuildingsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteBuilding(id),
     onSuccess: () => {
-      toast.success('Building deleted successfully')
+      toast.success('Tòa nhà đã được xóa')
       queryClient.invalidateQueries({ queryKey: buildingKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       setDeleteTarget(null)
     },
     onError: (error: Error & { status?: number }) => {
       if ((error as { status?: number }).status === 409) {
-        toast.error('Cannot delete building', 'Building has active contracts.')
+        toast.error('Không thể xóa tòa nhà', 'Tòa nhà có hợp đồng hiệu lực.')
       } else {
-        toast.error('Failed to delete building', error.message)
+        toast.error('Không thể xóa tòa nhà', error.message)
       }
     },
   })
@@ -85,7 +85,7 @@ export default function BuildingsPage() {
   const columns: Column<BuildingDto>[] = [
     {
       key: 'name',
-      header: 'Name',
+      header: 'Tên',
       render: (row) => (
         <div>
           <p className='font-medium'>{row.name}</p>
@@ -95,21 +95,21 @@ export default function BuildingsPage() {
     },
     {
       key: 'totalFloors',
-      header: 'Floors',
+      header: 'Tầng',
       render: (row) => row.totalFloors,
       className: 'text-center',
       headerClassName: 'text-center',
     },
     {
       key: 'invoiceDueDay',
-      header: 'Due Day',
-      render: (row) => `Day ${row.invoiceDueDay}`,
+      header: 'Hạn đóng',
+      render: (row) => `Ngày ${row.invoiceDueDay}`,
       className: 'text-center',
       headerClassName: 'text-center',
     },
     {
       key: 'createdAt',
-      header: 'Created',
+      header: 'Ngày tạo',
       render: (row) => formatDate(row.createdAt),
     },
     {
@@ -125,7 +125,7 @@ export default function BuildingsPage() {
               router.push(`/buildings/${row.id}`)
             }}
           >
-            View
+            Xem
           </Button>
           <Button
             variant='ghost'
@@ -136,7 +136,7 @@ export default function BuildingsPage() {
               setDeleteTarget(row)
             }}
           >
-            Delete
+            Xóa
           </Button>
         </div>
       ),
@@ -150,12 +150,12 @@ export default function BuildingsPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Buildings'
-      description='Manage your rental properties'
+      title='Tòa nhà'
+      description='Quản lý bất động sản cho thuê'
       actions={
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className='size-4' />
-          Add Building
+          Thêm tòa nhà
         </Button>
       }
     >
@@ -164,31 +164,31 @@ export default function BuildingsPage() {
         <div className='relative flex-1 min-w-[200px] max-w-xs'>
           <Search className='absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
           <Input
-            placeholder='Search by name…'
+            placeholder='Tìm theo tên…'
             value={searchName}
             onChange={(e) => setSearchName(e.target.value)}
             onKeyDown={handleKeyDown}
             className='pl-9'
-            aria-label='Search buildings by name'
+            aria-label='Tìm tòa nhà theo tên'
           />
         </div>
         <div className='relative flex-1 min-w-[200px] max-w-xs'>
           <MapPin className='absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
           <Input
-            placeholder='Search by address…'
+            placeholder='Tìm theo địa chỉ…'
             value={searchAddress}
             onChange={(e) => setSearchAddress(e.target.value)}
             onKeyDown={handleKeyDown}
             className='pl-9'
-            aria-label='Search buildings by address'
+            aria-label='Tìm tòa nhà theo địa chỉ'
           />
         </div>
         <Button variant='secondary' onClick={handleSearch}>
-          Search
+          Tìm kiếm
         </Button>
         {hasActiveFilters && (
           <Button variant='ghost' onClick={handleClearFilters}>
-            Clear
+            Xóa
           </Button>
         )}
       </div>
@@ -197,10 +197,10 @@ export default function BuildingsPage() {
       {isError && (
         <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
-          <p className='font-medium text-destructive'>Failed to load buildings</p>
-          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+          <p className='font-medium text-destructive'>Không thể tải tòa nhà</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'Đã xảy ra lỗi không mong muốn.'}</p>
           <Button variant='outline' className='mt-4' onClick={() => queryClient.invalidateQueries({ queryKey: buildingKeys.list(filters) })}>
-            Try Again
+            Thử lại
           </Button>
         </div>
       )}
@@ -209,9 +209,9 @@ export default function BuildingsPage() {
       {!isError && !isLoading && data && data.data.length === 0 && !hasActiveFilters ? (
         <EmptyState
           icon={<Building2 className='size-12' />}
-          title='No buildings yet'
-          description='Create your first building to start managing your rental properties.'
-          actionLabel='Add Building'
+          title='Chưa có tòa nhà'
+          description='Tạo tòa nhà đầu tiên để quản lý bất động sản cho thuê.'
+          actionLabel='Thêm tòa nhà'
           onAction={() => setCreateOpen(true)}
         />
       ) : !isError ? (
@@ -222,7 +222,7 @@ export default function BuildingsPage() {
             loading={isLoading}
             rowKey={(row) => row.id}
             onRowClick={(row) => router.push(`/buildings/${row.id}`)}
-            emptyMessage='No buildings match your search.'
+            emptyMessage='Không tìm thấy tòa nhà phù hợp.'
             emptyIcon={<Building2 className='size-10' />}
           />
           {data?.pagination && (
@@ -250,9 +250,9 @@ export default function BuildingsPage() {
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title='Delete Building'
-        description={`Are you sure you want to delete "${deleteTarget?.name}"? This action cannot be undone.`}
-        confirmLabel='Delete'
+        title='Xóa tòa nhà'
+        description={`Bạn có chắc muốn xóa "${deleteTarget?.name}"? Thao tác này không thể hoàn tác.`}
+        confirmLabel='Xóa'
         variant='destructive'
         loading={deleteMutation.isPending}
         onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}

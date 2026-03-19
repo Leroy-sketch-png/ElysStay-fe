@@ -61,14 +61,14 @@ export function AssignStaffDialog({
   const assignMutation = useMutation({
     mutationFn: (staffId: string) => assignStaff(buildingId, { staffId }),
     onSuccess: () => {
-      toast.success('Staff assigned to building')
+      toast.success('Đã phân công nhân viên')
       queryClient.invalidateQueries({ queryKey: staffKeys.byBuilding(buildingId) })
       setSelectedId(null)
       setSearch('')
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Failed to assign staff', error.message)
+      toast.error('Phân công thất bại', error.message)
     },
   })
 
@@ -81,9 +81,9 @@ export function AssignStaffDialog({
       <DialogContent size='sm'>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Assign Staff</DialogTitle>
+          <DialogTitle>Phân công nhân viên</DialogTitle>
           <DialogDescription>
-            Select a staff member to assign to this building. Already assigned members are excluded.
+            Chọn nhân viên để phân công vào tòa nhà. Nhân viên đã được giao sẽ không hiển thị.
           </DialogDescription>
         </DialogHeader>
 
@@ -91,7 +91,7 @@ export function AssignStaffDialog({
           <div className='relative'>
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
             <Input
-              placeholder='Search by name or email…'
+              placeholder='Tìm theo tên hoặc email…'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className='pl-9'
@@ -100,10 +100,10 @@ export function AssignStaffDialog({
 
           <div className='max-h-[280px] overflow-y-auto rounded-md border'>
             {isLoading ? (
-              <div className='p-4 text-center text-sm text-muted-foreground'>Loading staff…</div>
+              <div className='p-4 text-center text-sm text-muted-foreground'>Đang tải…</div>
             ) : availableStaff.length === 0 ? (
               <div className='p-4 text-center text-sm text-muted-foreground'>
-                {search ? 'No matching staff found.' : 'All staff are already assigned.'}
+                {search ? 'Không tìm thấy nhân viên phù hợp.' : 'Tất cả nhân viên đã được phân công.'}
               </div>
             ) : (
               availableStaff.map((staff) => (
@@ -133,14 +133,14 @@ export function AssignStaffDialog({
 
         <DialogFooter>
           <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
-            Cancel
+            Hủy
           </Button>
           <Button
             onClick={handleAssign}
             disabled={!selectedId || assignMutation.isPending}
           >
             <UserPlus className='size-4' />
-            {assignMutation.isPending ? 'Assigning…' : 'Assign'}
+            {assignMutation.isPending ? 'Đang phân công…' : 'Phân công'}
           </Button>
         </DialogFooter>
       </DialogContent>

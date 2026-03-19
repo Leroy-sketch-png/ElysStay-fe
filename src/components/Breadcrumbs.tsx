@@ -31,7 +31,7 @@ export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
             className='flex items-center hover:text-foreground transition-colors'
           >
             <Home className='size-3.5' />
-            <span className='sr-only'>Dashboard</span>
+            <span className='sr-only'>Trang chủ</span>
           </Link>
         </li>
 

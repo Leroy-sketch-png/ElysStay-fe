@@ -64,11 +64,11 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
   const saveMutation = useMutation({
     mutationFn: (payload: RoomServiceOverride[]) => updateRoomServices(roomId, payload),
     onSuccess: () => {
-      toast.success('Room services updated')
+      toast.success('Đã cập nhật dịch vụ phòng')
       queryClient.invalidateQueries({ queryKey: roomServiceKeys.byRoom(roomId) })
       setIsDirty(false)
     },
-    onError: (error: Error) => toast.error('Failed to save services', error.message),
+    onError: (error: Error) => toast.error('Lưu dịch vụ thất bại', error.message),
   })
 
   const handleSave = () => {
@@ -120,10 +120,10 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
         <CardContent className='flex flex-col items-center py-12'>
           <Settings className='size-10 text-muted-foreground mb-3' />
           <p className='text-sm text-muted-foreground'>
-            No services configured for this building yet.
+            Tòa nhà chưa có dịch vụ nào.
           </p>
           <p className='text-xs text-muted-foreground mt-1'>
-            Add services in the building settings first.
+            Thêm dịch vụ trong cài đặt tòa nhà trước.
           </p>
         </CardContent>
       </Card>
@@ -134,10 +134,10 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
     <div className='space-y-4'>
       <Card>
         <CardHeader>
-          <CardTitle className='text-base'>Service Configuration</CardTitle>
+          <CardTitle className='text-base'>Cấu hình dịch vụ</CardTitle>
           <CardDescription>
-            Toggle services on/off for this room and optionally override pricing.
-            Changes are saved as a batch.
+            Bật/tắt dịch vụ cho phòng và tùy chỉnh giá.
+            Thay đổi được lưu cùng lúc.
           </CardDescription>
         </CardHeader>
         <CardContent className='space-y-0 divide-y'>
@@ -182,7 +182,7 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
                 {state.isEnabled && (
                   <div className='flex items-center gap-3 ml-auto'>
                     <div className='space-y-1'>
-                      <label htmlFor={`price-${svc.serviceId}`} className='text-[11px] text-muted-foreground'>Override Price</label>
+                      <label htmlFor={`price-${svc.serviceId}`} className='text-[11px] text-muted-foreground'>Giá riêng</label>
                       <Input
                         id={`price-${svc.serviceId}`}
                         type='number'
@@ -196,7 +196,7 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
                     </div>
                     {!svc.isMetered && (
                       <div className='space-y-1'>
-                        <label htmlFor={`qty-${svc.serviceId}`} className='text-[11px] text-muted-foreground'>Override Qty</label>
+                        <label htmlFor={`qty-${svc.serviceId}`} className='text-[11px] text-muted-foreground'>SL riêng</label>
                         <Input
                           id={`qty-${svc.serviceId}`}
                           type='number'
@@ -210,7 +210,7 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
                       </div>
                     )}
                     <div className='space-y-1'>
-                      <label className='text-[11px] text-muted-foreground'>Effective</label>
+                      <label className='text-[11px] text-muted-foreground'>Thực tế</label>
                       <p className='h-8 flex items-center text-sm font-medium'>
                         {formatCurrency(
                           state.overrideUnitPrice
@@ -230,14 +230,14 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
       {/* Save bar */}
       {isDirty && (
         <div className='flex items-center justify-end gap-2 p-3 bg-muted/50 rounded-lg border'>
-          <p className='text-sm text-muted-foreground mr-auto'>You have unsaved changes.</p>
+          <p className='text-sm text-muted-foreground mr-auto'>Bạn có thay đổi chưa lưu.</p>
           <Button variant='outline' size='sm' onClick={handleReset}>
             <RotateCcw className='size-3.5' />
-            Reset
+            Hủy
           </Button>
           <Button size='sm' onClick={handleSave} disabled={saveMutation.isPending}>
             <Save className='size-3.5' />
-            {saveMutation.isPending ? 'Saving…' : 'Save Changes'}
+            {saveMutation.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
           </Button>
         </div>
       )}

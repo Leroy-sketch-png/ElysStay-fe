@@ -49,13 +49,13 @@ export default function TenantDetailPage() {
       <PageContainer>
         <div className='flex flex-col items-center justify-center py-20 text-center'>
           <User className='size-12 text-muted-foreground mb-4' />
-          <h2 className='text-lg font-semibold'>Tenant not found</h2>
+          <h2 className='text-lg font-semibold'>Không tìm thấy khách thuê</h2>
           <p className='mt-1 text-sm text-muted-foreground'>
-            This tenant may have been deleted or you don&apos;t have access.
+            Khách thuê này có thể đã bị xóa hoặc bạn không có quyền truy cập.
           </p>
           <Button variant='outline' className='mt-4' onClick={() => router.push('/tenants')}>
             <ArrowLeft className='size-4' />
-            Back to Tenants
+            Quay lại Khách thuê
           </Button>
         </div>
       </PageContainer>
@@ -66,11 +66,11 @@ export default function TenantDetailPage() {
     <PageContainer
       title={tenant.fullName}
       description={tenant.email}
-      breadcrumbs={<Breadcrumbs items={[{ label: 'Tenants', href: '/tenants' }, { label: tenant.fullName }]} />}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Khách thuê', href: '/tenants' }, { label: tenant.fullName }]} />}
       actions={
         <Button variant='outline' onClick={() => router.push('/tenants')}>
           <ArrowLeft className='size-4' />
-          Back
+          Quay lại
         </Button>
       }
     >
@@ -104,7 +104,7 @@ export default function TenantDetailPage() {
               <Shield className='size-5 text-success' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Status</p>
+              <p className='text-sm text-muted-foreground'>Trạng thái</p>
               <div className='mt-0.5'><UserStatusBadge status={tenant.status} /></div>
             </div>
           </CardContent>
@@ -115,7 +115,7 @@ export default function TenantDetailPage() {
               <CalendarDays className='size-5 text-warning' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Registered</p>
+              <p className='text-sm text-muted-foreground'>Đăng ký</p>
               <p className='text-sm font-medium'>{formatDate(tenant.createdAt)}</p>
             </div>
           </CardContent>
@@ -127,11 +127,11 @@ export default function TenantDetailPage() {
         <TabsList>
           <TabsTrigger value='profile'>
             <User className='size-4 mr-1.5' />
-            ID Profile
+            Hồ sơ CCCD
           </TabsTrigger>
           <TabsTrigger value='contracts'>
             <FileText className='size-4 mr-1.5' />
-            Contracts
+            Hợp đồng
           </TabsTrigger>
         </TabsList>
 

@@ -33,8 +33,8 @@ import { useAuth } from '@/providers/AuthProvider'
 const issueSchema = z.object({
   buildingId: z.string().optional().or(z.literal('')),
   roomId: z.string().optional().or(z.literal('')),
-  title: z.string().trim().min(1, 'Title is required').max(200),
-  description: z.string().trim().min(1, 'Description is required').max(2000),
+  title: z.string().trim().min(1, 'Tiêu đề là bắt buộc').max(200),
+  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(2000),
 })
 
 type IssueFormData = z.infer<typeof issueSchema>
@@ -112,19 +112,19 @@ export function CreateIssueDialog({
         description: data.description,
       }),
     onSuccess: () => {
-      toast.success('Issue reported', 'Maintenance issue has been created.')
+      toast.success('Vấn đề đã báo cáo', 'Yêu cầu bảo trì đã được tạo.')
       queryClient.invalidateQueries({ queryKey: issueKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Failed to report issue', error.message),
+    onError: (error: Error) => toast.error('Không thể báo vấn đề', error.message),
   })
 
   const onSubmit = (data: IssueFormData) => {
     if (!isTenant && !data.buildingId) {
       setError('buildingId', {
         type: 'manual',
-        message: 'Building is required for owner/staff.',
+        message: 'Tòa nhà là bắt buộc với chủ/nhân viên.',
       })
       return
     }
@@ -140,9 +140,9 @@ export function CreateIssueDialog({
       <DialogContent>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Report Maintenance Issue</DialogTitle>
+          <DialogTitle>Báo vấn đề bảo trì</DialogTitle>
           <DialogDescription>
-            Describe the problem so the building team can address it.
+            Mô tả vấn đề để đội quản lý tòa nhà xử lý.
           </DialogDescription>
         </DialogHeader>
 
@@ -150,17 +150,17 @@ export function CreateIssueDialog({
           <DialogBody className='space-y-4'>
             {/* Building (optional for tenants — auto-resolved from contract) */}
             <div className='space-y-2'>
-              <Label htmlFor='iss-building'>Building {isTenant ? '' : '*'}</Label>
+              <Label htmlFor='iss-building'>Tòa nhà {isTenant ? '' : '*'}</Label>
               <Select id='iss-building' {...register('buildingId')}>
-                <option value=''>{isTenant ? 'Auto-detect from contract' : 'Select building…'}</option>
+                <option value=''>{isTenant ? 'Tự phát hiện từ hợp đồng' : 'Chọn tòa nhà…'}</option>
                 {buildings.map((b) => (
                   <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
               </Select>
               <p className='text-xs text-muted-foreground'>
                 {isTenant
-                  ? 'Leave blank to auto-detect from your active contract.'
-                  : 'Required for owner/staff issue reports.'}
+                  ? 'Để trống để tự phát hiện từ hợp đồng hiệu lực.'
+                  : 'Bắt buộc với chủ/nhân viên.'}
               </p>
               {errors.buildingId && (
                 <p className='text-xs text-destructive'>{errors.buildingId.message}</p>
@@ -170,11 +170,11 @@ export function CreateIssueDialog({
             {/* Room (optional) */}
             {watchedBuildingId && rooms.length > 0 && (
               <div className='space-y-2'>
-                <Label htmlFor='iss-room'>Room (optional)</Label>
+                <Label htmlFor='iss-room'>Phòng (không bắt buộc)</Label>
                 <Select id='iss-room' {...register('roomId')}>
-                  <option value=''>Common area / building-wide</option>
+                  <option value=''>Khu vực chung / toàn tòa nhà</option>
                   {rooms.map((r) => (
-                    <option key={r.id} value={r.id}>Room {r.roomNumber}</option>
+                    <option key={r.id} value={r.id}>Phòng {r.roomNumber}</option>
                   ))}
                 </Select>
               </div>
@@ -182,10 +182,10 @@ export function CreateIssueDialog({
 
             {/* Title */}
             <div className='space-y-2'>
-              <Label htmlFor='iss-title'>Title *</Label>
+              <Label htmlFor='iss-title'>Tiêu đề *</Label>
               <Input
                 id='iss-title'
-                placeholder='e.g., Leaking faucet in bathroom'
+                placeholder='Ví dụ: Vòi nước bị rỉ trong phòng tắm'
                 {...register('title')}
                 aria-invalid={!!errors.title}
               />
@@ -196,10 +196,10 @@ export function CreateIssueDialog({
 
             {/* Description */}
             <div className='space-y-2'>
-              <Label htmlFor='iss-description'>Description *</Label>
+              <Label htmlFor='iss-description'>Mô tả *</Label>
               <Textarea
                 id='iss-description'
-                placeholder='Describe the issue in detail…'
+                placeholder='Mô tả chi tiết vấn đề…'
                 rows={4}
                 {...register('description')}
                 aria-invalid={!!errors.description}
@@ -217,10 +217,10 @@ export function CreateIssueDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Submitting…' : 'Report Issue'}
+              {mutation.isPending ? 'Đang gửi…' : 'Báo vấn đề'}
             </Button>
           </DialogFooter>
         </form>

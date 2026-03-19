@@ -26,9 +26,9 @@ import type { ServiceDto, CreateServiceRequest, UpdateServiceRequest } from '@/t
 // ─── Validation ─────────────────────────────────────────
 
 const serviceSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(200),
-  unit: z.string().min(1, 'Unit is required').max(50),
-  unitPrice: z.number().positive('Price must be positive'),
+  name: z.string().min(1, 'Tên là bắt buộc').max(200),
+  unit: z.string().min(1, 'Đơn vị là bắt buộc').max(50),
+  unitPrice: z.number().positive('Giá phải lớn hơn 0'),
   isMetered: z.enum(['true', 'false']),
 })
 
@@ -82,21 +82,21 @@ export function ServiceFormDialog({
   const createMutation = useMutation({
     mutationFn: (data: CreateServiceRequest) => createService(buildingId, data),
     onSuccess: () => {
-      toast.success('Service created')
+      toast.success('Đã tạo dịch vụ')
       queryClient.invalidateQueries({ queryKey: serviceKeys.byBuilding(buildingId) })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Failed to create service', error.message),
+    onError: (error: Error) => toast.error('Tạo dịch vụ thất bại', error.message),
   })
 
   const updateMutation = useMutation({
     mutationFn: (data: UpdateServiceRequest) => updateService(service!.id, data),
     onSuccess: () => {
-      toast.success('Service updated')
+      toast.success('Đã cập nhật dịch vụ')
       queryClient.invalidateQueries({ queryKey: serviceKeys.byBuilding(buildingId) })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Failed to update service', error.message),
+    onError: (error: Error) => toast.error('Cập nhật dịch vụ thất bại', error.message),
   })
 
   const onSubmit = (data: ServiceFormData) => {
@@ -120,53 +120,53 @@ export function ServiceFormDialog({
       <DialogContent size='sm'>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Edit Service' : 'Add Service'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Sửa dịch vụ' : 'Thêm dịch vụ'}</DialogTitle>
           <DialogDescription>
             {isEdit
-              ? 'Update the service configuration. Price changes are tracked automatically.'
-              : 'Configure a new service for this building.'}
+              ? 'Cập nhật cấu hình dịch vụ. Thay đổi giá được theo dõi tự động.'
+              : 'Thêm dịch vụ mới cho tòa nhà.'}
           </DialogDescription>
         </DialogHeader>
 
         <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             <div className='space-y-2'>
-              <Label htmlFor='svc-name'>Service Name *</Label>
-              <Input id='svc-name' placeholder='e.g. Electricity' {...register('name')} aria-invalid={!!errors.name} />
+              <Label htmlFor='svc-name'>Tên dịch vụ *</Label>
+              <Input id='svc-name' placeholder='VD: Điện' {...register('name')} aria-invalid={!!errors.name} />
               {errors.name && <p className='text-xs text-destructive'>{errors.name.message}</p>}
             </div>
 
             <div className='grid grid-cols-2 gap-4'>
               <div className='space-y-2'>
-                <Label htmlFor='svc-unit'>Unit *</Label>
-                <Input id='svc-unit' placeholder='e.g. kWh' {...register('unit')} aria-invalid={!!errors.unit} />
+                <Label htmlFor='svc-unit'>Đơn vị *</Label>
+                <Input id='svc-unit' placeholder='VD: kWh' {...register('unit')} aria-invalid={!!errors.unit} />
                 {errors.unit && <p className='text-xs text-destructive'>{errors.unit.message}</p>}
               </div>
               <div className='space-y-2'>
-                <Label htmlFor='svc-price'>Unit Price (VND) *</Label>
+                <Label htmlFor='svc-price'>Đơn giá (VND) *</Label>
                 <Input id='svc-price' type='number' min={0} step={100} {...register('unitPrice', { valueAsNumber: true })} aria-invalid={!!errors.unitPrice} />
                 {errors.unitPrice && <p className='text-xs text-destructive'>{errors.unitPrice.message}</p>}
               </div>
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='svc-metered'>Billing Type *</Label>
+              <Label htmlFor='svc-metered'>Loại tính phí *</Label>
               <Select id='svc-metered' {...register('isMetered')}>
-                <option value='false'>Flat fee (fixed per period)</option>
-                <option value='true'>Metered (requires meter reading)</option>
+                <option value='false'>Cố định (theo kỳ)</option>
+                <option value='true'>Đo đếm (cần ghi chỉ số)</option>
               </Select>
               <p className='text-xs text-muted-foreground'>
-                Metered services use electricity/water meter readings to calculate charges.
+                Dịch vụ đo đếm sử dụng chỉ số điện/nước để tính phí.
               </p>
             </div>
           </DialogBody>
 
           <DialogFooter>
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isPending}>
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={isPending}>
-              {isPending ? 'Saving…' : isEdit ? 'Save Changes' : 'Create Service'}
+              {isPending ? 'Đang lưu…' : isEdit ? 'Lưu thay đổi' : 'Tạo dịch vụ'}
             </Button>
           </DialogFooter>
         </form>

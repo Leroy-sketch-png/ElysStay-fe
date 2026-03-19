@@ -49,16 +49,16 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteRoom(id),
     onSuccess: () => {
-      toast.success('Room deleted')
+      toast.success('Đã xóa phòng')
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(buildingId) })
       setDeleteTarget(null)
     },
     onError: (error: Error) => {
       if (error instanceof ApiError && error.status === 409) {
-        toast.error('Cannot delete room', 'Room has an active contract.')
+        toast.error('Không thể xóa phòng', 'Phòng có hợp đồng đang hoạt động.')
       } else {
-        toast.error('Failed to delete room', error.message)
+        toast.error('Xóa phòng thất bại', error.message)
       }
     },
   })
@@ -67,48 +67,48 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
     mutationFn: ({ id, status }: { id: string; status: 'Available' | 'Maintenance' }) =>
       changeRoomStatus(id, { status }),
     onSuccess: () => {
-      toast.success('Room status updated')
+      toast.success('Đã cập nhật trạng thái phòng')
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(buildingId) })
     },
     onError: (error: Error) => {
-      toast.error('Failed to change status', error.message)
+      toast.error('Đổi trạng thái thất bại', error.message)
     },
   })
 
   const columns: Column<RoomDto>[] = [
     {
       key: 'roomNumber',
-      header: 'Room',
+      header: 'Phòng',
       render: (row) => <span className='font-medium'>{row.roomNumber}</span>,
     },
     {
       key: 'floor',
-      header: 'Floor',
+      header: 'Tầng',
       render: (row) => row.floor,
       className: 'text-center',
       headerClassName: 'text-center',
     },
     {
       key: 'area',
-      header: 'Area',
+      header: 'Diện tích',
       render: (row) => `${row.area} m²`,
     },
     {
       key: 'price',
-      header: 'Price',
+      header: 'Giá',
       render: (row) => formatCurrency(row.price),
     },
     {
       key: 'maxOccupants',
-      header: 'Max',
-      render: (row) => `${row.maxOccupants} pax`,
+      header: 'Tối đa',
+      render: (row) => `${row.maxOccupants} người`,
       className: 'text-center',
       headerClassName: 'text-center',
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (row) => <RoomStatusBadge status={row.status} />,
     },
     {
@@ -129,7 +129,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
               }}
               disabled={statusMutation.isPending}
             >
-              {row.status === 'Available' ? 'Set Maintenance' : 'Set Available'}
+              {row.status === 'Available' ? 'Đặt bảo trì' : 'Đặt trống'}
             </Button>
           )}
           <Button
@@ -141,7 +141,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
               setDeleteTarget(row)
             }}
           >
-            Delete
+            Xóa
           </Button>
         </div>
       ),
@@ -168,10 +168,10 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
           onChange={(e) => { setFloorFilter(e.target.value); setPage(1) }}
           className='w-36'
         >
-          <option value=''>All floors</option>
+          <option value=''>Tất cả tầng</option>
           {Array.from({ length: totalFloors }, (_, i) => (
             <option key={i + 1} value={String(i + 1)}>
-              Floor {i + 1}
+              Tầng {i + 1}
             </option>
           ))}
         </Select>
@@ -180,7 +180,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
 
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className='size-4' />
-          Add Room
+          Thêm phòng
         </Button>
       </div>
 
@@ -191,7 +191,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
         loading={isLoading}
         rowKey={(row) => row.id}
         onRowClick={(row) => router.push(`/rooms/${row.id}`)}
-        emptyMessage='No rooms in this building yet.'
+        emptyMessage='Chưa có phòng nào trong tòa nhà.'
         emptyIcon={<DoorOpen className='size-10' />}
       />
 
@@ -219,9 +219,9 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title='Delete Room'
-        description={`Are you sure you want to delete room "${deleteTarget?.roomNumber}"?`}
-        confirmLabel='Delete'
+        title='Xóa phòng'
+        description={`Bạn có chắc muốn xóa phòng "${deleteTarget?.roomNumber}"?`}
+        confirmLabel='Xóa'
         variant='destructive'
         loading={deleteMutation.isPending}
         onConfirm={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}

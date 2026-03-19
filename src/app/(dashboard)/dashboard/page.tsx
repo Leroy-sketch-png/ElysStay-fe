@@ -100,7 +100,7 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
     <StaggerContainer className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
       <AnimatedCard>
         <StatCard
-          label='Total Buildings'
+          label='Tổng tòa nhà'
           value={data.totalBuildings}
           icon={<Building2 className='size-5' />}
           href='/buildings'
@@ -108,16 +108,16 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Total Rooms'
+          label='Tổng phòng'
           value={data.totalRooms}
           icon={<DoorOpen className='size-5' />}
-          trend={`${data.occupiedRooms} occupied`}
+          trend={`${data.occupiedRooms} đang thuê`}
           href='/rooms'
         />
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Occupancy Rate'
+          label='Tỷ lệ lấp đầy'
           value={`${Math.round(data.occupancyRate * 100)}%`}
           icon={<TrendingUp className='size-5' />}
           variant={data.occupancyRate >= 0.8 ? 'success' : data.occupancyRate >= 0.5 ? 'default' : 'warning'}
@@ -125,7 +125,7 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Active Contracts'
+          label='Hợp đồng hiệu lực'
           value={data.activeContracts}
           icon={<FileText className='size-5' />}
           href='/contracts'
@@ -133,17 +133,17 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Expiring Soon'
+          label='Sắp hết hạn'
           value={data.expiringContracts}
           icon={<Clock className='size-5' />}
-          trend={data.expiringContracts > 0 ? 'Within 30 days' : undefined}
+          trend={data.expiringContracts > 0 ? 'Trong 30 ngày tới' : undefined}
           variant={data.expiringContracts > 0 ? 'warning' : 'default'}
           href='/contracts'
         />
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Pending Reservations'
+          label='Đặt cọc chờ duyệt'
           value={data.pendingReservations}
           icon={<CalendarClock className='size-5' />}
           variant={data.pendingReservations > 0 ? 'default' : 'success'}
@@ -152,7 +152,7 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Monthly Revenue'
+          label='Doanh thu tháng'
           value={formatCurrency(data.monthlyRevenue)}
           icon={<TrendingUp className='size-5' />}
           variant='success'
@@ -161,10 +161,10 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Overdue Invoices'
+          label='Hóa đơn quá hạn'
           value={data.overdueInvoiceCount}
           icon={<AlertTriangle className='size-5' />}
-          trend={data.overdueAmount > 0 ? `${formatCurrency(data.overdueAmount)} total` : undefined}
+          trend={data.overdueAmount > 0 ? `${formatCurrency(data.overdueAmount)} tổng` : undefined}
           variant={data.overdueInvoiceCount > 0 ? 'destructive' : 'default'}
           href='/billing/invoices'
         />
@@ -180,7 +180,7 @@ function StaffDashboard({ data }: { data: StaffDashboardDto }) {
     <StaggerContainer className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
       <AnimatedCard>
         <StatCard
-          label='Assigned Buildings'
+          label='Tòa nhà phụ trách'
           value={data.assignedBuildings}
           icon={<Building2 className='size-5' />}
           href='/buildings'
@@ -188,7 +188,7 @@ function StaffDashboard({ data }: { data: StaffDashboardDto }) {
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Pending Issues'
+          label='Yêu cầu chờ xử lý'
           value={data.pendingIssues}
           icon={<Wrench className='size-5' />}
           variant={data.pendingIssues > 0 ? 'warning' : 'success'}
@@ -197,7 +197,7 @@ function StaffDashboard({ data }: { data: StaffDashboardDto }) {
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Pending Meter Readings'
+          label='Ghi chỉ số chờ'
           value={data.pendingMeterReadings}
           icon={<Gauge className='size-5' />}
           variant={data.pendingMeterReadings > 0 ? 'warning' : 'success'}
@@ -216,25 +216,25 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
       {/* Room info card */}
       {data.roomNumber && (
         <div className='rounded-lg border bg-card p-6'>
-          <h3 className='text-lg font-semibold'>Your Room</h3>
+          <h3 className='text-lg font-semibold'>Phòng của bạn</h3>
           <div className='mt-3 grid gap-2 text-sm'>
             <div className='flex justify-between'>
-              <span className='text-muted-foreground'>Room</span>
+              <span className='text-muted-foreground'>Phòng</span>
               <span className='font-medium'>{data.roomNumber}</span>
             </div>
             <div className='flex justify-between'>
-              <span className='text-muted-foreground'>Building</span>
+              <span className='text-muted-foreground'>Tòa nhà</span>
               <span className='font-medium'>{data.buildingName}</span>
             </div>
             {data.contractStatus && (
               <div className='flex justify-between'>
-                <span className='text-muted-foreground'>Contract</span>
+                <span className='text-muted-foreground'>Hợp đồng</span>
                 <span className='font-medium'>{data.contractStatus}</span>
               </div>
             )}
             {data.contractEndDate && (
               <div className='flex justify-between'>
-                <span className='text-muted-foreground'>Ends</span>
+                <span className='text-muted-foreground'>Kết thúc</span>
                 <span className='font-medium'>{formatDate(data.contractEndDate)}</span>
               </div>
             )}
@@ -245,7 +245,7 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
       <StaggerContainer className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
         <AnimatedCard>
           <StatCard
-            label='Unpaid Invoices'
+            label='Hóa đơn chưa thanh toán'
             value={data.unpaidInvoiceCount}
             icon={<Receipt className='size-5' />}
             trend={data.unpaidAmount > 0 ? formatCurrency(data.unpaidAmount) : undefined}
@@ -255,7 +255,7 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
         </AnimatedCard>
         <AnimatedCard>
           <StatCard
-            label='Open Issues'
+            label='Yêu cầu đang mở'
             value={data.openIssueCount}
             icon={<Wrench className='size-5' />}
             variant={data.openIssueCount > 0 ? 'warning' : 'default'}
@@ -303,9 +303,9 @@ export default function DashboardPage() {
       ) : loadError ? (
         <EmptyState
           icon={<AlertTriangle className='size-8' />}
-          title='Unable to load dashboard'
-          description={loadError instanceof Error ? loadError.message : 'An unexpected error occurred while loading your dashboard.'}
-          actionLabel='Retry'
+          title='Không thể tải tổng quan'
+          description={loadError instanceof Error ? loadError.message : 'Đã xảy ra lỗi không mong muốn khi tải tổng quan.'}
+          actionLabel='Thử lại'
           onAction={() => {
             queryClient.invalidateQueries({ queryKey: userKeys.me() })
             queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
@@ -320,8 +320,8 @@ export default function DashboardPage() {
       ) : (
         <EmptyState
           icon={<AlertTriangle className='size-8' />}
-          title='No dashboard data available'
-          description='Your dashboard is empty right now. Once your role has active data, the summary cards will appear here.'
+          title='Chưa có dữ liệu tổng quan'
+          description='Tổng quan hiện đang trống. Khi vai trò của bạn có dữ liệu, các thẻ thống kê sẽ xuất hiện tại đây.'
         />
       )}
     </PageContainer>
@@ -333,15 +333,15 @@ export default function DashboardPage() {
 
 function getGreeting(): string {
   const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 18) return 'Good afternoon'
-  return 'Good evening'
+  if (hour < 12) return 'Chào buổi sáng'
+  if (hour < 18) return 'Chào buổi chiều'
+  return 'Chào buổi tối'
 }
 
 function getRoleDescription(roles: string[]): string {
   const lowerRoles = roles.map(r => r.toLowerCase())
-  if (lowerRoles.includes('owner')) return 'Here\'s your property portfolio overview'
-  if (lowerRoles.includes('staff')) return 'Here\'s what needs your attention today'
-  if (lowerRoles.includes('tenant')) return 'Here\'s your rental summary'
-  return 'Welcome to ElysStay'
+  if (lowerRoles.includes('owner')) return 'Tổng quan danh mục bất động sản của bạn'
+  if (lowerRoles.includes('staff')) return 'Những việc cần bạn chú ý hôm nay'
+  if (lowerRoles.includes('tenant')) return 'Tóm tắt tình trạng thuê của bạn'
+  return 'Chào mừng đến với ElysStay'
 }

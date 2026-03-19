@@ -34,12 +34,12 @@ export default function StaffPage() {
     mutationFn: ({ id, status }: { id: string; status: 'Active' | 'Deactivated' }) =>
       changeUserStatus(id, { status }),
     onSuccess: () => {
-      toast.success('Staff status updated')
+      toast.success('Trạng thái nhân viên đã cập nhật')
       queryClient.invalidateQueries({ queryKey: staffKeys.all })
       setStatusTarget(null)
     },
     onError: (error: Error) => {
-      toast.error('Failed to change status', error.message)
+      toast.error('Không thể thay đổi trạng thái', error.message)
       setStatusTarget(null)
     },
   })
@@ -47,7 +47,7 @@ export default function StaffPage() {
   const columns: Column<UserDto>[] = [
     {
       key: 'fullName',
-      header: 'Name',
+      header: 'Tên',
       render: (row) => (
         <div className='flex items-center gap-3'>
           <div className='flex size-8 items-center justify-center rounded-full bg-muted text-xs font-medium'>
@@ -62,17 +62,17 @@ export default function StaffPage() {
     },
     {
       key: 'phone',
-      header: 'Phone',
+      header: 'SĐT',
       render: (row) => row.phone ?? '—',
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (row) => <UserStatusBadge status={row.status} />,
     },
     {
       key: 'createdAt',
-      header: 'Joined',
+      header: 'Ngày tham gia',
       render: (row) => formatDate(row.createdAt),
     },
     {
@@ -94,12 +94,12 @@ export default function StaffPage() {
               {isActive ? (
                 <>
                   <UserX className='size-4 mr-1' />
-                  Deactivate
+                  Vô hiệu hóa
                 </>
               ) : (
                 <>
                   <UserCheck className='size-4 mr-1' />
-                  Activate
+                  Kích hoạt
                 </>
               )}
             </Button>
@@ -116,12 +116,12 @@ export default function StaffPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Staff Management'
-      description='Manage staff accounts. Assign staff to buildings from the building detail page.'
+      title='Quản lý nhân viên'
+      description='Quản lý tài khoản nhân viên. Giao nhân viên cho tòa nhà từ trang chi tiết tòa nhà.'
       actions={
         <Button onClick={() => setCreateOpen(true)}>
           <Plus className='size-4' />
-          Add Staff
+          Thêm nhân viên
         </Button>
       }
     >
@@ -129,8 +129,8 @@ export default function StaffPage() {
       {isError && (
         <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center mb-4'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
-          <p className='font-medium text-destructive'>Failed to load staff</p>
-          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
+          <p className='font-medium text-destructive'>Không thể tải nhân viên</p>
+          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'Đã xảy ra lỗi không mong muốn.'}</p>
         </div>
       )}
 
@@ -141,7 +141,7 @@ export default function StaffPage() {
             data={data?.data ?? []}
             loading={isLoading}
             rowKey={(row) => row.id}
-            emptyMessage='No staff members yet. Create one to get started.'
+            emptyMessage='Chưa có nhân viên. Tạo nhân viên đầu tiên để bắt đầu.'
             emptyIcon={<Users className='size-10' />}
           />
 
@@ -170,13 +170,13 @@ export default function StaffPage() {
       <ConfirmDialog
         open={!!statusTarget}
         onOpenChange={(open) => !open && setStatusTarget(null)}
-        title={targetIsActive ? 'Deactivate Staff' : 'Activate Staff'}
+        title={targetIsActive ? 'Vô hiệu hóa nhân viên' : 'Kích hoạt nhân viên'}
         description={
           targetIsActive
-            ? `Deactivate "${statusTarget?.fullName}"? They will lose access to all assigned buildings.`
-            : `Reactivate "${statusTarget?.fullName}"? They will regain access to their assigned buildings.`
+            ? `Vô hiệu hóa "${statusTarget?.fullName}"? Họ sẽ mất quyền truy cập tất cả tòa nhà được giao.`
+            : `Kích hoạt lại "${statusTarget?.fullName}"? Họ sẽ lấy lại quyền truy cập tòa nhà được giao.`
         }
-        confirmLabel={targetIsActive ? 'Deactivate' : 'Activate'}
+        confirmLabel={targetIsActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
         variant={targetIsActive ? 'destructive' : 'default'}
         loading={statusMutation.isPending}
         onConfirm={() =>

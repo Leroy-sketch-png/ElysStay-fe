@@ -49,18 +49,18 @@ export default function RoomDetailPage() {
   const statusMutation = useMutation({
     mutationFn: (status: 'Available' | 'Maintenance') => changeRoomStatus(id, { status }),
     onSuccess: () => {
-      toast.success('Room status updated')
+      toast.success('Đã cập nhật trạng thái phòng')
       queryClient.invalidateQueries({ queryKey: roomKeys.detail(id) })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
-    onError: (error: Error) => toast.error('Failed to change status', error.message),
+    onError: (error: Error) => toast.error('Đổi trạng thái thất bại', error.message),
   })
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteRoom(id),
     onSuccess: () => {
-      toast.success('Room deleted')
+      toast.success('Đã xóa phòng')
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       if (room?.buildingId) {
@@ -70,9 +70,9 @@ export default function RoomDetailPage() {
     },
     onError: (error: Error) => {
       if (error instanceof ApiError && error.status === 409) {
-        toast.error('Cannot delete room', 'Room has an active contract or reservation.')
+        toast.error('Không thể xóa phòng', 'Phòng có hợp đồng hoặc đặt cọc đang hoạt động.')
       } else {
-        toast.error('Failed to delete room', error.message)
+        toast.error('Xóa phòng thất bại', error.message)
       }
       setDeleteOpen(false)
     },
@@ -98,13 +98,13 @@ export default function RoomDetailPage() {
       <PageContainer>
         <div className='flex flex-col items-center justify-center py-20 text-center'>
           <DoorOpen className='size-12 text-muted-foreground mb-4' />
-          <h2 className='text-lg font-semibold'>Room not found</h2>
+          <h2 className='text-lg font-semibold'>Không tìm thấy phòng</h2>
           <p className='mt-1 text-sm text-muted-foreground'>
-            This room may have been deleted or you don&apos;t have access.
+            Phòng này có thể đã bị xóa hoặc bạn không có quyền truy cập.
           </p>
           <Button variant='outline' className='mt-4' onClick={() => router.push('/rooms')}>
             <ArrowLeft className='size-4' />
-            Back to Rooms
+            Quay lại Phòng
           </Button>
         </div>
       </PageContainer>
@@ -116,14 +116,14 @@ export default function RoomDetailPage() {
 
   return (
     <PageContainer
-      title={`Room ${room.roomNumber}`}
+      title={`Phòng ${room.roomNumber}`}
       description={room.buildingName ?? undefined}
-      breadcrumbs={<Breadcrumbs items={[{ label: 'Rooms', href: '/rooms' }, { label: `Room ${room.roomNumber}` }]} />}
+      breadcrumbs={<Breadcrumbs items={[{ label: 'Phòng', href: '/rooms' }, { label: `Phòng ${room.roomNumber}` }]} />}
       actions={
         <div className='flex items-center gap-2'>
           <Button variant='outline' onClick={() => router.push('/rooms')}>
             <ArrowLeft className='size-4' />
-            Back
+            Quay lại
           </Button>
           {canToggleStatus && (
             <Button
@@ -132,15 +132,15 @@ export default function RoomDetailPage() {
               disabled={statusMutation.isPending}
             >
               <ToggleLeft className='size-4' />
-              Set {toggleTarget}
+              Đặt {toggleTarget === 'Maintenance' ? 'Bảo trì' : 'Trống'}
             </Button>
           )}
           <Button variant='outline' onClick={() => setEditOpen(true)} disabled={!building}>
             <Pencil className='size-4' />
-            Edit
+            Sửa
           </Button>
           <Button variant='destructive' onClick={() => setDeleteOpen(true)}>
-            Delete
+            Xóa
           </Button>
         </div>
       }
@@ -153,7 +153,7 @@ export default function RoomDetailPage() {
               <DoorOpen className='size-4 text-primary' />
             </div>
             <div>
-              <p className='text-xs text-muted-foreground'>Status</p>
+              <p className='text-xs text-muted-foreground'>Trạng thái</p>
               <RoomStatusBadge status={room.status} />
             </div>
           </CardContent>
@@ -164,7 +164,7 @@ export default function RoomDetailPage() {
               <Layers className='size-4 text-info' />
             </div>
             <div>
-              <p className='text-xs text-muted-foreground'>Floor</p>
+              <p className='text-xs text-muted-foreground'>Tầng</p>
               <p className='text-lg font-bold'>{room.floor}</p>
             </div>
           </CardContent>
@@ -175,7 +175,7 @@ export default function RoomDetailPage() {
               <Ruler className='size-4 text-accent-foreground' />
             </div>
             <div>
-              <p className='text-xs text-muted-foreground'>Area</p>
+              <p className='text-xs text-muted-foreground'>Diện tích</p>
               <p className='text-lg font-bold'>{room.area} m²</p>
             </div>
           </CardContent>
@@ -186,7 +186,7 @@ export default function RoomDetailPage() {
               <Banknote className='size-4 text-success' />
             </div>
             <div>
-              <p className='text-xs text-muted-foreground'>Price</p>
+              <p className='text-xs text-muted-foreground'>Giá</p>
               <p className='text-lg font-bold'>{formatCurrency(room.price)}</p>
             </div>
           </CardContent>
@@ -197,7 +197,7 @@ export default function RoomDetailPage() {
               <Users2 className='size-4 text-warning' />
             </div>
             <div>
-              <p className='text-xs text-muted-foreground'>Max Occupants</p>
+              <p className='text-xs text-muted-foreground'>Sức chứa</p>
               <p className='text-lg font-bold'>{room.maxOccupants}</p>
             </div>
           </CardContent>
@@ -218,59 +218,59 @@ export default function RoomDetailPage() {
         <TabsList>
           <TabsTrigger value='info'>
             <DoorOpen className='size-4 mr-1.5' />
-            Details
+            Chi tiết
           </TabsTrigger>
           <TabsTrigger value='services'>
             <Settings className='size-4 mr-1.5' />
-            Services
+            Dịch vụ
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value='info'>
           <Card>
             <CardHeader>
-              <CardTitle className='text-base'>Room Information</CardTitle>
+              <CardTitle className='text-base'>Thông tin phòng</CardTitle>
             </CardHeader>
             <CardContent>
               <dl className='grid grid-cols-2 gap-4 text-sm'>
                 <div>
-                  <dt className='text-muted-foreground'>Room Number</dt>
+                  <dt className='text-muted-foreground'>Số phòng</dt>
                   <dd className='font-medium'>{room.roomNumber}</dd>
                 </div>
                 <div>
-                  <dt className='text-muted-foreground'>Building</dt>
+                  <dt className='text-muted-foreground'>Tòa nhà</dt>
                   <dd className='font-medium'>
                     <button
                       type='button'
                       className='text-primary hover:underline'
                       onClick={() => router.push(`/buildings/${room.buildingId}`)}
                     >
-                      {room.buildingName ?? 'View Building'}
+                      {room.buildingName ?? 'Xem tòa nhà'}
                     </button>
                   </dd>
                 </div>
                 <div>
-                  <dt className='text-muted-foreground'>Floor</dt>
+                  <dt className='text-muted-foreground'>Tầng</dt>
                   <dd className='font-medium'>{room.floor}</dd>
                 </div>
                 <div>
-                  <dt className='text-muted-foreground'>Area</dt>
+                  <dt className='text-muted-foreground'>Diện tích</dt>
                   <dd className='font-medium'>{room.area} m²</dd>
                 </div>
                 <div>
-                  <dt className='text-muted-foreground'>Monthly Price</dt>
+                  <dt className='text-muted-foreground'>Giá thuê/tháng</dt>
                   <dd className='font-medium'>{formatCurrency(room.price)}</dd>
                 </div>
                 <div>
-                  <dt className='text-muted-foreground'>Max Occupants</dt>
-                  <dd className='font-medium'>{room.maxOccupants} people</dd>
+                  <dt className='text-muted-foreground'>Sức chứa tối đa</dt>
+                  <dd className='font-medium'>{room.maxOccupants} người</dd>
                 </div>
                 <div>
-                  <dt className='text-muted-foreground'>Created</dt>
+                  <dt className='text-muted-foreground'>Ngày tạo</dt>
                   <dd className='font-medium'>{formatDate(room.createdAt)}</dd>
                 </div>
                 <div>
-                  <dt className='text-muted-foreground'>Last Updated</dt>
+                  <dt className='text-muted-foreground'>Cập nhật lần cuối</dt>
                   <dd className='font-medium'>{formatDate(room.updatedAt)}</dd>
                 </div>
               </dl>
@@ -297,9 +297,9 @@ export default function RoomDetailPage() {
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title='Delete Room'
-        description={`Permanently delete room "${room.roomNumber}"? This cannot be undone.`}
-        confirmLabel='Delete Room'
+        title='Xóa phòng'
+        description={`Xóa vĩnh viễn phòng "${room.roomNumber}"? Không thể hoàn tác.`}
+        confirmLabel='Xóa phòng'
         variant='destructive'
         loading={deleteMutation.isPending}
         onConfirm={() => deleteMutation.mutate()}

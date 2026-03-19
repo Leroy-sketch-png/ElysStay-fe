@@ -90,44 +90,44 @@ export default function ReservationsPage() {
   const columns: Column<ReservationDto>[] = [
     {
       key: 'tenantName',
-      header: 'Tenant',
+      header: 'Khách thuê',
       render: (r) => (
         <div>
           <p className='font-medium'>{r.tenantName ?? '—'}</p>
           <p className='text-xs text-muted-foreground'>
-            {r.buildingName} — Room {r.roomNumber}
+            {r.buildingName} — Phòng {r.roomNumber}
           </p>
         </div>
       ),
     },
     {
       key: 'depositAmount',
-      header: 'Deposit',
+      header: 'Tiền cọc',
       render: (r) => <span className='font-medium'>{formatCurrency(r.depositAmount)}</span>,
     },
     {
       key: 'status',
-      header: 'Status',
+      header: 'Trạng thái',
       render: (r) => <ReservationStatusBadge status={r.status} />,
     },
     {
       key: 'expiresAt',
-      header: 'Expires',
+      header: 'Hết hạn',
       render: (r) => {
         const expiring = isExpiringSoon(r)
         const expired = isExpired(r)
         return (
           <span className={expired ? 'text-destructive font-medium' : expiring ? 'text-warning font-medium' : ''}>
             {formatDate(r.expiresAt)}
-            {expired && ' (expired)'}
-            {expiring && ' (soon)'}
+            {expired && ' (đã hết hạn)'}
+            {expiring && ' (sắp hết)'}
           </span>
         )
       },
     },
     {
       key: 'refund',
-      header: 'Refund',
+      header: 'Hoàn tiền',
       render: (r) =>
         r.refundAmount != null ? (
           <span className='text-sm'>{formatCurrency(r.refundAmount)}</span>
@@ -137,7 +137,7 @@ export default function ReservationsPage() {
     },
     {
       key: 'createdAt',
-      header: 'Created',
+      header: 'Ngày tạo',
       render: (r) => <span className='text-sm text-muted-foreground'>{formatDate(r.createdAt)}</span>,
     },
     {
@@ -155,7 +155,7 @@ export default function ReservationsPage() {
               setStatusDialogReservation(r)
             }}
           >
-            Manage
+            Quản lý
           </Button>
         )
       },
@@ -167,12 +167,12 @@ export default function ReservationsPage() {
   if (buildings && (buildings.data ?? []).length === 0) {
     return (
       <PageTransition>
-      <PageContainer title='Reservations' description='Manage room reservation pipeline'>
+      <PageContainer title='Đặt cọc' description='Quản lý quy trình đặt cọc phòng'>
         <EmptyState
           icon={<Building2 className='size-12' />}
-          title='No buildings yet'
-          description='Add your first building to start managing reservations.'
-          actionLabel='Go to Buildings'
+          title='Chưa có tòa nhà'
+          description='Thêm tòa nhà đầu tiên để bắt đầu quản lý đặt cọc.'
+          actionLabel='Đến trang Tòa nhà'
           actionHref='/buildings'
         />
       </PageContainer>
@@ -184,18 +184,18 @@ export default function ReservationsPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Reservations'
-      description='Manage room reservation pipeline'
+      title='Đặt cọc'
+      description='Quản lý quy trình đặt cọc phòng'
       actions={
         <div className='flex items-center gap-2'>
           {hasActiveFilters && (
             <Button variant='outline' onClick={clearFilters}>
-              Clear Filters
+              Xóa bộ lọc
             </Button>
           )}
           <Button onClick={() => setCreateDialogOpen(true)}>
             <Plus className='size-4' />
-            New Reservation
+            Đặt cọc mới
           </Button>
         </div>
       }
@@ -210,7 +210,7 @@ export default function ReservationsPage() {
               setPage(1)
             }}
           >
-            <option value=''>All buildings</option>
+            <option value=''>Tất cả tòa nhà</option>
             {buildings?.data?.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
@@ -238,9 +238,9 @@ export default function ReservationsPage() {
       {isError ? (
         <EmptyState
           icon={<AlertTriangle className='size-6 text-destructive' />}
-          title='Failed to load reservations'
-          description={error instanceof Error ? error.message : 'An unexpected error occurred while loading reservations.'}
-          actionLabel='Retry'
+          title='Không thể tải đặt cọc'
+          description={error instanceof Error ? error.message : 'Đã xảy ra lỗi không mong muốn khi tải đặt cọc.'}
+          actionLabel='Thử lại'
           onAction={() => queryClient.invalidateQueries({ queryKey: reservationKeys.all })}
         />
       ) : (
@@ -249,7 +249,7 @@ export default function ReservationsPage() {
           data={reservations}
           rowKey={(r) => r.id}
           loading={isLoading}
-          emptyMessage={hasActiveFilters ? 'No reservations match the current filters.' : 'No reservations found.'}
+          emptyMessage={hasActiveFilters ? 'Không có đặt cọc phù hợp với bộ lọc.' : 'Chưa có đặt cọc nào.'}
           emptyIcon={<CalendarClock className='size-6' />}
         />
       )}

@@ -26,8 +26,8 @@ import type { MaintenanceIssueDto } from '@/types/api'
 // ─── Schema ─────────────────────────────────────────────
 
 const editIssueSchema = z.object({
-  title: z.string().trim().min(1, 'Title is required').max(200),
-  description: z.string().trim().min(1, 'Description is required').max(2000),
+  title: z.string().trim().min(1, 'Tiêu đề là bắt buộc').max(200),
+  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(2000),
 })
 
 type EditIssueFormData = z.infer<typeof editIssueSchema>
@@ -76,12 +76,12 @@ export function EditIssueDialog({
         description: data.description,
       }),
     onSuccess: () => {
-      toast.success('Issue updated')
+      toast.success('Đã cập nhật vấn đề')
       queryClient.invalidateQueries({ queryKey: issueKeys.all })
       queryClient.invalidateQueries({ queryKey: issueKeys.detail(issue.id) })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Failed to update issue', error.message),
+    onError: (error: Error) => toast.error('Cập nhật vấn đề thất bại', error.message),
   })
 
   const onSubmit = (data: EditIssueFormData) => mutation.mutate(data)
@@ -91,14 +91,14 @@ export function EditIssueDialog({
       <DialogContent>
         <DialogClose />
         <DialogHeader>
-          <DialogTitle>Edit Issue</DialogTitle>
-          <DialogDescription>Update the issue title or description.</DialogDescription>
+          <DialogTitle>Sửa vấn đề</DialogTitle>
+          <DialogDescription>Cập nhật tiêu đề hoặc mô tả vấn đề.</DialogDescription>
         </DialogHeader>
 
         <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             <div className='space-y-2'>
-              <Label htmlFor='edit-title'>Title *</Label>
+              <Label htmlFor='edit-title'>Tiêu đề *</Label>
               <Input
                 id='edit-title'
                 {...register('title')}
@@ -110,7 +110,7 @@ export function EditIssueDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='edit-desc'>Description *</Label>
+              <Label htmlFor='edit-desc'>Mô tả *</Label>
               <Textarea
                 id='edit-desc'
                 rows={5}
@@ -130,10 +130,10 @@ export function EditIssueDialog({
               onClick={() => onOpenChange(false)}
               disabled={mutation.isPending}
             >
-              Cancel
+              Hủy
             </Button>
             <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Saving…' : 'Save Changes'}
+              {mutation.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
             </Button>
           </DialogFooter>
         </form>

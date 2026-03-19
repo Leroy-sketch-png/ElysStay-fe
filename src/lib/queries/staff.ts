@@ -4,6 +4,7 @@ import type {
   AssignStaffRequest,
   UserDto,
   CreateStaffRequest,
+  CreateUserResultDto,
   ChangeUserStatusRequest,
 } from '@/types/api'
 
@@ -53,7 +54,7 @@ export async function unassignStaff(buildingId: string, staffId: string) {
 // ─── Staff User CRUD ────────────────────────────────────
 
 export async function createStaffUser(data: CreateStaffRequest) {
-  const res = await api.post<UserDto>('/users/staff', data)
+  const res = await api.post<CreateUserResultDto>('/users/staff', data)
   return requireData(res)
 }
 

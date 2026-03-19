@@ -112,14 +112,14 @@ export default function ExpensesPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteExpense,
     onSuccess: () => {
-      toast.success('Expense deleted')
+      toast.success('Chi phí đã xóa')
       queryClient.invalidateQueries({ queryKey: expenseKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       setDeletingExpense(null)
     },
     onError: (error: Error) => {
-      toast.error('Failed to delete expense', error.message)
+      toast.error('Không thể xóa chi phí', error.message)
     },
   })
 
@@ -127,18 +127,18 @@ export default function ExpensesPage() {
   const columns: Column<ExpenseDto>[] = [
     {
       key: 'date',
-      header: 'Date',
+      header: 'Ngày',
       render: (row) => formatDate(row.expenseDate),
     },
     {
       key: 'building',
-      header: 'Building',
+      header: 'Tòa nhà',
       render: (row) => (
         <div>
           <span className='font-medium'>{row.buildingName}</span>
           {row.roomNumber && (
             <span className='text-xs text-muted-foreground ml-2'>
-              Room {row.roomNumber}
+              Phòng {row.roomNumber}
             </span>
           )}
         </div>
@@ -146,7 +146,7 @@ export default function ExpensesPage() {
     },
     {
       key: 'category',
-      header: 'Category',
+      header: 'Danh mục',
       render: (row) => (
         <span className='inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium'>
           {row.category}
@@ -155,7 +155,7 @@ export default function ExpensesPage() {
     },
     {
       key: 'description',
-      header: 'Description',
+      header: 'Mô tả',
       render: (row) => (
         <span className='text-sm text-muted-foreground line-clamp-1 max-w-[200px]'>
           {row.description}
@@ -164,14 +164,14 @@ export default function ExpensesPage() {
     },
     {
       key: 'amount',
-      header: 'Amount',
+      header: 'Số tiền',
       render: (row) => (
         <span className='font-semibold tabular-nums'>{formatCurrency(row.amount)}</span>
       ),
     },
     {
       key: 'recordedBy',
-      header: 'Recorded By',
+      header: 'Người ghi nhận',
       render: (row) => row.recorderName ?? '—',
     },
     {
@@ -187,7 +187,7 @@ export default function ExpensesPage() {
               setEditingExpense(row)
               setDialogOpen(true)
             }}
-            aria-label='Edit expense'
+            aria-label='Sửa chi phí'
           >
             <Pencil className='size-4' />
           </Button>
@@ -199,7 +199,7 @@ export default function ExpensesPage() {
               setDeletingExpense(row)
             }}
             disabled={deleteMutation.isPending}
-            aria-label='Delete expense'
+            aria-label='Xóa chi phí'
           >
             <Trash2 className='size-4 text-destructive' />
           </Button>
@@ -213,19 +213,19 @@ export default function ExpensesPage() {
   return (
     <PageTransition>
     <PageContainer
-      title='Expenses'
-      description='Track building operating costs and expenses.'
+      title='Chi phí'
+      description='Theo dõi chi phí vận hành tòa nhà.'
       actions={
         <div className='flex items-center gap-2'>
           {hasActiveFilters && (
             <Button variant='outline' onClick={clearFilters}>
-              Clear Filters
+              Xóa bộ lọc
             </Button>
           )}
           {canCreateExpense && (
             <Button onClick={() => { setEditingExpense(null); setDialogOpen(true) }}>
               <Plus className='size-4' />
-              Add Expense
+              Thêm chi phí
             </Button>
           )}
         </div>
@@ -234,13 +234,13 @@ export default function ExpensesPage() {
       {/* Filters */}
       <div className='flex flex-wrap items-end gap-4'>
         <div className='space-y-1.5'>
-          <Label htmlFor='exp-building'>Building</Label>
+          <Label htmlFor='exp-building'>Tòa nhà</Label>
           <Select
             id='exp-building'
             value={selectedBuildingId}
             onChange={(e) => { setSelectedBuildingId(e.target.value); setPage(1) }}
           >
-            <option value=''>All Buildings</option>
+            <option value=''>Tất cả tòa nhà</option>
             {buildings.map((b) => (
               <option key={b.id} value={b.id}>{b.name}</option>
             ))}
@@ -248,13 +248,13 @@ export default function ExpensesPage() {
         </div>
 
         <div className='space-y-1.5'>
-          <Label htmlFor='exp-category'>Category</Label>
+          <Label htmlFor='exp-category'>Danh mục</Label>
           <Select
             id='exp-category'
             value={categoryFilter}
             onChange={(e) => { setCategoryFilter(e.target.value); setPage(1) }}
           >
-            <option value=''>All Categories</option>
+            <option value=''>Tất cả danh mục</option>
             {EXPENSE_CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
@@ -262,7 +262,7 @@ export default function ExpensesPage() {
         </div>
 
         <div className='space-y-1.5'>
-          <Label htmlFor='exp-from'>From</Label>
+          <Label htmlFor='exp-from'>Từ</Label>
           <Input
             id='exp-from'
             type='date'
@@ -273,7 +273,7 @@ export default function ExpensesPage() {
         </div>
 
         <div className='space-y-1.5'>
-          <Label htmlFor='exp-to'>To</Label>
+          <Label htmlFor='exp-to'>Đến</Label>
           <Input
             id='exp-to'
             type='date'
@@ -287,7 +287,7 @@ export default function ExpensesPage() {
       {hasInvalidDateRange && (
         <Card className='mt-4 border-warning/30 bg-warning/5'>
           <CardContent className='flex flex-wrap items-center justify-between gap-3 py-4 text-sm text-warning'>
-            <span>The date range is invalid. “From” must be on or before “To”.</span>
+            <span>Khoảng thời gian không hợp lệ. Ngày "Từ" phải trước hoặc bằng ngày "Đến".</span>
             <Button
               variant='outline'
               size='sm'
@@ -297,7 +297,7 @@ export default function ExpensesPage() {
                 setPage(1)
               }}
             >
-              Reset Dates
+              Đặt lại ngày
             </Button>
           </CardContent>
         </Card>
@@ -306,9 +306,9 @@ export default function ExpensesPage() {
       {!hasInvalidDateRange && buildings.length === 0 && !isLoading && !error && (
         <EmptyState
           icon={<Receipt className='size-8' />}
-          title='No buildings to assign expenses to'
-          description='Expenses only make sense after at least one building exists. Create a building first, then record costs against it.'
-          actionLabel='Go to Buildings'
+          title='Chưa có tòa nhà để gán chi phí'
+          description='Chi phí chỉ có ý nghĩa khi đã có ít nhất một tòa nhà. Hãy tạo tòa nhà trước, sau đó ghi nhận chi phí.'
+          actionLabel='Đến trang Tòa nhà'
           onAction={() => router.push('/buildings')}
         />
       )}
@@ -318,11 +318,11 @@ export default function ExpensesPage() {
         <Card className='mt-4'>
           <CardContent className='flex items-center justify-between py-4'>
             <span className='text-sm text-muted-foreground'>
-              Showing {expenses.length} expense(s)
-              {pagination && ` of ${pagination.totalItems}`}
+              Hiển thị {expenses.length} chi phí
+              {pagination && ` trong tổng số ${pagination.totalItems}`}
             </span>
             <span className='text-lg font-bold tabular-nums'>
-              Filtered Total: {formatCurrency(expenseSummary.totalAmount)}
+              Tổng theo bộ lọc: {formatCurrency(expenseSummary.totalAmount)}
             </span>
           </CardContent>
         </Card>
@@ -341,13 +341,13 @@ export default function ExpensesPage() {
       {error && !hasInvalidDateRange && (
         <Card className='mt-4 border-destructive'>
           <CardContent className='py-4 text-center'>
-            <p className='text-sm text-destructive'>Failed to load expenses. {(error as Error).message}</p>
+            <p className='text-sm text-destructive'>Không thể tải chi phí. {(error as Error).message}</p>
             <Button
               variant='outline'
               className='mt-3'
               onClick={() => queryClient.invalidateQueries({ queryKey: expenseKeys.all })}
             >
-              Retry
+              Thử lại
             </Button>
           </CardContent>
         </Card>
@@ -357,13 +357,13 @@ export default function ExpensesPage() {
       {!isLoading && !error && !hasInvalidDateRange && buildings.length > 0 && expenses.length === 0 && (
         <EmptyState
           icon={<Receipt className='size-8' />}
-          title='No expenses found'
+          title='Không tìm thấy chi phí'
           description={
             hasActiveFilters
-              ? 'No expenses match your filters. Try adjusting them.'
-              : 'Start tracking expenses by clicking "Add Expense" above.'
+              ? 'Không có chi phí phù hợp với bộ lọc. Hãy thử điều chỉnh.'
+              : 'Bắt đầu theo dõi chi phí bằng cách nhấn "Thêm chi phí" phía trên.'
           }
-          actionLabel={hasActiveFilters ? 'Clear Filters' : undefined}
+          actionLabel={hasActiveFilters ? 'Xóa bộ lọc' : undefined}
           onAction={hasActiveFilters ? clearFilters : undefined}
         />
       )}
@@ -402,13 +402,13 @@ export default function ExpensesPage() {
       <ConfirmDialog
         open={!!deletingExpense}
         onOpenChange={(open) => { if (!open) setDeletingExpense(null) }}
-        title='Delete Expense'
+        title='Xóa chi phí'
         description={
           deletingExpense
-            ? `Delete this ${deletingExpense.category} expense (${formatCurrency(deletingExpense.amount)})? This cannot be undone.`
+            ? `Xóa chi phí ${deletingExpense.category} (${formatCurrency(deletingExpense.amount)})? Thao tác này không thể hoàn tác.`
             : ''
         }
-        confirmLabel='Delete'
+        confirmLabel='Xóa'
         variant='destructive'
         loading={deleteMutation.isPending}
         onConfirm={() => {
