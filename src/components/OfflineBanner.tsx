@@ -17,7 +17,7 @@ export function OfflineBanner() {
         <motion.div
           role='alert'
           aria-live='assertive'
-          className='fixed bottom-0 inset-x-0 z-[9999] flex items-center justify-center gap-2 bg-amber-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg'
+          className='fixed bottom-0 inset-x-0 z-[9999] flex items-center justify-center gap-2 bg-warning px-4 py-2.5 text-sm font-medium text-warning-foreground shadow-lg'
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}

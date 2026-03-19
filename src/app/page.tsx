@@ -49,8 +49,8 @@ export default function HomePage() {
     return (
       <div className='flex h-screen items-center justify-center bg-background'>
         <div className='flex flex-col items-center gap-4'>
-          <div className='size-12 rounded-full border-4 border-primary border-t-transparent animate-spin' />
-          <p className='text-sm text-muted-foreground animate-pulse'>Loading ElysStay…</p>
+          <div className='size-12 rounded-full border-4 border-primary border-t-transparent animate-spin motion-reduce:animate-none' />
+          <p className='text-sm text-muted-foreground animate-pulse motion-reduce:animate-none'>Loading ElysStay…</p>
         </div>
       </div>
     )
@@ -65,7 +65,7 @@ export default function HomePage() {
         <div
           className='absolute inset-0 -z-10'
           style={{
-            background: 'linear-gradient(135deg, var(--primary) 0%, oklch(0.40 0.15 290) 50%, oklch(0.55 0.20 230) 100%)',
+            background: 'linear-gradient(135deg, var(--primary) 0%, oklch(0.40 0.17 260) 50%, oklch(0.50 0.18 250) 100%)',
           }}
         />
         {/* Subtle pattern overlay */}
@@ -103,15 +103,17 @@ export default function HomePage() {
             {/* CTA */}
             <div className='mt-10 flex flex-col sm:flex-row items-center justify-center gap-4'>
               <button
+                type='button'
                 onClick={login}
-                className='group relative inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 cursor-pointer'
+                className='group relative inline-flex items-center gap-2 rounded-md bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-lg transition-colors duration-150 hover:shadow-xl cursor-pointer'
               >
                 Get Started
-                <ChevronRight className='size-4 transition-transform group-hover:translate-x-0.5' />
+                <ChevronRight className='size-4 transition-transform motion-reduce:transition-none group-hover:translate-x-0.5' />
               </button>
               <button
+                type='button'
                 onClick={login}
-                className='inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/10 px-8 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 cursor-pointer'
+                className='inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/10 px-8 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-colors duration-150 hover:bg-white/20 cursor-pointer'
               >
                 Sign In
               </button>
@@ -143,10 +145,10 @@ export default function HomePage() {
           {FEATURES.map((feature, i) => (
             <div
               key={i}
-              className='group rounded-2xl border bg-card p-6 transition-all hover:-translate-y-1 hover:shadow-lg hover:border-primary/20'
+              className='group rounded-lg border bg-card p-6 transition-colors duration-150 hover:shadow-md hover:border-primary/20'
               style={{ animationDelay: `${i * 100}ms` }}
             >
-              <div className='mb-4 inline-flex rounded-xl bg-primary/10 p-3 text-primary group-hover:bg-primary/15 transition-colors'>
+              <div className='mb-4 inline-flex rounded-lg bg-primary/10 p-3 text-primary group-hover:bg-primary/15 transition-colors'>
                 <feature.icon className='size-6' />
               </div>
               <h3 className='text-lg font-semibold mb-2'>{feature.title}</h3>

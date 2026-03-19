@@ -7,7 +7,7 @@
 
 // ─── Spring Physics ──────────────────────────────────────
 
-export const SPRING = { stiffness: 400, damping: 17, mass: 0.5 } as const
+export const SPRING = { stiffness: 400, damping: 25, mass: 0.4 } as const
 
 // ─── Stagger Configuration ──────────────────────────────
 
@@ -32,6 +32,6 @@ export const staggerContainer = {
 }
 
 export const staggerItem = {
-	hidden: { opacity: 0, y: 20 },
+	hidden: { opacity: 0, y: 8 },
 	visible: { opacity: 1, y: 0, transition: TRANSITION_SPRING },
 }

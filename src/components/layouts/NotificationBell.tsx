@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Bell, Check, CheckCheck, Loader2 } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
@@ -78,8 +79,15 @@ export function NotificationBell() {
     refetchInterval: 30_000, // poll every 30s
   })
 
+  // Separate query for unread count — not bounded by page size
+  const { data: unreadData } = useQuery({
+    queryKey: notificationKeys.list({ page: 1, pageSize: 1, isRead: false }),
+    queryFn: () => fetchNotifications({ page: 1, pageSize: 1, isRead: false }),
+    refetchInterval: 30_000,
+  })
+
   const notifications = data?.data ?? []
-  const unreadCount = notifications.filter((n) => !n.isRead).length
+  const unreadCount = unreadData?.pagination?.totalItems ?? notifications.filter((n) => !n.isRead).length
 
   // ─── Mutations ──────────────────────────────────────────
   const markReadMutation = useMutation({
@@ -148,7 +156,7 @@ export function NotificationBell() {
           ref={dropdownRef}
           role='dialog'
           aria-label='Notifications'
-          className='absolute right-0 top-full mt-2 w-80 rounded-xl border bg-popover shadow-lg overflow-hidden'
+          className='absolute right-0 top-full mt-2 w-80 rounded-lg border bg-popover shadow-lg overflow-hidden'
           style={{ zIndex: 50 }}
         >
           {/* Header */}
@@ -191,13 +199,13 @@ export function NotificationBell() {
           {/* Footer */}
           {notifications.length > 0 && (
             <div className='border-t px-4 py-2 text-center'>
-              <a
+              <Link
                 href='/notifications'
                 onClick={() => setOpen(false)}
                 className='text-xs font-medium text-primary hover:underline'
               >
                 View all notifications
-              </a>
+              </Link>
             </div>
           )}
         </div>

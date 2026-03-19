@@ -83,7 +83,7 @@ interface AnimatedCardProps {
 export function AnimatedCard({
   children,
   className,
-  hoverY = -4,
+  hoverY = 0,
 }: AnimatedCardProps) {
   const prefersReduced = useReducedMotion()
 
@@ -95,7 +95,7 @@ export function AnimatedCard({
     <motion.div
       className={className}
       variants={staggerItem}
-      whileHover={{ y: hoverY, transition: { duration: 0.2 } }}
+      whileHover={hoverY !== 0 ? { y: hoverY, transition: { duration: 0.15 } } : undefined}
     >
       {children}
     </motion.div>
@@ -119,9 +119,9 @@ export function PageTransition({ children, className }: PageTransitionProps) {
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.25, 0.8, 0.25, 1] }}
+      transition={{ duration: 0.2, ease: [0.25, 0.8, 0.25, 1] }}
     >
       {children}
     </motion.div>

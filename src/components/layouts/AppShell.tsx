@@ -190,11 +190,10 @@ export function AppShell({ children }: AppShellProps) {
       <aside
         role='navigation'
         aria-label='Main navigation'
-        aria-hidden={!mobileOpen ? 'true' : undefined}
         className={cn(
           'fixed top-0 left-0 h-full border-r bg-sidebar-bg transition-all duration-200 flex flex-col',
-          'md:relative md:translate-x-0 md:aria-[hidden=true]:block',
-          mobileOpen ? 'translate-x-0' : '-translate-x-full',
+          'md:relative md:translate-x-0',
+          mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
         )}
         style={{
           width: mobileOpen ? SIDEBAR.expandedWidth : sidebarWidth,
@@ -222,7 +221,7 @@ export function AppShell({ children }: AppShellProps) {
                   <Link
                     href={item.href}
                     className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
                       'hover:bg-accent hover:text-accent-foreground',
                       isActive && 'bg-primary/10 text-primary',
                       collapsed && !mobileOpen && 'justify-center px-0',

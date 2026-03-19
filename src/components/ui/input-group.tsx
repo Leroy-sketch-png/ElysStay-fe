@@ -9,11 +9,11 @@ function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
 		<div
 			role='group'
 			className={cn(
-				'group/input-group border-input relative flex w-full items-center rounded-md border shadow-xs transition-[color,box-shadow] outline-none',
+				'group/input-group border-input relative flex w-full items-center rounded-md border shadow-sm transition-[color,box-shadow] outline-none',
 				'h-9 min-w-0 has-[>textarea]:h-auto',
 				'has-[>[data-align=inline-start]]:[&>input]:pl-2 has-[>[data-align=inline-start]]:[&>textarea]:pl-2',
 				'has-[>[data-align=inline-end]]:[&>input]:pr-2 has-[>[data-align=inline-end]]:[&>textarea]:pr-2',
-				'has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot=input-group-control]:focus-visible]:ring-[3px]',
+				'has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-offset-2',
 				'has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:ring-destructive/20',
 				className,
 			)}

@@ -66,7 +66,7 @@ function TabsTrigger({ value: tabValue, className, ...props }: TabsTriggerProps)
       aria-selected={isActive}
       data-state={isActive ? 'active' : 'inactive'}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-background transition-all',
+        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         'disabled:pointer-events-none disabled:opacity-50',
         isActive && 'bg-background text-foreground shadow-sm',
@@ -93,7 +93,7 @@ function TabsContent({ value: tabValue, className, ...props }: TabsContentProps)
     <div
       role='tabpanel'
       data-state={value === tabValue ? 'active' : 'inactive'}
-      className={cn('mt-4 ring-offset-background focus-visible:outline-none', className)}
+      className={cn('mt-4 focus-visible:outline-none', className)}
       {...props}
     />
   )

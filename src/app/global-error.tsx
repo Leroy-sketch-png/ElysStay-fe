@@ -56,9 +56,10 @@ export default function GlobalError({
 
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <button
+              type='button'
               onClick={reset}
               style={{
-                padding: '0.625rem 1.25rem', borderRadius: 8,
+                padding: '0.625rem 1.25rem', borderRadius: 6,
                 backgroundColor: '#6366f1', color: 'white', fontWeight: 600,
                 fontSize: '0.875rem', border: 'none', cursor: 'pointer',
               }}
@@ -68,7 +69,7 @@ export default function GlobalError({
             <a
               href='/dashboard'
               style={{
-                padding: '0.625rem 1.25rem', borderRadius: 8,
+                padding: '0.625rem 1.25rem', borderRadius: 6,
                 backgroundColor: 'transparent', color: '#e4e4e7', fontWeight: 600,
                 fontSize: '0.875rem', border: '1px solid #3f3f46', textDecoration: 'none',
               }}

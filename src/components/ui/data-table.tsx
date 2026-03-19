@@ -7,7 +7,7 @@ import { Skeleton } from './skeleton'
 
 function Table({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className='relative w-full overflow-auto rounded-xl border'>
+    <div className='relative w-full overflow-auto rounded-lg border'>
       <table className={cn('w-full caption-bottom text-sm', className)} {...props} />
     </div>
   )
@@ -37,7 +37,7 @@ function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
   return (
     <th
       className={cn(
-        'h-10 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0',
+        'h-10 px-4 text-left align-middle text-xs font-medium uppercase tracking-wider text-muted-foreground bg-muted [&:has([role=checkbox])]:pr-0',
         className,
       )}
       {...props}
@@ -118,7 +118,7 @@ function DataTable<T>({
 
   if (data.length === 0) {
     return (
-      <div className='rounded-xl border bg-card'>
+      <div className='rounded-lg border bg-card'>
         <Table className={className}>
           <TableHeader>
             <TableRow>
@@ -155,6 +155,9 @@ function DataTable<T>({
             key={rowKey(row)}
             className={onRowClick ? 'cursor-pointer' : undefined}
             onClick={() => onRowClick?.(row)}
+            tabIndex={onRowClick ? 0 : undefined}
+            role={onRowClick ? 'button' : undefined}
+            onKeyDown={onRowClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onRowClick(row) } } : undefined}
           >
             {columns.map((col) => (
               <TableCell key={col.key} className={col.className}>
