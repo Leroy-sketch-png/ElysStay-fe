@@ -261,7 +261,7 @@ export function AppShell({ children }: AppShellProps) {
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileOpen(true)}
-            className='md:hidden p-2 text-muted-foreground hover:text-foreground cursor-pointer'
+            className='md:hidden p-2.5 -ml-1 text-muted-foreground hover:text-foreground cursor-pointer'
             aria-label='Mở menu điều hướng'
             aria-expanded={mobileOpen}
           >
@@ -272,13 +272,13 @@ export function AppShell({ children }: AppShellProps) {
           <HeaderBreadcrumbs pathname={pathname} />
 
           {/* Right-side actions */}
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-1 sm:gap-2'>
             {/* Theme toggle */}
             <button
               onClick={() =>
                 setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'dark' : 'light')
               }
-              className='p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer'
+              className='p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer'
               title={`Chuyển sang chế độ ${theme === 'dark' ? 'sáng' : 'tối'}`}
             >
               {theme === 'dark' ? (
@@ -293,21 +293,21 @@ export function AppShell({ children }: AppShellProps) {
             <NotificationBell />
 
             {/* User info + actions */}
-            <div className='flex items-center gap-2'>
+            <div className='flex items-center gap-1 sm:gap-2'>
               <div className='hidden sm:block text-right'>
                 <p className='text-sm font-medium leading-none'>{user?.fullName}</p>
                 <p className='text-xs text-muted-foreground'>{user?.roles[0]}</p>
               </div>
               <Link
                 href='/settings'
-                className='p-2 text-muted-foreground hover:text-foreground transition-colors'
+                className='p-2.5 text-muted-foreground hover:text-foreground transition-colors'
                 title='Cài đặt'
               >
                 <Settings className='size-5' />
               </Link>
               <button
                 onClick={logout}
-                className='p-2 text-muted-foreground hover:text-destructive transition-colors cursor-pointer'
+                className='p-2.5 text-muted-foreground hover:text-destructive transition-colors cursor-pointer'
                 title='Đăng xuất'
               >
                 <LogOut className='size-5' />
