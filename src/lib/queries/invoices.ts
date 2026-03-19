@@ -1,4 +1,4 @@
-import { api, toQueryString } from '@/lib/api-client'
+import { api, toQueryString, requireData } from '@/lib/api-client'
 import type {
   InvoiceDto,
   InvoiceDetailDto,
@@ -18,6 +18,7 @@ export const invoiceKeys = {
 
 export interface InvoiceFilters {
   buildingId?: string
+  contractId?: string
   billingYear?: number
   billingMonth?: number
   status?: string
@@ -31,6 +32,7 @@ export interface InvoiceFilters {
 export async function fetchInvoices(filters: InvoiceFilters = {}) {
   const qs = toQueryString({
     buildingId: filters.buildingId,
+    contractId: filters.contractId,
     billingYear: filters.billingYear,
     billingMonth: filters.billingMonth,
     status: filters.status,
@@ -43,19 +45,19 @@ export async function fetchInvoices(filters: InvoiceFilters = {}) {
 
 export async function fetchInvoiceById(id: string) {
   const response = await api.get<InvoiceDetailDto>(`/invoices/${id}`)
-  return response.data!
+  return requireData(response)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function generateInvoices(data: GenerateInvoicesRequest) {
   const response = await api.post<InvoiceGenerationResult>('/invoices/generate', data)
-  return response.data!
+  return requireData(response)
 }
 
 export async function updateInvoice(id: string, data: UpdateInvoiceRequest) {
   const response = await api.put<InvoiceDto>(`/invoices/${id}`, data)
-  return response.data!
+  return requireData(response)
 }
 
 export async function sendInvoice(id: string) {
@@ -64,7 +66,7 @@ export async function sendInvoice(id: string) {
 
 export async function batchSendInvoices(data: BatchSendInvoicesRequest) {
   const response = await api.post<{ sentCount: number }>('/invoices/send-batch', data)
-  return response.data!
+  return requireData(response)
 }
 
 export async function voidInvoice(id: string) {

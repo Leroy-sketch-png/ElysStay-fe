@@ -1,4 +1,4 @@
-import { api, toQueryString, type PagedResponse } from '@/lib/api-client'
+import { api, toQueryString, requireData, type PagedResponse } from '@/lib/api-client'
 import type {
   UserDto,
   CreateTenantRequest,
@@ -34,14 +34,14 @@ export async function fetchTenants(filters: TenantFilters = {}): Promise<PagedRe
 
 export async function fetchTenantById(id: string): Promise<UserDto> {
   const res = await api.get<UserDto>(`/users/${id}`)
-  return res.data!
+  return requireData(res)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function createTenant(data: CreateTenantRequest): Promise<UserDto> {
   const res = await api.post<UserDto>('/users/tenants', data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function changeTenantStatus(id: string, data: ChangeUserStatusRequest): Promise<void> {

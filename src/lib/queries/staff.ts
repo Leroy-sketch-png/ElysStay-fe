@@ -1,4 +1,4 @@
-import { api, toQueryString, type ApiResponse, type PagedResponse } from '@/lib/api-client'
+import { api, toQueryString, requireData, type PagedResponse } from '@/lib/api-client'
 import type {
   StaffAssignmentDto,
   AssignStaffRequest,
@@ -36,14 +36,14 @@ export async function fetchStaffList(filters: StaffFilters = {}) {
 
 export async function fetchBuildingStaff(buildingId: string) {
   const res = await api.get<StaffAssignmentDto[]>(`/buildings/${buildingId}/staff`)
-  return res.data!
+  return requireData(res)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function assignStaff(buildingId: string, data: AssignStaffRequest) {
   const res = await api.post<StaffAssignmentDto>(`/buildings/${buildingId}/staff`, data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function unassignStaff(buildingId: string, staffId: string) {
@@ -54,7 +54,7 @@ export async function unassignStaff(buildingId: string, staffId: string) {
 
 export async function createStaffUser(data: CreateStaffRequest) {
   const res = await api.post<UserDto>('/users/staff', data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function changeUserStatus(userId: string, data: ChangeUserStatusRequest) {

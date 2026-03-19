@@ -1,4 +1,4 @@
-import { api, toQueryString } from '@/lib/api-client'
+import { api, toQueryString, requireData } from '@/lib/api-client'
 import type { DashboardStatsDto, PnlReportDto } from '@/types/api'
 
 // ─── Query Keys ─────────────────────────────────────────
@@ -16,7 +16,7 @@ export const reportKeys = {
 export async function fetchDashboardStats(buildingId?: string) {
   const qs = buildingId ? toQueryString({ buildingId }) : ''
   const res = await api.get<DashboardStatsDto>(`/reports/dashboard-stats${qs}`)
-  return res.data!
+  return requireData(res)
 }
 
 export async function fetchPnlReport(buildingId?: string, year?: number) {
@@ -25,5 +25,5 @@ export async function fetchPnlReport(buildingId?: string, year?: number) {
     year: year ?? new Date().getFullYear(),
   })
   const res = await api.get<PnlReportDto>(`/reports/pnl${qs}`)
-  return res.data!
+  return requireData(res)
 }

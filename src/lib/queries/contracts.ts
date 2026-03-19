@@ -1,4 +1,4 @@
-import { api, toQueryString, type PagedResponse } from '@/lib/api-client'
+import { api, toQueryString, requireData, type PagedResponse } from '@/lib/api-client'
 import type {
   ContractDto,
   ContractDetailDto,
@@ -48,21 +48,21 @@ export async function fetchContracts(
 
 export async function fetchContractById(id: string): Promise<ContractDetailDto> {
   const res = await api.get<ContractDetailDto>(`/contracts/${id}`)
-  return res.data!
+  return requireData(res)
 }
 
 export async function fetchContractTenants(
   contractId: string,
 ): Promise<ContractTenantDto[]> {
   const res = await api.get<ContractTenantDto[]>(`/contracts/${contractId}/tenants`)
-  return res.data!
+  return requireData(res)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function createContract(data: CreateContractRequest): Promise<ContractDto> {
   const res = await api.post<ContractDto>('/contracts', data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function updateContract(
@@ -70,7 +70,7 @@ export async function updateContract(
   data: UpdateContractRequest,
 ): Promise<ContractDto> {
   const res = await api.put<ContractDto>(`/contracts/${id}`, data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function terminateContract(
@@ -78,15 +78,15 @@ export async function terminateContract(
   data: TerminateContractRequest,
 ): Promise<ContractDto> {
   const res = await api.patch<ContractDto>(`/contracts/${id}/terminate`, data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function renewContract(
   id: string,
   data: RenewContractRequest,
 ): Promise<ContractDto> {
-  const res = await api.post<ContractDto>(`/contracts/${id}/renew`, data)
-  return res.data!
+  const res = await api.patch<ContractDto>(`/contracts/${id}/renew`, data)
+  return requireData(res)
 }
 
 // ─── Roommate Mutations ─────────────────────────────────
@@ -99,7 +99,7 @@ export async function addContractTenant(
     `/contracts/${contractId}/tenants`,
     data,
   )
-  return res.data!
+  return requireData(res)
 }
 
 export async function removeContractTenant(
