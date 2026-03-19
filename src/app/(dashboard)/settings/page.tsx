@@ -19,6 +19,8 @@ import { useAuth } from '@/providers/AuthProvider'
 
 // ─── Schemas ────────────────────────────────────────────
 
+const ROLE_LABELS: Record<string, string> = { Owner: 'Chủ nhà', Staff: 'Nhân viên', Tenant: 'Khách thuê' }
+
 const profileSchema = z.object({
   fullName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự').max(100),
   phone: z.string().max(20).regex(/^[+\d][\d\s\-().]*$/, 'Số điện thoại không hợp lệ').optional().or(z.literal('')),
@@ -145,10 +147,10 @@ export default function SettingsPage() {
                     {profileMutation.isPending ? (
                       <>
                         <Loader2 className='size-4 animate-spin' />
-                        Saving…
+                        Đang lưu…
                       </>
                     ) : (
-                      'Save Changes'
+                      'Lưu thay đổi'
                     )}
                   </Button>
                 </div>
@@ -206,12 +208,12 @@ export default function SettingsPage() {
             <div className='grid gap-3 text-sm'>
               <div className='flex justify-between py-2 border-b'>
                 <span className='text-muted-foreground'>Vai trò</span>
-                <span className='font-medium'>{user?.roles.join(', ') || '—'}</span>
+                <span className='font-medium'>{user?.roles.map(r => ROLE_LABELS[r] ?? r).join(', ') || '—'}</span>
               </div>
               <div className='flex justify-between py-2'>
                 <span className='text-muted-foreground'>Trạng thái tài khoản</span>
                 <span className={`font-medium ${profile?.status === 'Active' ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
-                  {profile?.status ?? '—'}
+                  {profile?.status === 'Active' ? 'Hoạt động' : profile?.status === 'Deactivated' ? 'Vô hiệu hóa' : '—'}
                 </span>
               </div>
             </div>

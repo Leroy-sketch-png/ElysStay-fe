@@ -34,15 +34,15 @@ function Pagination({
     <div className={cn('flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between', className)}>
       <div className='flex items-center gap-4'>
         <p className='text-sm text-muted-foreground'>
-          Showing <span className='font-medium text-foreground'>{start}</span>
-          {' '}to{' '}
+          Hiển thị <span className='font-medium text-foreground'>{start}</span>
+          {' '}đến{' '}
           <span className='font-medium text-foreground'>{end}</span>
-          {' '}of{' '}
-          <span className='font-medium text-foreground'>{totalItems}</span> results
+          {' '}trong{' '}
+          <span className='font-medium text-foreground'>{totalItems}</span> kết quả
         </p>
         {onPageSizeChange && (
           <div className='flex items-center gap-2'>
-            <span className='text-sm text-muted-foreground'>per page</span>
+            <span className='text-sm text-muted-foreground'>mỗi trang</span>
             <select
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}

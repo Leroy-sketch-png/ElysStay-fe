@@ -51,6 +51,7 @@ export interface OwnerDashboardDto {
   overdueInvoiceCount: number
   overdueAmount: number
   monthlyRevenue: number
+  pendingMeterReadings: number
 }
 
 export interface StaffDashboardDto {

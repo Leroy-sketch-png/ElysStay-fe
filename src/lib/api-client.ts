@@ -128,7 +128,7 @@ async function apiFetch<T>(
       headers,
     })
   } catch {
-    throw new ApiError(0, 'NETWORK_ERROR', undefined, undefined, 'Network error — check your connection and try again.')
+    throw new ApiError(0, 'NETWORK_ERROR', undefined, undefined, 'Lỗi mạng — vui lòng kiểm tra kết nối và thử lại.')
   }
 
   // 204 No Content — callers expecting void or undefined handle this safely
@@ -140,7 +140,7 @@ async function apiFetch<T>(
   try {
     json = await response.json()
   } catch {
-    throw new ApiError(response.status, 'PARSE_ERROR', undefined, undefined, 'Unexpected response from the server.')
+    throw new ApiError(response.status, 'PARSE_ERROR', undefined, undefined, 'Phản hồi không mong đợi từ máy chủ.')
   }
 
   if (!response.ok) {
@@ -156,7 +156,7 @@ async function apiFetch<T>(
       json.errorCode as string | undefined,
       json.errors as Record<string, string[]> | undefined,
       retryAfterMs,
-      (json.message as string | undefined) ?? `Request failed (${response.status})`,
+      (json.message as string | undefined) ?? `Yêu cầu thất bại (${response.status})`,
     )
   }
 
@@ -168,7 +168,7 @@ async function apiFetch<T>(
       undefined,
       typeof json.message === 'string'
         ? json.message
-        : 'Server reported the request as unsuccessful.',
+        : 'Máy chủ báo yêu cầu không thành công.',
     )
   }
 
@@ -222,7 +222,7 @@ export function requireData<T>(res: ApiResponse<T>): T {
       'EMPTY_RESPONSE',
       undefined,
       undefined,
-      res.message || 'Server returned success but no data.',
+      res.message || 'Máy chủ trả về thành công nhưng không có dữ liệu.',
     )
   }
   return res.data

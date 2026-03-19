@@ -170,6 +170,17 @@ export function ContractFormDialog({ open, onOpenChange, fromReservation }: Cont
     }
   }, [watchedRoomId, availableRooms, setValue])
 
+  // Auto-fill moveInDate from startDate (most Vietnamese leases: move-in = start)
+  const watchedStartDate = watch('startDate')
+  useEffect(() => {
+    if (watchedStartDate) {
+      const currentMoveIn = watch('moveInDate')
+      if (!currentMoveIn) {
+        setValue('moveInDate', watchedStartDate)
+      }
+    }
+  }, [watchedStartDate, setValue, watch])
+
   // ─── Mutation ─────────────────────────────────────────
   const createMutation = useMutation({
     mutationFn: (data: CreateContractRequest) => createContract(data),

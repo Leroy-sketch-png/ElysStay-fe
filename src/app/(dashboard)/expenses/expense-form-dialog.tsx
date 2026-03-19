@@ -246,7 +246,7 @@ export function ExpenseFormDialog({
               >
                 <option value=''>Chọn danh mục…</option>
                 {EXPENSE_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                  <option key={cat.value} value={cat.value}>{cat.label}</option>
                 ))}
               </Select>
               {errors.category && (

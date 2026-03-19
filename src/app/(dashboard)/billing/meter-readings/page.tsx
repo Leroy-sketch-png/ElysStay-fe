@@ -144,7 +144,7 @@ export default function MeterReadingsPage() {
         const [roomId, serviceId] = key.split('-')
         const previous = getPreviousValue(roomId, serviceId)
         if (value < previous) {
-          throw new Error(`Current reading (${value}) is less than previous reading (${previous}). Please check your entries.`)
+          throw new Error(`Chỉ số hiện tại (${value.toLocaleString('vi-VN')}) nhỏ hơn chỉ số trước (${previous.toLocaleString('vi-VN')}). Vui lòng kiểm tra lại.`)
         }
         readings.push({
           roomId,
@@ -154,7 +154,7 @@ export default function MeterReadingsPage() {
       }
 
       if (readings.length === 0) {
-        throw new Error('No readings were changed.')
+        throw new Error('Không có chỉ số nào được thay đổi.')
       }
 
       return bulkUpsertMeterReadings({

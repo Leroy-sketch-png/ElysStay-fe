@@ -74,13 +74,27 @@ export function canManageReservation(status: ReservationStatus) {
 
 // ─── Expense Categories ──────────────────────────────────
 // Must match backend AllowedCategories in ExpenseValidators.cs
+// `value` is what the API expects; `label` is what Vietnamese users see.
 
-export const EXPENSE_CATEGORIES = [
-  'Sửa chữa', 'Bảo trì', 'Tiện ích', 'Vệ sinh', 'Bảo hiểm',
-  'Thuế', 'Quản lý', 'Thiết bị', 'Vật tư', 'Khác',
+export const EXPENSE_CATEGORIES: readonly { value: string; label: string }[] = [
+  { value: 'Repair', label: 'Sửa chữa' },
+  { value: 'Maintenance', label: 'Bảo trì' },
+  { value: 'Utilities', label: 'Tiện ích' },
+  { value: 'Cleaning', label: 'Vệ sinh' },
+  { value: 'Insurance', label: 'Bảo hiểm' },
+  { value: 'Tax', label: 'Thuế' },
+  { value: 'Management', label: 'Quản lý' },
+  { value: 'Equipment', label: 'Thiết bị' },
+  { value: 'Supplies', label: 'Vật tư' },
+  { value: 'Other', label: 'Khác' },
 ] as const
 
-export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number]
+export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number]['value']
+
+/** Get Vietnamese display label for an expense category API value */
+export function getExpenseCategoryLabel(value: string): string {
+  return EXPENSE_CATEGORIES.find((c) => c.value === value)?.label ?? value
+}
 
 // ─── Dropdown Page Size ──────────────────────────────────
 // Used for "fetch all" dropdown queries (buildings, staff, rooms).

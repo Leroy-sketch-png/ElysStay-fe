@@ -169,6 +169,16 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
           href='/billing/invoices'
         />
       </AnimatedCard>
+      <AnimatedCard>
+        <StatCard
+          label='Ghi chỉ số chờ'
+          value={data.pendingMeterReadings}
+          icon={<Gauge className='size-5' />}
+          trend={data.pendingMeterReadings > 0 ? 'Phòng chưa ghi tháng này' : undefined}
+          variant={data.pendingMeterReadings > 0 ? 'warning' : 'success'}
+          href='/billing/meter-readings'
+        />
+      </AnimatedCard>
     </StaggerContainer>
   )
 }

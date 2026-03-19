@@ -43,7 +43,7 @@ function roomSchema(maxFloors: number) {
     ),
     maxOccupants: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-      z.number().int().min(1, 'Ít nhất 1 người').max(20),
+      z.number().int().min(1, 'Ít nhất 1 người').max(20, 'Tối đa 20 người'),
     ),
     description: z.string().trim().max(2000).optional().or(z.literal('')),
   })

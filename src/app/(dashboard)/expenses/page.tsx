@@ -25,7 +25,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { toast } from '@/components/ui/toaster'
 import { reportKeys } from '@/lib/queries/reports'
 import { userKeys } from '@/lib/queries/users'
-import { EXPENSE_CATEGORIES, DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
+import { EXPENSE_CATEGORIES, DROPDOWN_PAGE_SIZE, getExpenseCategoryLabel } from '@/lib/domain-constants'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   expenseKeys,
@@ -149,7 +149,7 @@ export default function ExpensesPage() {
       header: 'Danh mục',
       render: (row) => (
         <span className='inline-flex items-center rounded-md bg-muted px-2 py-1 text-xs font-medium'>
-          {row.category}
+          {getExpenseCategoryLabel(row.category)}
         </span>
       ),
     },
@@ -256,7 +256,7 @@ export default function ExpensesPage() {
           >
             <option value=''>Tất cả danh mục</option>
             {EXPENSE_CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat.value} value={cat.value}>{cat.label}</option>
             ))}
           </Select>
         </div>
