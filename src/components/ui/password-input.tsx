@@ -30,7 +30,7 @@ export function PasswordInput({
 				type='button'
 				onClick={() => setShowPassword(!showPassword)}
 				className='absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground transition-colors cursor-pointer'
-				aria-label={showPassword ? 'Hide password' : 'Show password'}
+				aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
 			>
 				{showPassword ? <EyeOff className='size-4' /> : <Eye className='size-4' />}
 			</button>

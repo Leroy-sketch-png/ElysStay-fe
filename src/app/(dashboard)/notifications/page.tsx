@@ -146,7 +146,7 @@ function NotificationRow({
           {!notification.isRead && (
             <button
               type='button'
-              aria-label={`Mark ${notification.title} as read`}
+              aria-label={`Đánh dấu đã đọc: ${notification.title}`}
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()

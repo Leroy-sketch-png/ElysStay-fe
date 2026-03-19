@@ -171,8 +171,8 @@ export default function PnlReportPage() {
     if (months.length === 0) return
 
     const buildingLabel = selectedBuildingId
-      ? buildings.find((b) => b.id === selectedBuildingId)?.name ?? 'Unknown'
-      : 'All Buildings'
+      ? buildings.find((b) => b.id === selectedBuildingId)?.name ?? 'Không xác định'
+      : 'Tất cả tòa nhà'
 
     // Escape CSV values: wrap in quotes if contains comma, quote, or newline
     const escapeCsv = (val: string) => {
@@ -185,21 +185,21 @@ export default function PnlReportPage() {
     const header = ['Tháng', 'Doanh thu', 'Cọc vào', 'Cọc ra', 'Chi phí', 'Thuần vận hành', 'Dòng tiền ròng']
     const rows = months.map((m) => [
       escapeCsv(MONTH_FULL[m.month - 1]),
-      m.operationalIncome.toFixed(2),
-      m.depositsReceived.toFixed(2),
-      m.depositsRefunded.toFixed(2),
-      m.expenses.toFixed(2),
-      m.netOperational.toFixed(2),
-      m.netCashFlow.toFixed(2),
+      m.operationalIncome.toFixed(0),
+      m.depositsReceived.toFixed(0),
+      m.depositsRefunded.toFixed(0),
+      m.expenses.toFixed(0),
+      m.netOperational.toFixed(0),
+      m.netCashFlow.toFixed(0),
     ])
     rows.push([
       'Tổng',
-      totals.operationalIncome.toFixed(2),
-      totals.depositsReceived.toFixed(2),
-      totals.depositsRefunded.toFixed(2),
-      totals.expenses.toFixed(2),
-      totals.netOperational.toFixed(2),
-      totals.netCashFlow.toFixed(2),
+      totals.operationalIncome.toFixed(0),
+      totals.depositsReceived.toFixed(0),
+      totals.depositsRefunded.toFixed(0),
+      totals.expenses.toFixed(0),
+      totals.netOperational.toFixed(0),
+      totals.netCashFlow.toFixed(0),
     ])
 
     const csvContent = [header.map(escapeCsv), ...rows].map((r) => r.join(',')).join('\n')

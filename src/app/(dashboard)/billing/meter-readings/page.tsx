@@ -391,7 +391,7 @@ export default function MeterReadingsPage() {
                             <div className='space-y-1'>
                               <div className='flex items-center gap-2'>
                                 <span className='text-xs text-muted-foreground w-12'>Trước:</span>
-                                <span className='text-xs'>{prevVal.toLocaleString()}</span>
+                                <span className='text-xs'>{prevVal.toLocaleString('vi-VN')}</span>
                               </div>
                               <Input
                                 type='number'
@@ -400,12 +400,12 @@ export default function MeterReadingsPage() {
                                 value={currVal}
                                 onChange={(e) => handleReadingChange(room.id, service.id, e.target.value)}
                                 className='w-28 h-8 text-sm'
-                                aria-label={`Current reading for ${room.roomNumber} ${service.name}`}
+                                aria-label={`Chỉ số hiện tại ${room.roomNumber} ${service.name}`}
                               />
                               <div className='flex items-center gap-2'>
                                 <span className='text-xs text-muted-foreground w-12'>Dùng:</span>
                                 <span className={`text-xs font-medium ${consumption < 0 ? 'text-destructive' : ''}`}>
-                                  {consumption.toLocaleString()} {service.unit}
+                                  {consumption.toLocaleString('vi-VN')} {service.unit}
                                 </span>
                               </div>
                             </div>

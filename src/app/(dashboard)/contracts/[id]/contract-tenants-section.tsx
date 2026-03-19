@@ -136,7 +136,7 @@ export function ContractTenantsSection({
                       className='text-destructive hover:text-destructive'
                       onClick={() => handleRemove(tenant)}
                       disabled={removeMutation.isPending}
-                      aria-label={`Remove ${tenant.tenantName}`}
+                      aria-label={`Xóa ${tenant.tenantName}`}
                     >
                       <UserMinus className='size-4' />
                     </Button>

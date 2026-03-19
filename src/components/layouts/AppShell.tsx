@@ -189,7 +189,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Sidebar */}
       <aside
         role='navigation'
-        aria-label='Main navigation'
+        aria-label='Thanh điều hướng chính'
         className={cn(
           'fixed top-0 left-0 h-full border-r bg-sidebar-bg transition-all duration-200 flex flex-col',
           'md:relative md:translate-x-0',

@@ -286,7 +286,7 @@ export default function InvoiceDetailPage() {
                       <span className='font-medium'>{item.description}</span>
                       {item.previousReading != null && item.currentReading != null && (
                         <div className='text-xs text-muted-foreground'>
-                          Chỉ số: {item.previousReading.toLocaleString()} → {item.currentReading.toLocaleString()}
+                          Chỉ số: {item.previousReading.toLocaleString('vi-VN')} → {item.currentReading.toLocaleString('vi-VN')}
                         </div>
                       )}
                     </div>

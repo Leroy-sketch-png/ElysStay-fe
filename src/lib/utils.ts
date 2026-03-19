@@ -41,7 +41,7 @@ export function formatCurrency(amount: number): string {
 export function formatNumber(num: number): string {
   if (num >= 1_000_000) return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M'
   if (num >= 1_000) return (num / 1_000).toFixed(1).replace(/\.0$/, '') + 'K'
-  return num.toLocaleString()
+  return num.toLocaleString('vi-VN')
 }
 
 /**
@@ -78,13 +78,13 @@ export function timeAgo(dateStr: string): string {
   const now = Date.now()
   const then = new Date(dateStr).getTime()
   const seconds = Math.floor((now - then) / 1000)
-  if (seconds < 60) return 'just now'
+  if (seconds < 60) return 'vừa xong'
   const minutes = Math.floor(seconds / 60)
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 60) return `${minutes} phút trước`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return `${hours} giờ trước`
   const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
+  if (days < 7) return `${days} ngày trước`
   return new Intl.DateTimeFormat('vi-VN', {
     day: '2-digit',
     month: '2-digit',

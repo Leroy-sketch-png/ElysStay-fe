@@ -65,7 +65,7 @@ function Pagination({
           className='size-8'
           onClick={() => onPageChange(1)}
           disabled={page <= 1}
-          aria-label='First page'
+          aria-label='Trang đầu'
         >
           <ChevronsLeft className='size-4' />
         </Button>
@@ -75,7 +75,7 @@ function Pagination({
           className='size-8'
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          aria-label='Previous page'
+          aria-label='Trang trước'
         >
           <ChevronLeft className='size-4' />
         </Button>
@@ -104,7 +104,7 @@ function Pagination({
           className='size-8'
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          aria-label='Next page'
+          aria-label='Trang sau'
         >
           <ChevronRight className='size-4' />
         </Button>
@@ -114,7 +114,7 @@ function Pagination({
           className='size-8'
           onClick={() => onPageChange(totalPages)}
           disabled={page >= totalPages}
-          aria-label='Last page'
+          aria-label='Trang cuối'
         >
           <ChevronsRight className='size-4' />
         </Button>

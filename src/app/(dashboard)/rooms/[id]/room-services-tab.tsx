@@ -155,7 +155,7 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
                     type='button'
                     role='switch'
                     aria-checked={state.isEnabled}
-                    aria-label={`Toggle ${svc.serviceName}`}
+                    aria-label={`Bật/tắt ${svc.serviceName}`}
                     className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
                       state.isEnabled ? 'bg-primary' : 'bg-muted-foreground/30'
                     }`}
