@@ -118,7 +118,7 @@ export default function TenantsPage() {
           <Button
             variant='ghost'
             size='sm'
-            className={row.status === 'Active' ? 'text-destructive hover:text-destructive' : 'text-green-600 hover:text-green-600 dark:text-green-400 dark:hover:text-green-300'}
+            className={row.status === 'Active' ? 'text-destructive hover:text-destructive' : 'text-success hover:text-success'}
             onClick={(e) => {
               e.stopPropagation()
               setStatusTarget(row)
@@ -157,6 +157,7 @@ export default function TenantsPage() {
             onChange={(e) => setSearchValue(e.target.value)}
             onKeyDown={handleKeyDown}
             className='pl-9'
+            aria-label='Search tenants by name or email'
           />
         </div>
         <Button variant='secondary' onClick={handleSearch}>
@@ -171,7 +172,7 @@ export default function TenantsPage() {
 
       {/* Error State */}
       {isError && (
-        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+        <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
           <p className='font-medium text-destructive'>Failed to load tenants</p>
           <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>

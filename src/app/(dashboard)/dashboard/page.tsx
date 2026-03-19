@@ -1,7 +1,9 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import Link from 'next/link'
 import { useAuth } from '@/providers/AuthProvider'
+import { EmptyState } from '@/components/EmptyState'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Skeleton } from '@/components/ui/skeleton'
 import { fetchDashboard, fetchCurrentUser, userKeys } from '@/lib/queries/users'
@@ -15,8 +17,10 @@ import {
   Gauge,
   Receipt,
   Wrench,
+  Clock,
+  CalendarClock,
 } from 'lucide-react'
-import { cn, formatCurrency, formatNumber } from '@/lib/utils'
+import { cn, formatCurrency, formatNumber, formatDate } from '@/lib/utils'
 import { StaggerContainer, AnimatedCard, PageTransition } from '@/components/Motion'
 import type {
   OwnerDashboardDto,
@@ -48,23 +52,19 @@ interface StatCardProps {
   icon: React.ReactNode
   trend?: string
   variant?: 'default' | 'warning' | 'success' | 'destructive'
+  href?: string
 }
 
-function StatCard({ label, value, icon, trend, variant = 'default' }: StatCardProps) {
+function StatCard({ label, value, icon, trend, variant = 'default', href }: StatCardProps) {
   const variantStyles = {
     default: 'bg-card',
-    warning: 'bg-amber-50 border-amber-200 dark:bg-amber-950/20 dark:border-amber-800',
-    success: 'bg-green-50 border-green-200 dark:bg-green-950/20 dark:border-green-800',
-    destructive: 'bg-red-50 border-red-200 dark:bg-red-950/20 dark:border-red-800',
+    warning: 'bg-warning/5 border-warning/20',
+    success: 'bg-success/5 border-success/20',
+    destructive: 'bg-destructive/5 border-destructive/20',
   }
 
-  return (
-    <div
-      className={cn(
-        'rounded-xl border p-5 transition-all hover:-translate-y-0.5 hover:shadow-md',
-        variantStyles[variant],
-      )}
-    >
+  const content = (
+    <div className='flex flex-col'>
       <div className='flex items-center justify-between'>
         <p className='text-sm font-medium text-muted-foreground'>{label}</p>
         <div className='text-muted-foreground'>{icon}</div>
@@ -75,6 +75,22 @@ function StatCard({ label, value, icon, trend, variant = 'default' }: StatCardPr
       </div>
     </div>
   )
+
+  const className = cn(
+    'rounded-lg border p-5 transition-colors duration-150 hover:shadow-md',
+    variantStyles[variant],
+    href && 'cursor-pointer',
+  )
+
+  if (href) {
+    return (
+      <Link href={href} className={cn(className, 'block no-underline')}>
+        {content}
+      </Link>
+    )
+  }
+
+  return <div className={className}>{content}</div>
 }
 
 // ─── Owner Dashboard ────────────────────────────────────
@@ -87,6 +103,7 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
           label='Total Buildings'
           value={data.totalBuildings}
           icon={<Building2 className='size-5' />}
+          href='/buildings'
         />
       </AnimatedCard>
       <AnimatedCard>
@@ -95,6 +112,7 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
           value={data.totalRooms}
           icon={<DoorOpen className='size-5' />}
           trend={`${data.occupiedRooms} occupied`}
+          href='/rooms'
         />
       </AnimatedCard>
       <AnimatedCard>
@@ -110,6 +128,26 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
           label='Active Contracts'
           value={data.activeContracts}
           icon={<FileText className='size-5' />}
+          href='/contracts'
+        />
+      </AnimatedCard>
+      <AnimatedCard>
+        <StatCard
+          label='Expiring Soon'
+          value={data.expiringContracts}
+          icon={<Clock className='size-5' />}
+          trend={data.expiringContracts > 0 ? 'Within 30 days' : undefined}
+          variant={data.expiringContracts > 0 ? 'warning' : 'default'}
+          href='/contracts'
+        />
+      </AnimatedCard>
+      <AnimatedCard>
+        <StatCard
+          label='Pending Reservations'
+          value={data.pendingReservations}
+          icon={<CalendarClock className='size-5' />}
+          variant={data.pendingReservations > 0 ? 'default' : 'success'}
+          href='/reservations'
         />
       </AnimatedCard>
       <AnimatedCard>
@@ -118,6 +156,7 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
           value={formatCurrency(data.monthlyRevenue)}
           icon={<TrendingUp className='size-5' />}
           variant='success'
+          href='/reports/pnl'
         />
       </AnimatedCard>
       <AnimatedCard>
@@ -127,6 +166,7 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
           icon={<AlertTriangle className='size-5' />}
           trend={data.overdueAmount > 0 ? `${formatCurrency(data.overdueAmount)} total` : undefined}
           variant={data.overdueInvoiceCount > 0 ? 'destructive' : 'default'}
+          href='/billing/invoices'
         />
       </AnimatedCard>
     </StaggerContainer>
@@ -143,6 +183,7 @@ function StaffDashboard({ data }: { data: StaffDashboardDto }) {
           label='Assigned Buildings'
           value={data.assignedBuildings}
           icon={<Building2 className='size-5' />}
+          href='/buildings'
         />
       </AnimatedCard>
       <AnimatedCard>
@@ -151,6 +192,7 @@ function StaffDashboard({ data }: { data: StaffDashboardDto }) {
           value={data.pendingIssues}
           icon={<Wrench className='size-5' />}
           variant={data.pendingIssues > 0 ? 'warning' : 'success'}
+          href='/maintenance'
         />
       </AnimatedCard>
       <AnimatedCard>
@@ -159,6 +201,7 @@ function StaffDashboard({ data }: { data: StaffDashboardDto }) {
           value={data.pendingMeterReadings}
           icon={<Gauge className='size-5' />}
           variant={data.pendingMeterReadings > 0 ? 'warning' : 'success'}
+          href='/billing/meter-readings'
         />
       </AnimatedCard>
     </StaggerContainer>
@@ -172,7 +215,7 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
     <div className='space-y-6'>
       {/* Room info card */}
       {data.roomNumber && (
-        <div className='rounded-xl border bg-card p-6'>
+        <div className='rounded-lg border bg-card p-6'>
           <h3 className='text-lg font-semibold'>Your Room</h3>
           <div className='mt-3 grid gap-2 text-sm'>
             <div className='flex justify-between'>
@@ -192,7 +235,7 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
             {data.contractEndDate && (
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>Ends</span>
-                <span className='font-medium'>{new Date(data.contractEndDate).toLocaleDateString('vi-VN')}</span>
+                <span className='font-medium'>{formatDate(data.contractEndDate)}</span>
               </div>
             )}
           </div>
@@ -207,6 +250,7 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
             icon={<Receipt className='size-5' />}
             trend={data.unpaidAmount > 0 ? formatCurrency(data.unpaidAmount) : undefined}
             variant={data.unpaidInvoiceCount > 0 ? 'warning' : 'success'}
+            href='/billing/invoices'
           />
         </AnimatedCard>
         <AnimatedCard>
@@ -215,6 +259,7 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
             value={data.openIssueCount}
             icon={<Wrench className='size-5' />}
             variant={data.openIssueCount > 0 ? 'warning' : 'default'}
+            href='/maintenance'
           />
         </AnimatedCard>
       </StaggerContainer>
@@ -226,16 +271,19 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
 
 export default function DashboardPage() {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
 
-  const { data: profile } = useQuery({
+  const { data: profile, error: profileError } = useQuery({
     queryKey: userKeys.me(),
     queryFn: fetchCurrentUser,
   })
 
-  const { data: dashboard, isLoading } = useQuery({
+  const { data: dashboard, isLoading, error: dashboardError } = useQuery({
     queryKey: userKeys.dashboard(),
     queryFn: fetchDashboard,
   })
+
+  const loadError = dashboardError || profileError
 
   const greeting = getGreeting()
   const displayName = profile?.fullName || user?.fullName || 'there'
@@ -249,9 +297,20 @@ export default function DashboardPage() {
       {isLoading ? (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className='h-32 rounded-xl' />
+            <Skeleton key={i} className='h-32 rounded-lg' />
           ))}
         </div>
+      ) : loadError ? (
+        <EmptyState
+          icon={<AlertTriangle className='size-8' />}
+          title='Unable to load dashboard'
+          description={loadError instanceof Error ? loadError.message : 'An unexpected error occurred while loading your dashboard.'}
+          actionLabel='Retry'
+          onAction={() => {
+            queryClient.invalidateQueries({ queryKey: userKeys.me() })
+            queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
+          }}
+        />
       ) : dashboard ? (
         <>
           {isOwnerDashboard(dashboard) && <OwnerDashboard data={dashboard} />}
@@ -259,9 +318,11 @@ export default function DashboardPage() {
           {isTenantDashboard(dashboard) && <TenantDashboard data={dashboard} />}
         </>
       ) : (
-        <div className='rounded-xl border bg-card p-12 text-center'>
-          <p className='text-muted-foreground'>Unable to load dashboard data.</p>
-        </div>
+        <EmptyState
+          icon={<AlertTriangle className='size-8' />}
+          title='No dashboard data available'
+          description='Your dashboard is empty right now. Once your role has active data, the summary cards will appear here.'
+        />
       )}
     </PageContainer>
     </PageTransition>

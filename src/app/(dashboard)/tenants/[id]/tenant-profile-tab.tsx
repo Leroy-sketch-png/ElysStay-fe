@@ -6,6 +6,7 @@ import { Pencil, Save, X, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { toast } from '@/components/ui/toaster'
 import {
@@ -159,7 +160,12 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
               value={form.gender}
               editing={editing}
               onChange={(v) => updateField('gender', v)}
-              placeholder='Male / Female'
+              fieldType='select'
+              selectOptions={[
+                { value: 'Male', label: 'Male' },
+                { value: 'Female', label: 'Female' },
+              ]}
+              placeholder='Select gender'
             />
             <ProfileField
               label='Permanent Address'
@@ -198,6 +204,8 @@ function ProfileField({
   editing,
   onChange,
   type = 'text',
+  fieldType = 'input',
+  selectOptions,
   placeholder,
   maxLength,
   className,
@@ -207,6 +215,8 @@ function ProfileField({
   editing: boolean
   onChange: (v: string) => void
   type?: string
+  fieldType?: 'input' | 'select'
+  selectOptions?: { value: string; label: string }[]
   placeholder?: string
   maxLength?: number
   className?: string
@@ -219,15 +229,29 @@ function ProfileField({
         {label}
       </Label>
       {editing ? (
-        <Input
-          id={id}
-          type={type}
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          className='mt-1'
-        />
+        fieldType === 'select' && selectOptions ? (
+          <Select
+            id={id}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            className='mt-1'
+          >
+            <option value=''>{placeholder || 'Select…'}</option>
+            {selectOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </Select>
+        ) : (
+          <Input
+            id={id}
+            type={type}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            maxLength={maxLength}
+            className='mt-1'
+          />
+        )
       ) : (
         <p className='mt-1 text-sm font-medium'>
           {value || <span className='text-muted-foreground'>—</span>}

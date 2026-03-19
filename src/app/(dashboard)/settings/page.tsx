@@ -21,7 +21,7 @@ import { useAuth } from '@/providers/AuthProvider'
 
 const profileSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters').max(100),
-  phone: z.string().max(20).optional().or(z.literal('')),
+  phone: z.string().max(20).regex(/^[+\d][\d\s\-().]*$/, 'Invalid phone format').optional().or(z.literal('')),
 })
 
 type ProfileFormData = z.infer<typeof profileSchema>
@@ -43,15 +43,16 @@ export default function SettingsPage() {
     defaultValues: { fullName: '', phone: '' },
   })
 
+  const { reset: resetForm } = profileForm
+
   useEffect(() => {
     if (profile) {
-      profileForm.reset({
+      resetForm({
         fullName: profile.fullName || '',
         phone: profile.phone || '',
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile])
+  }, [profile, resetForm])
 
   const profileMutation = useMutation({
     mutationFn: updateProfile,
@@ -59,8 +60,8 @@ export default function SettingsPage() {
       toast.success('Profile updated')
       queryClient.invalidateQueries({ queryKey: userKeys.me() })
     },
-    onError: () => {
-      toast.error('Failed to update profile')
+    onError: (error: Error) => {
+      toast.error('Failed to update profile', error.message)
     },
   })
 
@@ -76,7 +77,7 @@ export default function SettingsPage() {
     <PageTransition>
     <PageContainer title='Settings' description='Manage your account'>
       {isError && (
-        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+        <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <p className='font-medium text-destructive'>Failed to load profile</p>
           <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
         </div>
@@ -102,10 +103,11 @@ export default function SettingsPage() {
                 <Skeleton className='h-10 w-full' />
               </div>
             ) : (
-              <form onSubmit={onProfileSubmit} className='space-y-4'>
+              <form noValidate onSubmit={onProfileSubmit} className='space-y-4'>
                 <div className='space-y-1.5'>
                   <Label htmlFor='fullName'>Full Name</Label>
                   <Input
+                    id='fullName'
                     {...profileForm.register('fullName')}
                     placeholder='Your name'
                   />
@@ -119,9 +121,15 @@ export default function SettingsPage() {
                 <div className='space-y-1.5'>
                   <Label htmlFor='phone'>Phone</Label>
                   <Input
+                    id='phone'
                     {...profileForm.register('phone')}
                     placeholder='+84 xxx xxx xxx'
                   />
+                  {profileForm.formState.errors.phone && (
+                    <p className='text-xs text-destructive'>
+                      {profileForm.formState.errors.phone.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className='space-y-1.5'>
@@ -136,7 +144,7 @@ export default function SettingsPage() {
                   <Button type='submit' disabled={profileMutation.isPending}>
                     {profileMutation.isPending ? (
                       <>
-                        <Loader2 className='mr-2 size-4 animate-spin' />
+                        <Loader2 className='size-4 animate-spin' />
                         Saving…
                       </>
                     ) : (
@@ -167,10 +175,15 @@ export default function SettingsPage() {
               use the Keycloak Account Console.
             </p>
             <a
-              href={`${process.env.NEXT_PUBLIC_KEYCLOAK_URL || 'http://localhost:8080'}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'elysstay'}/account/#/security/signingin`}
+              href={`${process.env.NEXT_PUBLIC_KEYCLOAK_URL}/realms/${process.env.NEXT_PUBLIC_KEYCLOAK_REALM || 'elysstay'}/account/#/security/signingin`}
               target='_blank'
               rel='noopener noreferrer'
-              className='inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors'
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
+                process.env.NEXT_PUBLIC_KEYCLOAK_URL
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                  : 'bg-muted text-muted-foreground cursor-not-allowed pointer-events-none'
+              }`}
+              aria-disabled={!process.env.NEXT_PUBLIC_KEYCLOAK_URL}
             >
               <Shield className='size-4' />
               Manage Account Security
