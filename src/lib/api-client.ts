@@ -35,6 +35,9 @@ export interface PagedResponse<T> {
   success: boolean
   data: T[]
   pagination: PaginationMeta
+  message?: string
+  errorCode?: string
+  errors?: Record<string, string[]>
 }
 
 // ─── Error Class ────────────────────────────────────────
@@ -44,11 +47,40 @@ export class ApiError extends Error {
     public status: number,
     public errorCode?: string,
     public errors?: Record<string, string[]>,
+    public retryAfterMs?: number,
     message?: string,
   ) {
     super(message || 'API request failed')
     this.name = 'ApiError'
   }
+}
+
+function getRetryAfterMs(response: Response): number | undefined {
+  const retryAfter = response.headers.get('Retry-After')
+  if (!retryAfter) {
+    return undefined
+  }
+
+  const seconds = Number(retryAfter)
+  if (!Number.isNaN(seconds) && seconds >= 0) {
+    return seconds * 1000
+  }
+
+  const retryDate = Date.parse(retryAfter)
+  if (Number.isNaN(retryDate)) {
+    return undefined
+  }
+
+  return Math.max(0, retryDate - Date.now())
+}
+
+function isApiEnvelope(value: unknown): value is {
+  success: boolean
+  message?: string
+  errorCode?: string
+  errors?: Record<string, string[]>
+} {
+  return typeof value === 'object' && value !== null && 'success' in value
 }
 
 // ─── Token Accessor ─────────────────────────────────────
@@ -96,22 +128,24 @@ async function apiFetch<T>(
       headers,
     })
   } catch {
-    throw new ApiError(0, 'NETWORK_ERROR', undefined, 'Network error — check your connection and try again.')
+    throw new ApiError(0, 'NETWORK_ERROR', undefined, undefined, 'Network error — check your connection and try again.')
   }
 
-  // 204 No Content
+  // 204 No Content — callers expecting void or undefined handle this safely
   if (response.status === 204) {
-    return undefined as T
+    return undefined as unknown as T
   }
 
   let json: Record<string, unknown>
   try {
     json = await response.json()
   } catch {
-    throw new ApiError(response.status, 'PARSE_ERROR', undefined, 'Unexpected response from the server.')
+    throw new ApiError(response.status, 'PARSE_ERROR', undefined, undefined, 'Unexpected response from the server.')
   }
 
   if (!response.ok) {
+    const retryAfterMs = getRetryAfterMs(response)
+
     // 401 Unauthorized — token expired or invalid, trigger auth redirect
     if (response.status === 401) {
       onUnauthorized?.()
@@ -121,7 +155,20 @@ async function apiFetch<T>(
       response.status,
       json.errorCode as string | undefined,
       json.errors as Record<string, string[]> | undefined,
+      retryAfterMs,
       (json.message as string | undefined) ?? `Request failed (${response.status})`,
+    )
+  }
+
+  if (isApiEnvelope(json) && json.success === false) {
+    throw new ApiError(
+      response.status,
+      typeof json.errorCode === 'string' ? json.errorCode : undefined,
+      json.errors,
+      undefined,
+      typeof json.message === 'string'
+        ? json.message
+        : 'Server reported the request as unsuccessful.',
     )
   }
 
@@ -165,11 +212,28 @@ export const api = {
   },
 }
 
+// ─── Data Extraction Helper ─────────────────────────────
+
+/** Extract `data` from an API response, throwing if absent. Replaces unsafe `res.data!`. */
+export function requireData<T>(res: ApiResponse<T>): T {
+  if (res.data === undefined || res.data === null) {
+    throw new ApiError(
+      0,
+      'EMPTY_RESPONSE',
+      undefined,
+      undefined,
+      res.message || 'Server returned success but no data.',
+    )
+  }
+  return res.data
+}
+
 // ─── Query String Helper ────────────────────────────────
 
 export function toQueryString(params: Record<string, unknown>): string {
   const entries = Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .filter(([, v]) => v !== undefined && v !== null)
+    .filter(([, v]) => typeof v !== 'string' || v !== '')
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
   return entries.length > 0 ? `?${entries.join('&')}` : ''
 }
