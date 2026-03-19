@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -14,8 +15,11 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { InvoiceStatusBadge } from '@/components/ui/status-badge'
 import { toast } from '@/components/ui/toaster'
-import { formatCurrency, formatDate, formatBillingPeriod } from '@/lib/utils'
+import { canRecordInvoicePayment, canSendInvoice, canVoidInvoice, isInvoiceClosed } from '@/lib/domain-constants'
+import { formatCurrency, formatDate, formatBillingPeriod, toLocalDateInputValue } from '@/lib/utils'
 import { invoiceKeys, fetchInvoiceById, sendInvoice, voidInvoice } from '@/lib/queries/invoices'
+import { reportKeys } from '@/lib/queries/reports'
+import { userKeys } from '@/lib/queries/users'
 import { RecordPaymentDialog } from './record-payment-dialog'
 
 export default function InvoiceDetailPage() {
@@ -24,6 +28,7 @@ export default function InvoiceDetailPage() {
   const queryClient = useQueryClient()
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [voidConfirmOpen, setVoidConfirmOpen] = useState(false)
+  const [sendConfirmOpen, setSendConfirmOpen] = useState(false)
 
   const { data: invoice, isLoading, error } = useQuery({
     queryKey: invoiceKeys.detail(id),
@@ -36,6 +41,9 @@ export default function InvoiceDetailPage() {
     onSuccess: () => {
       toast.success('Invoice sent', 'Status changed to Sent.')
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
       toast.error('Failed to send invoice', error.message)
@@ -47,6 +55,9 @@ export default function InvoiceDetailPage() {
     onSuccess: () => {
       toast.success('Invoice voided')
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
       toast.error('Failed to void invoice', error.message)
@@ -59,12 +70,12 @@ export default function InvoiceDetailPage() {
         <div className='space-y-6'>
           <Skeleton className='h-8 w-64' />
           <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
           </div>
-          <Skeleton className='h-64 rounded-xl' />
+          <Skeleton className='h-64 rounded-lg' />
         </div>
       </PageContainer>
     )
@@ -91,12 +102,16 @@ export default function InvoiceDetailPage() {
   const billingPeriod = formatBillingPeriod(invoice.billingYear, invoice.billingMonth)
 
   const amountDue = invoice.totalAmount - invoice.paidAmount
-  const canSend = invoice.status === 'Draft'
-  const canVoid = invoice.status !== 'Paid' && invoice.status !== 'Void'
-  const canRecordPayment = invoice.status !== 'Paid' && invoice.status !== 'Void'
+  const canSend = canSendInvoice(invoice.status)
+  const canVoid = canVoidInvoice(invoice.status)
+  const canRecordPayment = canRecordInvoicePayment(invoice.status)
+
+  const [dueYear, dueMonth, dueDay] = invoice.dueDate.split('-').map(Number)
+  const dueDate = new Date(dueYear, dueMonth - 1, dueDay)
+  const today = new Date(toLocalDateInputValue())
 
   const isOverdue = invoice.status === 'Overdue' ||
-    (invoice.status !== 'Paid' && invoice.status !== 'Void' && new Date(invoice.dueDate) < new Date())
+    (!isInvoiceClosed(invoice.status) && dueDate < today)
 
   return (
     <PageContainer
@@ -112,7 +127,7 @@ export default function InvoiceDetailPage() {
           {canSend && (
             <Button
               variant='outline'
-              onClick={() => sendMutation.mutate()}
+              onClick={() => setSendConfirmOpen(true)}
               disabled={sendMutation.isPending}
             >
               <Send className='size-4' />
@@ -140,9 +155,9 @@ export default function InvoiceDetailPage() {
     >
       {/* Overdue Warning */}
       {isOverdue && invoice.status !== 'Void' && (
-        <div className='mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/50'>
-          <CalendarDays className='size-5 text-red-600 dark:text-red-400 shrink-0' />
-          <p className='text-sm font-medium text-red-800 dark:text-red-200'>
+        <div className='mb-6 flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4'>
+          <CalendarDays className='size-5 text-destructive shrink-0' />
+          <p className='text-sm font-medium text-destructive'>
             This invoice is overdue. Due date was {formatDate(invoice.dueDate)}.
           </p>
         </div>
@@ -163,8 +178,8 @@ export default function InvoiceDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className='rounded-lg bg-green-100 p-2.5 dark:bg-green-900/20'>
-              <DollarSign className='size-5 text-green-600 dark:text-green-400' />
+            <div className='rounded-lg bg-success/10 p-2.5'>
+              <DollarSign className='size-5 text-success' />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Total Amount</p>
@@ -174,8 +189,8 @@ export default function InvoiceDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className='rounded-lg bg-blue-100 p-2.5 dark:bg-blue-900/20'>
-              <DollarSign className='size-5 text-blue-600 dark:text-blue-400' />
+            <div className='rounded-lg bg-info/10 p-2.5'>
+              <DollarSign className='size-5 text-info' />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Paid Amount</p>
@@ -185,12 +200,12 @@ export default function InvoiceDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className={`rounded-lg p-2.5 ${amountDue > 0 ? 'bg-amber-100 dark:bg-amber-900/20' : 'bg-green-100 dark:bg-green-900/20'}`}>
-              <DollarSign className={`size-5 ${amountDue > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'}`} />
+            <div className={`rounded-lg p-2.5 ${amountDue > 0 ? 'bg-warning/10' : 'bg-success/10'}`}>
+              <DollarSign className={`size-5 ${amountDue > 0 ? 'text-warning' : 'text-success'}`} />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Amount Due</p>
-              <p className={`text-xl font-bold ${amountDue > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600'}`}>
+              <p className={`text-xl font-bold ${amountDue > 0 ? 'text-warning' : 'text-success'}`}>
                 {formatCurrency(amountDue)}
               </p>
             </div>
@@ -208,8 +223,16 @@ export default function InvoiceDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            <InfoRow label='Building' value={invoice.buildingName} />
-            <InfoRow label='Room' value={invoice.roomNumber} />
+            <InfoRow label='Building'>
+              <Link href={`/buildings/${invoice.buildingId}`} className='text-sm font-medium hover:underline'>
+                {invoice.buildingName}
+              </Link>
+            </InfoRow>
+            <InfoRow label='Room'>
+              <Link href={`/rooms/${invoice.roomId}`} className='text-sm font-medium hover:underline'>
+                {invoice.roomNumber}
+              </Link>
+            </InfoRow>
             <InfoRow label='Billing Period' value={billingPeriod} />
             <InfoRow label='Due Date' value={formatDate(invoice.dueDate)} />
           </CardContent>
@@ -223,7 +246,16 @@ export default function InvoiceDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            <InfoRow label='Name' value={invoice.tenantName} />
+            <InfoRow label='Name'>
+              <Link href={`/tenants/${invoice.tenantUserId}`} className='text-sm font-medium hover:underline'>
+                {invoice.tenantName}
+              </Link>
+            </InfoRow>
+            <InfoRow label='Contract'>
+              <Link href={`/contracts/${invoice.contractId}`} className='text-sm font-medium hover:underline'>
+                View Contract
+              </Link>
+            </InfoRow>
             <InfoRow label='Created' value={formatDate(invoice.createdAt)} />
             {invoice.note && <InfoRow label='Note' value={invoice.note} />}
           </CardContent>
@@ -237,7 +269,7 @@ export default function InvoiceDetailPage() {
           <CardDescription>Breakdown of charges for this billing period.</CardDescription>
         </CardHeader>
         <CardContent>
-          <table className='w-full text-sm'>
+            <table className='w-full text-sm' aria-label='Invoice line items'>
             <thead>
               <tr className='border-b'>
                 <th className='text-left font-medium py-2'>Description</th>
@@ -286,7 +318,7 @@ export default function InvoiceDetailPage() {
               {invoice.discountAmount > 0 && (
                 <tr>
                   <td colSpan={3} className='text-right py-1 text-muted-foreground'>Discount</td>
-                  <td className='text-right py-1 text-green-600'>
+                  <td className='text-right py-1 text-success'>
                     -{formatCurrency(invoice.discountAmount)}
                   </td>
                 </tr>
@@ -299,12 +331,12 @@ export default function InvoiceDetailPage() {
               {/* Paid */}
               <tr>
                 <td colSpan={3} className='text-right py-1 text-muted-foreground'>Paid</td>
-                <td className='text-right py-1 text-green-600'>-{formatCurrency(invoice.paidAmount)}</td>
+                <td className='text-right py-1 text-success'>-{formatCurrency(invoice.paidAmount)}</td>
               </tr>
               {/* Amount Due */}
               <tr className='border-t'>
                 <td colSpan={3} className='text-right py-2 font-semibold'>Amount Due</td>
-                <td className={`text-right py-2 font-bold text-lg ${amountDue > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600'}`}>
+                <td className={`text-right py-2 font-bold text-lg ${amountDue > 0 ? 'text-warning' : 'text-success'}`}>
                   {formatCurrency(amountDue)}
                 </td>
               </tr>
@@ -312,6 +344,68 @@ export default function InvoiceDetailPage() {
           </table>
         </CardContent>
       </Card>
+
+      {/* Payment History */}
+      {invoice.payments.length > 0 ? (
+        <Card className='mt-6'>
+          <CardHeader>
+            <CardTitle className='text-base flex items-center gap-2'>
+              <DollarSign className='size-4' />
+              Payment History
+            </CardTitle>
+            <CardDescription>{invoice.payments.length} payment(s) recorded</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <table className='w-full text-sm' aria-label='Payment history'>
+              <thead>
+                <tr className='border-b'>
+                  <th className='text-left font-medium py-2'>Date</th>
+                  <th className='text-left font-medium py-2'>Method</th>
+                  <th className='text-left font-medium py-2'>Reference</th>
+                  <th className='text-left font-medium py-2'>Recorded By</th>
+                  <th className='text-right font-medium py-2'>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.payments.map((payment) => (
+                  <tr key={payment.id} className='border-b last:border-0'>
+                    <td className='py-3'>{formatDate(payment.paidAt)}</td>
+                    <td className='py-3'>{payment.paymentMethod ?? '—'}</td>
+                    <td className='py-3 text-muted-foreground'>{payment.referenceCode ?? '—'}</td>
+                    <td className='py-3'>{payment.recordedByName}</td>
+                    <td className='py-3 text-right font-medium text-success'>
+                      {formatCurrency(payment.amount)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      ) : !isInvoiceClosed(invoice.status) && (
+        <Card className='mt-6'>
+          <CardContent className='py-8 text-center'>
+            <DollarSign className='size-8 text-muted-foreground mx-auto mb-2' />
+            <p className='text-sm text-muted-foreground'>No payments recorded yet.</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Send confirmation */}
+      <ConfirmDialog
+        open={sendConfirmOpen}
+        onOpenChange={setSendConfirmOpen}
+        title='Send Invoice'
+        description='This will change the invoice status from Draft to Sent and notify the tenant. This action cannot be undone.'
+        confirmLabel='Send Invoice'
+        variant='default'
+        loading={sendMutation.isPending}
+        onConfirm={() => {
+          sendMutation.mutate(undefined, {
+            onSuccess: () => setSendConfirmOpen(false),
+          })
+        }}
+      />
 
       {/* Void confirmation */}
       <ConfirmDialog
@@ -341,11 +435,11 @@ export default function InvoiceDetailPage() {
 
 // ─── Helper ─────────────────────────────────────────────
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, children }: { label: string; value?: string; children?: React.ReactNode }) {
   return (
     <div className='flex items-start justify-between gap-4'>
       <span className='text-sm text-muted-foreground shrink-0'>{label}</span>
-      <span className='text-sm font-medium text-right'>{value}</span>
+      {children ?? <span className='text-sm font-medium text-right'>{value}</span>}
     </div>
   )
 }

@@ -2,9 +2,10 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { CalendarDays, Gauge, Info, Loader2 } from 'lucide-react'
+import { CalendarDays, Gauge, Info, Loader2, Building2, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
+import { EmptyState } from '@/components/EmptyState'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -13,6 +14,7 @@ import { Select } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/toaster'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import { roomKeys, fetchRooms } from '@/lib/queries/rooms'
 import { serviceKeys, fetchBuildingServices } from '@/lib/queries/services'
 import {
@@ -39,27 +41,20 @@ export default function MeterReadingsPage() {
   const [hasChanges, setHasChanges] = useState(false)
 
   // ─── Data: Buildings ───────────────────────────────────
-  const { data: buildingsData, isLoading: buildingsLoading } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+  const { data: buildingsData, isLoading: buildingsLoading, error: buildingsError } = useQuery({
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
 
-  // Auto-select first building
-  useEffect(() => {
-    if (!selectedBuildingId && buildingsData?.data && buildingsData.data.length > 0) {
-      setSelectedBuildingId(buildingsData.data[0].id)
-    }
-  }, [buildingsData, selectedBuildingId])
-
   // ─── Data: Occupied Rooms ──────────────────────────────
-  const { data: roomsData } = useQuery({
-    queryKey: roomKeys.list({ buildingId: selectedBuildingId, status: 'Occupied', pageSize: 200 }),
-    queryFn: () => fetchRooms({ buildingId: selectedBuildingId, status: 'Occupied', pageSize: 200 }),
+  const { data: roomsData, error: roomsError } = useQuery({
+    queryKey: roomKeys.list({ buildingId: selectedBuildingId, status: 'Occupied', pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchRooms({ buildingId: selectedBuildingId, status: 'Occupied', pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: !!selectedBuildingId,
   })
 
   // ─── Data: Building Services (metered only) ────────────
-  const { data: servicesData } = useQuery({
+  const { data: servicesData, error: servicesError } = useQuery({
     queryKey: serviceKeys.byBuilding(selectedBuildingId),
     queryFn: () => fetchBuildingServices(selectedBuildingId),
     enabled: !!selectedBuildingId,
@@ -71,7 +66,7 @@ export default function MeterReadingsPage() {
   )
 
   // ─── Data: Existing Readings ───────────────────────────
-  const { data: readingsData, isLoading: readingsLoading } = useQuery({
+  const { data: readingsData, isLoading: readingsLoading, error: readingsError } = useQuery({
     queryKey: meterReadingKeys.list({
       buildingId: selectedBuildingId,
       billingYear,
@@ -108,9 +103,20 @@ export default function MeterReadingsPage() {
 
   const handleReadingChange = (roomId: string, serviceId: string, value: string) => {
     const key = `${roomId}-${serviceId}`
-    const numValue = value === '' ? 0 : parseFloat(value)
-    setEditedReadings((prev) => ({ ...prev, [key]: numValue }))
-    setHasChanges(true)
+    setEditedReadings((prev) => {
+      const next = { ...prev }
+
+      if (value === '') {
+        delete next[key]
+      } else {
+        const numValue = parseFloat(value)
+        if (!Number.isFinite(numValue)) return prev
+        next[key] = numValue
+      }
+
+      setHasChanges(Object.keys(next).length > 0)
+      return next
+    })
   }
 
   const getCurrentValue = (roomId: string, serviceId: string) => {
@@ -136,6 +142,10 @@ export default function MeterReadingsPage() {
 
       for (const [key, value] of Object.entries(editedReadings)) {
         const [roomId, serviceId] = key.split('-')
+        const previous = getPreviousValue(roomId, serviceId)
+        if (value < previous) {
+          throw new Error(`Current reading (${value}) is less than previous reading (${previous}). Please check your entries.`)
+        }
         readings.push({
           roomId,
           serviceId,
@@ -173,6 +183,24 @@ export default function MeterReadingsPage() {
   const rooms = roomsData?.data ?? []
   const noMeteredServices = meteredServices.length === 0
   const noOccupiedRooms = rooms.length === 0
+  const loadError = buildingsError || roomsError || servicesError || readingsError
+
+  // ─── No Buildings Prerequisite ─────────────────────────
+  if (buildingsData && (buildingsData.data ?? []).length === 0) {
+    return (
+      <PageTransition>
+      <PageContainer title='Meter Readings' description='Record utility meter readings for billing.'>
+        <EmptyState
+          icon={<Building2 className='size-12' />}
+          title='No buildings yet'
+          description='Add your first building to record meter readings.'
+          actionLabel='Go to Buildings'
+          actionHref='/buildings'
+        />
+      </PageContainer>
+      </PageTransition>
+    )
+  }
 
   return (
     <PageTransition>
@@ -182,7 +210,7 @@ export default function MeterReadingsPage() {
       actions={
         <Button
           onClick={() => submitMutation.mutate()}
-          disabled={!hasChanges || submitMutation.isPending || noMeteredServices || noOccupiedRooms}
+          disabled={!selectedBuildingId || !hasChanges || submitMutation.isPending || noMeteredServices || noOccupiedRooms}
         >
           {submitMutation.isPending ? (
             <>
@@ -210,6 +238,7 @@ export default function MeterReadingsPage() {
                   value={selectedBuildingId}
                   onChange={(e) => setSelectedBuildingId(e.target.value)}
                 >
+                  <option value=''>Select building…</option>
                   {(buildingsData?.data ?? []).map((b) => (
                     <option key={b.id} value={b.id}>{b.name}</option>
                   ))}
@@ -251,19 +280,42 @@ export default function MeterReadingsPage() {
       </Card>
 
       {/* Info Banner */}
-      <div className='mb-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/50'>
-        <Info className='size-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5' />
-        <div className='text-sm text-blue-800 dark:text-blue-200'>
+      <div className='mb-6 flex items-start gap-3 rounded-lg border border-info/20 bg-info/5 p-4'>
+        <Info className='size-5 text-info shrink-0 mt-0.5' />
+        <div className='text-sm text-foreground'>
           <p className='font-medium'>Billing Period: {formatBillingPeriod(billingYear, billingMonth)}</p>
-          <p className='mt-1 text-blue-700 dark:text-blue-300'>
+          <p className='mt-1 text-info'>
             Enter current meter readings below. Previous readings are auto-filled from last month.
             Consumption = Current − Previous.
           </p>
         </div>
       </div>
 
+      {!selectedBuildingId && !buildingsLoading && !loadError && (
+        <EmptyState
+          icon={<Building2 className='size-8' />}
+          title='Select a building'
+          description='Choose a building before entering meter readings so the room and service grid is scoped intentionally.'
+        />
+      )}
+
+      {selectedBuildingId && loadError && (
+        <EmptyState
+          icon={<AlertTriangle className='size-8' />}
+          title='Unable to load meter readings'
+          description={loadError instanceof Error ? loadError.message : 'An unexpected error occurred while loading meter reading data.'}
+          actionLabel='Retry'
+          onAction={() => {
+            queryClient.invalidateQueries({ queryKey: buildingKeys.all })
+            queryClient.invalidateQueries({ queryKey: roomKeys.all })
+            queryClient.invalidateQueries({ queryKey: serviceKeys.all })
+            queryClient.invalidateQueries({ queryKey: meterReadingKeys.all })
+          }}
+        />
+      )}
+
       {/* Empty States */}
-      {noMeteredServices && selectedBuildingId && (
+      {!loadError && noMeteredServices && selectedBuildingId && (
         <Card>
           <CardContent className='py-12 text-center'>
             <Gauge className='size-12 text-muted-foreground mx-auto mb-4' />
@@ -276,7 +328,7 @@ export default function MeterReadingsPage() {
         </Card>
       )}
 
-      {!noMeteredServices && noOccupiedRooms && selectedBuildingId && (
+      {!loadError && !noMeteredServices && noOccupiedRooms && selectedBuildingId && (
         <Card>
           <CardContent className='py-12 text-center'>
             <CalendarDays className='size-12 text-muted-foreground mx-auto mb-4' />
@@ -289,7 +341,7 @@ export default function MeterReadingsPage() {
       )}
 
       {/* Matrix Grid */}
-      {!noMeteredServices && !noOccupiedRooms && (
+      {!loadError && selectedBuildingId && !noMeteredServices && !noOccupiedRooms && (
         readingsLoading ? (
           <Card>
             <CardContent className='py-8 space-y-4'>

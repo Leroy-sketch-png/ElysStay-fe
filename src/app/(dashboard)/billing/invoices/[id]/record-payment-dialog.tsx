@@ -24,17 +24,15 @@ import { toast } from '@/components/ui/toaster'
 import { formatCurrency, formatBillingPeriod } from '@/lib/utils'
 import { invoiceKeys } from '@/lib/queries/invoices'
 import { paymentKeys, recordPayment } from '@/lib/queries/payments'
+import { reportKeys } from '@/lib/queries/reports'
+import { userKeys } from '@/lib/queries/users'
 import type { InvoiceDetailDto, RecordPaymentRequest } from '@/types/api'
 
-// ─── Schema ─────────────────────────────────────────────
-
-const paymentSchema = z.object({
-  amount: z.number().positive('Amount must be positive'),
-  paymentMethod: z.string().optional(),
-  note: z.string().max(500).optional().or(z.literal('')),
-})
-
-type PaymentFormData = z.infer<typeof paymentSchema>
+type PaymentFormData = {
+  amount: number
+  paymentMethod?: string
+  note?: string
+}
 
 // ─── Payment Methods ────────────────────────────────────
 
@@ -65,6 +63,13 @@ export function RecordPaymentDialog({
   const queryClient = useQueryClient()
 
   const amountDue = invoice.totalAmount - invoice.paidAmount
+  const paymentSchema = z.object({
+    amount: z.number()
+      .positive('Amount must be positive')
+      .max(amountDue, `Payment cannot exceed the remaining balance of ${formatCurrency(amountDue)}`),
+    paymentMethod: z.string().optional(),
+    note: z.string().max(500).optional().or(z.literal('')),
+  })
 
   const {
     register,
@@ -106,7 +111,10 @@ export function RecordPaymentDialog({
           : `${formatCurrency(remainingAfter)} remaining.`,
       )
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(invoice.id) })
       queryClient.invalidateQueries({ queryKey: paymentKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
@@ -134,7 +142,7 @@ export function RecordPaymentDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-5'>
             {/* Invoice Summary */}
             <div className='rounded-lg bg-muted/50 p-4 space-y-2'>
@@ -144,13 +152,13 @@ export function RecordPaymentDialog({
               </div>
               <div className='flex justify-between text-sm'>
                 <span className='text-muted-foreground'>Already Paid</span>
-                <span className='font-medium text-green-600'>
+                <span className='font-medium text-success'>
                   − {formatCurrency(invoice.paidAmount)}
                 </span>
               </div>
               <div className='border-t pt-2 flex justify-between text-sm font-semibold'>
                 <span>Amount Due</span>
-                <span className='text-amber-600 dark:text-amber-400'>
+                <span className='text-warning'>
                   {formatCurrency(amountDue)}
                 </span>
               </div>
@@ -190,15 +198,10 @@ export function RecordPaymentDialog({
               <div className='rounded-lg border p-3 space-y-1'>
                 <div className='flex justify-between text-sm'>
                   <span className='text-muted-foreground'>After this payment</span>
-                  <span className={willFullyPay ? 'text-green-600 font-medium' : ''}>
+                  <span className={willFullyPay ? 'text-success font-medium' : ''}>
                     {willFullyPay ? 'Fully Paid' : `${formatCurrency(remainingAfter)} remaining`}
                   </span>
                 </div>
-                {watchedAmount > amountDue && (
-                  <p className='text-xs text-amber-600 dark:text-amber-400'>
-                    ⚠️ Payment exceeds amount due by {formatCurrency(watchedAmount - amountDue)}
-                  </p>
-                )}
               </div>
             )}
 

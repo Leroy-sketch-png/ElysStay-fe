@@ -7,9 +7,12 @@ import {
   CreditCard,
   ExternalLink,
   AlertTriangle,
+  X,
+  Building2,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
@@ -19,8 +22,15 @@ import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
 import { PaymentTypeBadge } from '@/components/ui/status-badge'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { paymentKeys, fetchPayments, type PaymentFilters } from '@/lib/queries/payments'
+import {
+  paymentKeys,
+  fetchPayments,
+  fetchPaymentSummary,
+  type PaymentFilters,
+  type PaymentSummaryFilters,
+} from '@/lib/queries/payments'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import type { PaymentDto, PaymentType } from '@/types/api'
 
 // ─── Type filter options ────────────────────────────────
@@ -37,11 +47,13 @@ const TYPE_OPTIONS: { label: string; value: PaymentType | '' }[] = [
 export default function PaymentsPage() {
   // ─── State ─────────────────────────────────────────────
   const [selectedBuildingId, setSelectedBuildingId] = useState('')
-  const [typeFilter, setTypeFilter] = useState('')
+  const [typeFilter, setTypeFilter] = useState<PaymentType | ''>('')
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
+  const hasInvalidDateRange = Boolean(fromDate && toDate && fromDate > toDate)
+  const hasActiveFilters = Boolean(selectedBuildingId || typeFilter || fromDate || toDate)
 
   // ─── Filters ───────────────────────────────────────────
   const filters: PaymentFilters = useMemo(
@@ -56,34 +68,44 @@ export default function PaymentsPage() {
     [selectedBuildingId, typeFilter, fromDate, toDate, page, pageSize],
   )
 
+  const summaryFilters: PaymentSummaryFilters = useMemo(
+    () => ({
+      buildingId: selectedBuildingId || undefined,
+      type: typeFilter || undefined,
+      fromDate: fromDate || undefined,
+      toDate: toDate || undefined,
+    }),
+    [selectedBuildingId, typeFilter, fromDate, toDate],
+  )
+
   // ─── Queries ───────────────────────────────────────────
   const { data: buildings } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
 
   const { data: paymentsData, isLoading, isError, error } = useQuery({
     queryKey: paymentKeys.list(filters),
     queryFn: () => fetchPayments(filters),
+    enabled: !hasInvalidDateRange,
+  })
+
+  const { data: paymentSummary } = useQuery({
+    queryKey: paymentKeys.summary(summaryFilters),
+    queryFn: () => fetchPaymentSummary(summaryFilters),
+    enabled: !hasInvalidDateRange,
   })
 
   const payments = paymentsData?.data ?? []
   const pagination = paymentsData?.pagination
 
-  // ─── Summary ───────────────────────────────────────────
-  const summary = useMemo(() => {
-    if (!payments.length) return { total: 0, rentPayments: 0, depositsIn: 0, depositsOut: 0 }
-    return payments.reduce(
-      (acc, p) => {
-        acc.total += p.amount
-        if (p.type === 'RentPayment') acc.rentPayments += p.amount
-        else if (p.type === 'DepositIn') acc.depositsIn += p.amount
-        else if (p.type === 'DepositRefund') acc.depositsOut += p.amount
-        return acc
-      },
-      { total: 0, rentPayments: 0, depositsIn: 0, depositsOut: 0 },
-    )
-  }, [payments])
+  function clearFilters() {
+    setSelectedBuildingId('')
+    setTypeFilter('')
+    setFromDate('')
+    setToDate('')
+    setPage(1)
+  }
 
   // ─── Columns ───────────────────────────────────────────
   const columns: Column<PaymentDto>[] = [
@@ -103,7 +125,7 @@ export default function PaymentsPage() {
       render: (p) => (
         <span
           className={
-            p.type === 'DepositRefund' ? 'font-medium text-destructive' : 'font-medium text-green-600 dark:text-green-400'
+            p.type === 'DepositRefund' ? 'font-medium text-destructive' : 'font-medium text-success'
           }
         >
           {p.type === 'DepositRefund' ? '-' : '+'}
@@ -116,7 +138,7 @@ export default function PaymentsPage() {
       header: 'Method',
       render: (p) => (
         <span className='text-sm text-muted-foreground capitalize'>
-          {p.paymentMethod || 'Cash'}
+          {p.paymentMethod || '—'}
         </span>
       ),
     },
@@ -152,9 +174,37 @@ export default function PaymentsPage() {
     },
   ]
 
+  // ─── No Buildings Prerequisite ─────────────────────────
+  if (buildings && (buildings.data ?? []).length === 0) {
+    return (
+      <PageTransition>
+      <PageContainer title='Payments' description='Payment history across all buildings'>
+        <EmptyState
+          icon={<Building2 className='size-12' />}
+          title='No buildings yet'
+          description='Add your first building to view payment history.'
+          actionLabel='Go to Buildings'
+          actionHref='/buildings'
+        />
+      </PageContainer>
+      </PageTransition>
+    )
+  }
+
   return (
     <PageTransition>
-    <PageContainer title='Payments' description='Payment history across all buildings'>
+    <PageContainer
+      title='Payments'
+      description='Payment history across all buildings'
+      actions={
+        hasActiveFilters ? (
+          <Button variant='outline' size='sm' onClick={clearFilters}>
+            <X className='size-4' />
+            Clear filters
+          </Button>
+        ) : undefined
+      }
+    >
       {/* Filters */}
       <div className='flex flex-wrap items-end gap-4'>
         <div className='w-56'>
@@ -177,7 +227,7 @@ export default function PaymentsPage() {
           <Select
             value={typeFilter}
             onChange={(e) => {
-              setTypeFilter(e.target.value)
+              setTypeFilter(e.target.value as PaymentType | '')
               setPage(1)
             }}
           >
@@ -214,9 +264,15 @@ export default function PaymentsPage() {
         </div>
       </div>
 
+      {hasInvalidDateRange && (
+        <div className='rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm text-warning'>
+          The date range is invalid. “From” must be on or before “To”.
+        </div>
+      )}
+
       {/* Error State */}
-      {isError && (
-        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+      {isError && !hasInvalidDateRange && (
+        <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
           <p className='font-medium text-destructive'>Failed to load payments</p>
           <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
@@ -224,37 +280,37 @@ export default function PaymentsPage() {
       )}
 
       {/* Summary Cards */}
-      {!isError && pagination && pagination.totalItems > 0 && (
+      {!isError && !hasInvalidDateRange && paymentSummary && paymentSummary.paymentCount > 0 && (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
           <Card>
             <CardContent className='p-4'>
-              <p className='text-sm text-muted-foreground'>Page Total</p>
-              <p className='text-xl font-bold'>{formatCurrency(summary.total)}</p>
+              <p className='text-sm text-muted-foreground'>Filtered Net Total</p>
+              <p className='text-xl font-bold'>{formatCurrency(paymentSummary.totalAmount)}</p>
             </CardContent>
           </Card>
-          <Card className='border-green-200 bg-green-50/50 dark:bg-green-950/10 dark:border-green-800'>
+          <Card className='border-success/20 bg-success/5'>
             <CardContent className='p-4'>
-              <p className='text-sm text-muted-foreground'>Rent Payments</p>
-              <p className='text-xl font-bold text-green-600 dark:text-green-400'>{formatCurrency(summary.rentPayments)}</p>
+              <p className='text-sm text-muted-foreground'>Filtered Rent Payments</p>
+              <p className='text-xl font-bold text-success'>{formatCurrency(paymentSummary.rentPayments)}</p>
             </CardContent>
           </Card>
-          <Card className='border-blue-200 bg-blue-50/50 dark:bg-blue-950/10 dark:border-blue-800'>
+          <Card className='border-info/20 bg-info/5'>
             <CardContent className='p-4'>
-              <p className='text-sm text-muted-foreground'>Deposits In</p>
-              <p className='text-xl font-bold text-blue-600 dark:text-blue-400'>{formatCurrency(summary.depositsIn)}</p>
+              <p className='text-sm text-muted-foreground'>Filtered Deposits In</p>
+              <p className='text-xl font-bold text-info'>{formatCurrency(paymentSummary.depositsIn)}</p>
             </CardContent>
           </Card>
-          <Card className='border-amber-200 bg-amber-50/50 dark:bg-amber-950/10 dark:border-amber-800'>
+          <Card className='border-warning/20 bg-warning/5'>
             <CardContent className='p-4'>
-              <p className='text-sm text-muted-foreground'>Deposits Refunded</p>
-              <p className='text-xl font-bold text-amber-600 dark:text-amber-400'>{formatCurrency(summary.depositsOut)}</p>
+              <p className='text-sm text-muted-foreground'>Filtered Deposits Refunded</p>
+              <p className='text-xl font-bold text-warning'>{formatCurrency(paymentSummary.depositsRefunded)}</p>
             </CardContent>
           </Card>
         </div>
       )}
 
       {/* Table */}
-      {!isError && (
+      {!isError && !hasInvalidDateRange && (
         <>
       <DataTable
         columns={columns}
