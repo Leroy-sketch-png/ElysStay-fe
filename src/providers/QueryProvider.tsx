@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, type ReactNode } from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ApiError } from '@/lib/api-client'
+import { toast } from '@/components/ui/toaster'
 
 function makeQueryClient() {
   return new QueryClient({
@@ -34,6 +35,26 @@ function makeQueryClient() {
         retry: false,
       },
     },
+    mutationCache: new MutationCache({
+      onError: (error, _variables, _context, mutation) => {
+        // Skip if the mutation already has its own onError handler
+        if (mutation.options.onError) return
+
+        if (error instanceof ApiError && error.status === 429) {
+          toast.warning('Quá nhiều yêu cầu', 'Vui lòng đợi một lát rồi thử lại.')
+        } else {
+          toast.error('Thao tác thất bại', error.message)
+        }
+      },
+    }),
+    queryCache: new QueryCache({
+      onError: (error) => {
+        // Only toast for rate limits — other query errors are handled inline by pages
+        if (error instanceof ApiError && error.status === 429) {
+          toast.warning('Quá nhiều yêu cầu', 'Vui lòng đợi một lát rồi thử lại.')
+        }
+      },
+    }),
   })
 }
 
