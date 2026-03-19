@@ -21,6 +21,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toaster'
 import { contractKeys, updateContract } from '@/lib/queries/contracts'
+import { reportKeys } from '@/lib/queries/reports'
+import { userKeys } from '@/lib/queries/users'
 import type { ContractDetailDto, UpdateContractRequest } from '@/types/api'
 
 // ─── Schema ─────────────────────────────────────────────
@@ -77,6 +79,8 @@ export function EditContractDialog({
     onSuccess: () => {
       toast.success('Contract updated')
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
@@ -113,7 +117,7 @@ export function EditContractDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-5'>
             {/* End Date */}
             <div className='space-y-2'>

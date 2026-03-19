@@ -24,8 +24,12 @@ import { toast } from '@/components/ui/toaster'
 import { formatCurrency } from '@/lib/utils'
 import { contractKeys, createContract } from '@/lib/queries/contracts'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import { roomKeys, fetchRooms } from '@/lib/queries/rooms'
 import { tenantKeys, fetchTenants } from '@/lib/queries/tenants'
+import { paymentKeys } from '@/lib/queries/payments'
+import { invoiceKeys } from '@/lib/queries/invoices'
+import { userKeys } from '@/lib/queries/users'
 import type { CreateContractRequest } from '@/types/api'
 
 // ─── Validation ─────────────────────────────────────────
@@ -37,15 +41,22 @@ const contractSchema = z.object({
   startDate: z.string().min(1, 'Start date is required'),
   endDate: z.string().min(1, 'End date is required'),
   moveInDate: z.string().min(1, 'Move-in date is required'),
-  monthlyRent: z.number().positive('Rent must be positive'),
-  depositAmount: z.number().min(0, 'Deposit cannot be negative'),
+  monthlyRent: z.number({ error: 'Monthly rent is required' }).positive('Rent must be positive'),
+  depositAmount: z.number({ error: 'Deposit amount is required' }).min(0, 'Deposit cannot be negative'),
   note: z.string().max(500).optional().or(z.literal('')),
 }).refine((data) => data.endDate > data.startDate, {
   message: 'End date must be after start date',
   path: ['endDate'],
+}).refine((data) => !data.moveInDate || !data.startDate || data.moveInDate >= data.startDate, {
+  message: 'Move-in date cannot be before start date',
+  path: ['moveInDate'],
+}).refine((data) => !data.moveInDate || !data.endDate || data.moveInDate <= data.endDate, {
+  message: 'Move-in date cannot be after end date',
+  path: ['moveInDate'],
 })
 
-type ContractFormData = z.infer<typeof contractSchema>
+type ContractFormData = z.input<typeof contractSchema>
+type ContractFormOutput = z.output<typeof contractSchema>
 
 // ─── Props ──────────────────────────────────────────────
 
@@ -66,7 +77,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
     watch,
     setValue,
     formState: { errors },
-  } = useForm<ContractFormData>({
+  } = useForm<ContractFormData, unknown, ContractFormOutput>({
     resolver: zodResolver(contractSchema),
     defaultValues: {
       buildingId: '',
@@ -101,22 +112,22 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
 
   // ─── Data: Buildings ──────────────────────────────────
   const { data: buildingsData } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: open,
   })
 
   // ─── Data: Available Rooms ────────────────────────────
   const { data: roomsData } = useQuery({
-    queryKey: roomKeys.list({ buildingId: selectedBuildingId, status: 'Available', pageSize: 100 }),
-    queryFn: () => fetchRooms({ buildingId: selectedBuildingId, status: 'Available', pageSize: 100 }),
+    queryKey: roomKeys.list({ buildingId: selectedBuildingId, status: 'Available', pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchRooms({ buildingId: selectedBuildingId, status: 'Available', pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: open && !!selectedBuildingId,
   })
 
   // ─── Data: Active Tenants ─────────────────────────────
   const { data: tenantsData } = useQuery({
-    queryKey: tenantKeys.list({ pageSize: 200 }),
-    queryFn: () => fetchTenants({ pageSize: 200 }),
+    queryKey: tenantKeys.list({ pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchTenants({ pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: open,
   })
 
@@ -145,6 +156,9 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
       toast.success('Contract created', 'Deposit payment has been recorded automatically.')
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: paymentKeys.all })
+      queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error & { status?: number }) => {
@@ -156,7 +170,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
     },
   })
 
-  const onSubmit = (data: ContractFormData) => {
+  const onSubmit = (data: ContractFormOutput) => {
     createMutation.mutate({
       roomId: data.roomId,
       tenantUserId: data.tenantUserId,
@@ -181,7 +195,7 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-5'>
             {/* Building + Room Selection */}
             <div className='grid gap-4 sm:grid-cols-2'>
@@ -308,7 +322,9 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                   type='number'
                   min={0}
                   step={100000}
-                  {...register('monthlyRent', { valueAsNumber: true })}
+                  {...register('monthlyRent', {
+                    setValueAs: (value) => value === '' ? undefined : Number(value),
+                  })}
                   aria-invalid={!!errors.monthlyRent}
                 />
                 {errors.monthlyRent && <p className='text-xs text-destructive'>{errors.monthlyRent.message}</p>}
@@ -323,7 +339,9 @@ export function ContractFormDialog({ open, onOpenChange }: ContractFormDialogPro
                   type='number'
                   min={0}
                   step={100000}
-                  {...register('depositAmount', { valueAsNumber: true })}
+                  {...register('depositAmount', {
+                    setValueAs: (value) => value === '' ? undefined : Number(value),
+                  })}
                   aria-invalid={!!errors.depositAmount}
                 />
                 {errors.depositAmount && <p className='text-xs text-destructive'>{errors.depositAmount.message}</p>}

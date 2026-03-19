@@ -19,21 +19,41 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/toaster'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, parseDateInput } from '@/lib/utils'
 import { contractKeys, renewContract } from '@/lib/queries/contracts'
+import { roomKeys } from '@/lib/queries/rooms'
+import { reportKeys } from '@/lib/queries/reports'
+import { userKeys } from '@/lib/queries/users'
 import type { ContractDetailDto, RenewContractRequest } from '@/types/api'
 
 // ─── Schema ─────────────────────────────────────────────
 
 const renewSchema = z.object({
   newEndDate: z.string().min(1, 'New end date is required'),
-  newMonthlyRent: z.union([
-    z.literal(0),
-    z.number().positive('Rent must be positive'),
-  ]).optional(),
+  newMonthlyRent: z
+    .preprocess(
+      (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
+      z.number().positive('Rent must be positive').optional(),
+    ),
 })
 
-type RenewFormData = z.infer<typeof renewSchema>
+/** Build a schema with date-ordering validation scoped to the computed newStartDate. */
+function buildRenewSchema(newStartDate: string) {
+  return renewSchema.refine(
+    (data) => data.newEndDate > newStartDate,
+    { message: 'End date must be after start date', path: ['newEndDate'] },
+  )
+}
+
+type RenewFormInput = z.input<typeof renewSchema>
+type RenewFormData = z.output<typeof renewSchema>
+
+function toLocalDateInputValue(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 // ─── Props ──────────────────────────────────────────────
 
@@ -51,17 +71,24 @@ export function RenewContractDialog({
   const queryClient = useQueryClient()
 
   // New contract starts the day after current end date
+  // Use parseDateInput to avoid timezone shift bugs with new Date() on date-only strings
   const newStartDate = (() => {
-    const d = new Date(contract.endDate)
+    const d = parseDateInput(contract.endDate)
     d.setDate(d.getDate() + 1)
-    return d.toISOString().split('T')[0]
+    return toLocalDateInputValue(d)
   })()
 
   // Default new end: 1 year from new start
   const defaultNewEnd = (() => {
     const d = new Date(newStartDate)
     d.setFullYear(d.getFullYear() + 1)
-    return d.toISOString().split('T')[0]
+    return toLocalDateInputValue(d)
+  })()
+
+  const minNewEndDate = (() => {
+    const d = new Date(newStartDate)
+    d.setDate(d.getDate() + 1)
+    return toLocalDateInputValue(d)
   })()
 
   const {
@@ -69,11 +96,11 @@ export function RenewContractDialog({
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<RenewFormData>({
-    resolver: zodResolver(renewSchema),
+  } = useForm<RenewFormInput, unknown, RenewFormData>({
+    resolver: zodResolver(buildRenewSchema(newStartDate)),
     defaultValues: {
       newEndDate: defaultNewEnd,
-      newMonthlyRent: 0,
+      newMonthlyRent: undefined,
     },
   })
 
@@ -81,7 +108,7 @@ export function RenewContractDialog({
     if (open) {
       reset({
         newEndDate: defaultNewEnd,
-        newMonthlyRent: 0,
+        newMonthlyRent: undefined,
       })
     }
   }, [open, reset, defaultNewEnd])
@@ -94,6 +121,10 @@ export function RenewContractDialog({
         'A new contract has been created. The old contract is now terminated.',
       )
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
+      queryClient.invalidateQueries({ queryKey: contractKeys.detail(contract.id) })
+      queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
@@ -122,7 +153,7 @@ export function RenewContractDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-5'>
             {/* Current contract info */}
             <div className='rounded-lg bg-muted/50 p-4 space-y-2'>
@@ -163,7 +194,7 @@ export function RenewContractDialog({
               <Input
                 id='renew-end'
                 type='date'
-                min={newStartDate}
+                min={minNewEndDate}
                 {...register('newEndDate')}
                 aria-invalid={!!errors.newEndDate}
               />
@@ -181,7 +212,13 @@ export function RenewContractDialog({
                 min={0}
                 step={100000}
                 placeholder={String(contract.monthlyRent)}
-                {...register('newMonthlyRent', { valueAsNumber: true })}
+                {...register('newMonthlyRent', {
+                  setValueAs: (v) => {
+                    if (v === '') return undefined
+                    const parsed = Number(v)
+                    return Number.isFinite(parsed) ? parsed : undefined
+                  },
+                })}
                 aria-invalid={!!errors.newMonthlyRent}
               />
               {errors.newMonthlyRent && typeof errors.newMonthlyRent.message === 'string' && (
@@ -193,7 +230,7 @@ export function RenewContractDialog({
             </div>
 
             {/* What happens */}
-            <div className='rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200 space-y-1'>
+            <div className='rounded-lg border border-warning/20 bg-warning/5 p-3 text-xs text-foreground space-y-1'>
               <p className='font-medium'>What happens on renewal:</p>
               <ul className='list-disc pl-4 space-y-0.5'>
                 <li>Current contract → Terminated (no deposit refund)</li>
