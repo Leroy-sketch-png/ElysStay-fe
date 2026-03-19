@@ -163,7 +163,7 @@ function DialogContent({ className, children, size = 'md', ...props }: DialogCon
           role='dialog'
           aria-modal='true'
           className={cn(
-            'relative w-full rounded-xl border bg-background shadow-lg animate-slideInUp',
+            'relative w-full rounded-lg border bg-background shadow-lg animate-slideInUp',
             'max-h-[85vh] overflow-y-auto',
             sizeClasses[size],
             className,

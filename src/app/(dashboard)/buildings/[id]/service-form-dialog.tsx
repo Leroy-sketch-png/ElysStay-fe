@@ -28,7 +28,7 @@ import type { ServiceDto, CreateServiceRequest, UpdateServiceRequest } from '@/t
 const serviceSchema = z.object({
   name: z.string().min(1, 'Name is required').max(200),
   unit: z.string().min(1, 'Unit is required').max(50),
-  unitPrice: z.number().min(0, 'Price must be positive'),
+  unitPrice: z.number().positive('Price must be positive'),
   isMetered: z.enum(['true', 'false']),
 })
 
@@ -61,7 +61,7 @@ export function ServiceFormDialog({
     formState: { errors },
   } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
-    defaultValues: { name: '', unit: '', unitPrice: 0, isMetered: 'false' },
+    defaultValues: { name: '', unit: '', unitPrice: 1000, isMetered: 'false' },
   })
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export function ServiceFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             <div className='space-y-2'>
               <Label htmlFor='svc-name'>Service Name *</Label>

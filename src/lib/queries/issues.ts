@@ -1,4 +1,4 @@
-import { api, toQueryString } from '@/lib/api-client'
+import { api, toQueryString, requireData } from '@/lib/api-client'
 import type {
   MaintenanceIssueDto,
   CreateIssueRequest,
@@ -39,22 +39,22 @@ export async function fetchIssues(filters: IssueFilters = {}) {
 
 export async function fetchIssueById(id: string) {
   const response = await api.get<MaintenanceIssueDto>(`/issues/${id}`)
-  return response.data!
+  return requireData(response)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function createIssue(data: CreateIssueRequest) {
   const response = await api.post<MaintenanceIssueDto>('/issues', data)
-  return response.data!
+  return requireData(response)
 }
 
 export async function updateIssue(id: string, data: UpdateIssueRequest) {
   const response = await api.put<MaintenanceIssueDto>(`/issues/${id}`, data)
-  return response.data!
+  return requireData(response)
 }
 
 export async function changeIssueStatus(id: string, data: ChangeIssueStatusRequest) {
   const response = await api.patch<MaintenanceIssueDto>(`/issues/${id}/status`, data)
-  return response.data!
+  return requireData(response)
 }

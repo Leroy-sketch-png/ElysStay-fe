@@ -18,6 +18,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
 import { cn, timeAgo } from '@/lib/utils'
 import { toast } from '@/components/ui/toaster'
+import Link from 'next/link'
 import {
   notificationKeys,
   fetchNotifications,
@@ -25,7 +26,7 @@ import {
   markAllNotificationsRead,
   type NotificationFilters,
 } from '@/lib/queries/notifications'
-import type { NotificationDto } from '@/types/api'
+import type { NotificationDto, NotificationType } from '@/types/api'
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -33,8 +34,12 @@ type ReadFilter = 'all' | 'unread' | 'read'
 
 // ─── Notification type icon/label mapping ───────────────
 
-function getNotificationTypeLabel(type: string): string {
-  const map: Record<string, string> = {
+function getNotificationTypeLabel(type: NotificationType): string {
+  const map: Record<NotificationType, string> = {
+    INVOICE_SENT: 'Invoice',
+    INVOICE_VOIDED: 'Invoice',
+    PAYMENT_RECORDED: 'Payment',
+    ISSUE: 'Maintenance',
     InvoiceGenerated: 'Invoice',
     PaymentReceived: 'Payment',
     ContractExpiring: 'Contract',
@@ -42,19 +47,38 @@ function getNotificationTypeLabel(type: string): string {
     ReservationUpdate: 'Reservation',
     SystemAlert: 'System',
   }
-  return map[type] || type
+  return map[type]
 }
 
-function getNotificationTypeColor(type: string): string {
-  const map: Record<string, string> = {
-    InvoiceGenerated: 'bg-blue-100 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400',
-    PaymentReceived: 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-400',
-    ContractExpiring: 'bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400',
-    MaintenanceUpdate: 'bg-orange-100 text-orange-700 dark:bg-orange-950/30 dark:text-orange-400',
-    ReservationUpdate: 'bg-purple-100 text-purple-700 dark:bg-purple-950/30 dark:text-purple-400',
-    SystemAlert: 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400',
+function getNotificationTypeColor(type: NotificationType): string {
+  const map: Record<NotificationType, string> = {
+    INVOICE_SENT: 'bg-info/10 text-info',
+    INVOICE_VOIDED: 'bg-destructive/10 text-destructive',
+    PAYMENT_RECORDED: 'bg-success/10 text-success',
+    ISSUE: 'bg-warning/10 text-warning',
+    InvoiceGenerated: 'bg-info/10 text-info',
+    PaymentReceived: 'bg-success/10 text-success',
+    ContractExpiring: 'bg-warning/10 text-warning',
+    MaintenanceUpdate: 'bg-warning/10 text-warning',
+    ReservationUpdate: 'bg-info/10 text-info',
+    SystemAlert: 'bg-destructive/10 text-destructive',
   }
-  return map[type] || 'bg-muted text-muted-foreground'
+  return map[type]
+}
+
+// ─── Notification type → detail page mapping ────────────
+
+function getNotificationHref(type: NotificationType, referenceId?: string | null): string | null {
+  if (!referenceId) return null
+  const map: Partial<Record<NotificationType, string>> = {
+    INVOICE_SENT: `/billing/invoices/${referenceId}`,
+    INVOICE_VOIDED: `/billing/invoices/${referenceId}`,
+    PAYMENT_RECORDED: `/billing/invoices/${referenceId}`,
+    ISSUE: `/maintenance/${referenceId}`,
+    InvoiceGenerated: `/billing/invoices/${referenceId}`,
+    MaintenanceUpdate: `/maintenance/${referenceId}`,
+  }
+  return map[type] ?? null
 }
 
 // ─── Notification Row ───────────────────────────────────
@@ -68,7 +92,9 @@ function NotificationRow({
   onMarkRead: (id: string) => void
   isMarking: boolean
 }) {
-  return (
+  const href = getNotificationHref(notification.type, notification.referenceId)
+
+  const content = (
     <div
       className={cn(
         'group flex gap-4 rounded-lg border p-4 transition-colors',
@@ -119,9 +145,15 @@ function NotificationRow({
           {/* Mark read button */}
           {!notification.isRead && (
             <button
-              onClick={() => onMarkRead(notification.id)}
+              type='button'
+              aria-label={`Mark ${notification.title} as read`}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                onMarkRead(notification.id)
+              }}
               disabled={isMarking}
-              className='shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer disabled:opacity-50'
+              className='shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 cursor-pointer disabled:opacity-50'
               title='Mark as read'
             >
               {isMarking ? (
@@ -135,6 +167,24 @@ function NotificationRow({
       </div>
     </div>
   )
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className='block no-underline text-inherit'
+        onClick={() => {
+          if (!notification.isRead && !isMarking) {
+            onMarkRead(notification.id)
+          }
+        }}
+      >
+        {content}
+      </Link>
+    )
+  }
+
+  return content
 }
 
 // ─── Filter Tabs ────────────────────────────────────────
@@ -159,6 +209,7 @@ function FilterTabs({
       {tabs.map((tab) => (
         <button
           key={tab.key}
+          type='button'
           onClick={() => onChange(tab.key)}
           className={cn(
             'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer',
@@ -191,24 +242,26 @@ export default function NotificationsPage() {
   const [readFilter, setReadFilter] = useState<ReadFilter>('all')
   const [markingId, setMarkingId] = useState<string | null>(null)
 
+  const currentFilters = {
+    ...filters,
+    isRead: readFilter === 'all' ? undefined : readFilter === 'read',
+  }
+
   // ─── Query ──────────────────────────────────────────────
   const { data, isLoading, isError } = useQuery({
-    queryKey: notificationKeys.list({
-      ...filters,
-      isRead: readFilter === 'all' ? undefined : readFilter === 'read',
-    }),
-    queryFn: () =>
-      fetchNotifications({
-        ...filters,
-        isRead: readFilter === 'all' ? undefined : readFilter === 'read',
-      }),
+    queryKey: notificationKeys.list(currentFilters),
+    queryFn: () => fetchNotifications(currentFilters),
+  })
+
+  const { data: unreadSummary } = useQuery({
+    queryKey: notificationKeys.list({ page: 1, pageSize: 1, isRead: false }),
+    queryFn: () => fetchNotifications({ page: 1, pageSize: 1, isRead: false }),
   })
 
   const notifications = data?.data ?? []
   const pagination = data?.pagination
 
-  // Count unread from the current page for UI badge
-  const unreadCount = notifications.filter((n) => !n.isRead).length
+  const unreadCount = unreadSummary?.pagination.totalItems ?? notifications.filter((n) => !n.isRead).length
 
   // ─── Mutations ──────────────────────────────────────────
   const markReadMutation = useMutation({
@@ -216,6 +269,9 @@ export default function NotificationsPage() {
     onMutate: (id) => setMarkingId(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all })
+    },
+    onError: () => {
+      toast.error('Failed to mark notification as read')
     },
     onSettled: () => setMarkingId(null),
   })
@@ -269,7 +325,10 @@ export default function NotificationsPage() {
       <div className='mb-6'>
         <FilterTabs
           value={readFilter}
-          onChange={setReadFilter}
+            onChange={(nextFilter) => {
+              setReadFilter(nextFilter)
+              setFilters((prev) => ({ ...prev, page: 1 }))
+            }}
           unreadCount={unreadCount}
         />
       </div>

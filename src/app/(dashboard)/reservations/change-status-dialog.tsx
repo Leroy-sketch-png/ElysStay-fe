@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -21,21 +22,26 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toaster'
 import { ReservationStatusBadge } from '@/components/ui/status-badge'
+import { canCancelReservation, canConfirmReservation } from '@/lib/domain-constants'
 import { reservationKeys, changeReservationStatus } from '@/lib/queries/reservations'
 import { roomKeys } from '@/lib/queries/rooms'
+import { userKeys } from '@/lib/queries/users'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { ReservationDto, ReservationAction } from '@/types/api'
 
 // ─── Cancel Schema (with refund fields) ─────────────────
 
-const cancelSchema = z.object({
-  refundAmount: z
-    .number({ error: 'Enter a valid amount' })
-    .min(0, 'Refund cannot be negative'),
-  refundNote: z.string().max(500).optional(),
-})
+function buildCancelSchema(depositAmount: number) {
+  return z.object({
+    refundAmount: z
+      .number({ error: 'Enter a valid amount' })
+      .min(0, 'Refund cannot be negative')
+      .max(depositAmount, `Refund cannot exceed ${formatCurrency(depositAmount)}`),
+    refundNote: z.string().trim().max(500).optional(),
+  })
+}
 
-type CancelFormData = z.infer<typeof cancelSchema>
+type CancelFormData = z.infer<ReturnType<typeof buildCancelSchema>>
 
 // ─── Props ──────────────────────────────────────────────
 
@@ -56,11 +62,12 @@ export function ChangeReservationStatusDialog({
   const {
     register,
     handleSubmit,
+    reset,
     watch,
     setValue,
     formState: { errors },
   } = useForm<CancelFormData>({
-    resolver: zodResolver(cancelSchema),
+    resolver: zodResolver(buildCancelSchema(reservation.depositAmount)),
     defaultValues: {
       refundAmount: reservation.depositAmount,
       refundNote: '',
@@ -78,10 +85,12 @@ export function ChangeReservationStatusDialog({
     onSuccess: () => {
       toast.success('Reservation confirmed')
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
+      queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
-    onError: () => {
-      toast.error('Failed to confirm reservation')
+    onError: (error: Error) => {
+      toast.error('Failed to confirm reservation', error.message)
     },
   })
 
@@ -96,10 +105,11 @@ export function ChangeReservationStatusDialog({
       toast.success('Reservation cancelled')
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
-    onError: () => {
-      toast.error('Failed to cancel reservation')
+    onError: (error: Error) => {
+      toast.error('Failed to cancel reservation', error.message)
     },
   })
 
@@ -107,9 +117,19 @@ export function ChangeReservationStatusDialog({
 
   const onCancelSubmit = handleSubmit((data) => cancelMutation.mutate(data))
 
+  useEffect(() => {
+    if (open) {
+      setMode('choose')
+      reset({
+        refundAmount: reservation.depositAmount,
+        refundNote: '',
+      })
+    }
+  }, [open, reservation.id, reservation.depositAmount, reset])
+
   // ─── Allowed actions based on current status ───────────
-  const canConfirm = reservation.status === 'Pending'
-  const canCancel = reservation.status === 'Pending' || reservation.status === 'Confirmed'
+  const canConfirm = canConfirmReservation(reservation.status)
+  const canCancel = canCancelReservation(reservation.status)
 
   return (
     <Dialog
@@ -190,12 +210,17 @@ export function ChangeReservationStatusDialog({
                     Cancel Reservation…
                   </Button>
                 )}
+                {!canConfirm && !canCancel && (
+                  <p className='text-sm text-muted-foreground'>
+                    No actions available for reservations in {reservation.status} status.
+                  </p>
+                )}
               </div>
             </DialogBody>
           </>
         ) : (
           /* Cancel flow with refund details */
-          <form onSubmit={onCancelSubmit}>
+          <form noValidate onSubmit={onCancelSubmit}>
             <DialogHeader>
               <DialogTitle>Cancel Reservation</DialogTitle>
               <DialogDescription>
@@ -230,14 +255,14 @@ export function ChangeReservationStatusDialog({
                   <button
                     type='button'
                     className='text-xs underline text-primary'
-                    onClick={() => setValue('refundAmount', reservation.depositAmount)}
+                    onClick={() => setValue('refundAmount', reservation.depositAmount, { shouldValidate: true })}
                   >
                     Full refund
                   </button>
                   <button
                     type='button'
                     className='text-xs underline text-primary'
-                    onClick={() => setValue('refundAmount', 0)}
+                    onClick={() => setValue('refundAmount', 0, { shouldValidate: true })}
                   >
                     No refund
                   </button>
@@ -245,7 +270,7 @@ export function ChangeReservationStatusDialog({
 
                 {/* Refund preview */}
                 {isPartialRefund && (
-                  <p className='text-xs text-amber-600'>
+                  <p className='text-xs text-warning'>
                     Partial refund: {formatCurrency(refundAmount)} of {formatCurrency(reservation.depositAmount)}
                     {' '}({formatCurrency(reservation.depositAmount - refundAmount)} retained)
                   </p>

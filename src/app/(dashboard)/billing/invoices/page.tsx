@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  FileText, Plus, Send, AlertTriangle, Eye, Loader2, Filter,
+  FileText, Plus, Send, AlertTriangle, Eye, Loader2, Filter, Building2,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
@@ -17,7 +17,9 @@ import { DataTable, type Column } from '@/components/ui/data-table'
 import { EmptyState } from '@/components/EmptyState'
 import { InvoiceStatusBadge } from '@/components/ui/status-badge'
 import { Pagination } from '@/components/ui/pagination'
+import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
+import { INVOICE_STATUS_OPTIONS, canSendInvoice, DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import { formatCurrency, formatDate, formatBillingPeriod, getCurrentBillingPeriod } from '@/lib/utils'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
 import {
@@ -28,24 +30,20 @@ import {
   batchSendInvoices,
   voidInvoice,
 } from '@/lib/queries/invoices'
+import { reportKeys } from '@/lib/queries/reports'
+import { userKeys } from '@/lib/queries/users'
 import type { InvoiceDto, InvoiceStatus } from '@/types/api'
-
-const statusOptions: { label: string; value: InvoiceStatus | '' }[] = [
-  { label: 'All Statuses', value: '' },
-  { label: 'Draft', value: 'Draft' },
-  { label: 'Sent', value: 'Sent' },
-  { label: 'Partially Paid', value: 'PartiallyPaid' },
-  { label: 'Paid', value: 'Paid' },
-  { label: 'Overdue', value: 'Overdue' },
-  { label: 'Void', value: 'Void' },
-]
 
 // ─── Page ───────────────────────────────────────────────
 
 export default function InvoicesPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const queryClient = useQueryClient()
   const defaultPeriod = getCurrentBillingPeriod()
+
+  // Support pre-filtering by contractId from URL (e.g. from contract detail page)
+  const contractIdParam = searchParams.get('contractId') ?? undefined
 
   // ─── State ─────────────────────────────────────────────
   const [selectedBuildingId, setSelectedBuildingId] = useState('')
@@ -55,19 +53,21 @@ export default function InvoicesPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [batchSendOpen, setBatchSendOpen] = useState(false)
+  const [sendTarget, setSendTarget] = useState<string | null>(null)
+  const hasActiveFilters = Boolean(
+    contractIdParam
+      || selectedBuildingId
+      || billingYear !== defaultPeriod.year
+      || billingMonth !== defaultPeriod.month
+      || statusFilter,
+  )
 
   // ─── Data: Buildings ───────────────────────────────────
   const { data: buildingsData, isLoading: buildingsLoading } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
-
-  // Auto-select first building
-  useEffect(() => {
-    if (!selectedBuildingId && buildingsData?.data && buildingsData.data.length > 0) {
-      setSelectedBuildingId(buildingsData.data[0].id)
-    }
-  }, [buildingsData, selectedBuildingId])
 
   // Reset page on filter change
   useEffect(() => {
@@ -78,23 +78,24 @@ export default function InvoicesPage() {
   // ─── Data: Invoices ────────────────────────────────────
   const { data: invoicesData, isLoading: invoicesLoading, error } = useQuery({
     queryKey: invoiceKeys.list({
-      buildingId: selectedBuildingId,
-      billingYear,
-      billingMonth,
+      buildingId: selectedBuildingId || undefined,
+      contractId: contractIdParam,
+      billingYear: contractIdParam ? undefined : billingYear,
+      billingMonth: contractIdParam ? undefined : billingMonth,
       status: statusFilter || undefined,
       page,
       pageSize,
     }),
     queryFn: () =>
       fetchInvoices({
-        buildingId: selectedBuildingId,
-        billingYear,
-        billingMonth,
+        buildingId: selectedBuildingId || undefined,
+        contractId: contractIdParam,
+        billingYear: contractIdParam ? undefined : billingYear,
+        billingMonth: contractIdParam ? undefined : billingMonth,
         status: statusFilter || undefined,
         page,
         pageSize,
       }),
-    enabled: !!selectedBuildingId,
   })
 
   const invoices = invoicesData?.data ?? []
@@ -127,6 +128,8 @@ export default function InvoicesPage() {
         toast.info('No invoices to generate', 'No active contracts found.')
       }
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
       toast.error('Failed to generate invoices', error.message)
@@ -138,6 +141,8 @@ export default function InvoicesPage() {
     onSuccess: () => {
       toast.success('Invoice sent')
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
       toast.error('Failed to send invoice', error.message)
@@ -149,6 +154,8 @@ export default function InvoicesPage() {
     onSuccess: (result) => {
       toast.success(`${result?.sentCount ?? 0} invoice(s) sent`)
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       setSelectedIds([])
     },
     onError: (error: Error) => {
@@ -164,7 +171,7 @@ export default function InvoicesPage() {
         key: 'select',
         header: '',
         render: (row) =>
-          row.status === 'Draft' ? (
+          canSendInvoice(row.status) ? (
             <input
               type='checkbox'
               className='size-4 cursor-pointer'
@@ -205,7 +212,7 @@ export default function InvoicesPage() {
         key: 'paidAmount',
         header: 'Paid',
         render: (row) => (
-          <span className={row.paidAmount < row.totalAmount ? 'text-muted-foreground' : 'text-green-600 dark:text-green-400'}>
+          <span className={row.paidAmount < row.totalAmount ? 'text-muted-foreground' : 'text-success'}>
             {formatCurrency(row.paidAmount)}
           </span>
         ),
@@ -236,13 +243,13 @@ export default function InvoicesPage() {
             >
               <Eye className='size-4' />
             </Button>
-            {row.status === 'Draft' && (
+            {canSendInvoice(row.status) && (
               <Button
                 variant='ghost'
                 size='sm'
                 onClick={(e) => {
                   e.stopPropagation()
-                  sendMutation.mutate(row.id)
+                  setSendTarget(row.id)
                 }}
                 disabled={sendMutation.isPending}
                 aria-label='Send invoice'
@@ -263,6 +270,63 @@ export default function InvoicesPage() {
     [invoices],
   )
 
+  function clearFilters() {
+    // Clear the contractId from URL if present
+    if (contractIdParam) {
+      router.replace('/billing/invoices')
+    }
+    setSelectedBuildingId('')
+    setBillingYear(defaultPeriod.year)
+    setBillingMonth(defaultPeriod.month)
+    setStatusFilter('')
+    setPage(1)
+    setSelectedIds([])
+  }
+
+  // ─── No Buildings Prerequisite ─────────────────────────
+  if (buildingsData && (buildingsData.data ?? []).length === 0) {
+    return (
+      <PageTransition>
+      <PageContainer title='Invoices' description='Generate and manage monthly invoices.'>
+        <EmptyState
+          icon={<Building2 className='size-12' />}
+          title='No buildings yet'
+          description='Add your first building to start managing invoices.'
+          actionLabel='Go to Buildings'
+          actionHref='/buildings'
+        />
+      {/* Batch Send Confirm Dialog */}
+      <ConfirmDialog
+        open={batchSendOpen}
+        onOpenChange={setBatchSendOpen}
+        title='Send Selected Invoices'
+        description={`Are you sure you want to send ${selectedIds.length} selected invoice${selectedIds.length > 1 ? 's' : ''} to tenants?`}
+        confirmLabel='Send All'
+        loading={batchSendMutation.isPending}
+        onConfirm={() => {
+          batchSendMutation.mutate(undefined, { onSettled: () => setBatchSendOpen(false) })
+        }}
+      />
+
+      {/* Single Send Confirm Dialog */}
+      <ConfirmDialog
+        open={!!sendTarget}
+        onOpenChange={(open) => { if (!open) setSendTarget(null) }}
+        title='Send Invoice'
+        description='This will mark the invoice as Sent and notify the tenant. Continue?'
+        confirmLabel='Send'
+        loading={sendMutation.isPending}
+        onConfirm={() => {
+          if (sendTarget) {
+            sendMutation.mutate(sendTarget, { onSettled: () => setSendTarget(null) })
+          }
+        }}
+      />
+    </PageContainer>
+      </PageTransition>
+    )
+  }
+
   // ─── Render ────────────────────────────────────────────
 
   return (
@@ -272,10 +336,16 @@ export default function InvoicesPage() {
       description='Generate and manage monthly invoices.'
       actions={
         <div className='flex items-center gap-2'>
+          {hasActiveFilters && (
+            <Button variant='outline' onClick={clearFilters}>
+              <Filter className='size-4' />
+              Reset Filters
+            </Button>
+          )}
           {selectedIds.length > 0 && (
             <Button
               variant='outline'
-              onClick={() => batchSendMutation.mutate()}
+              onClick={() => setBatchSendOpen(true)}
               disabled={batchSendMutation.isPending}
             >
               {batchSendMutation.isPending ? (
@@ -286,25 +356,49 @@ export default function InvoicesPage() {
               Send Selected ({selectedIds.length})
             </Button>
           )}
-          <Button
-            onClick={() => generateMutation.mutate()}
-            disabled={generateMutation.isPending || !selectedBuildingId}
-          >
-            {generateMutation.isPending ? (
-              <>
-                <Loader2 className='size-4 animate-spin' />
-                Generating…
-              </>
-            ) : (
-              <>
-                <Plus className='size-4' />
-                Generate Invoices
-              </>
+          <div className='relative group'>
+            <Button
+              onClick={() => generateMutation.mutate()}
+              disabled={generateMutation.isPending || !selectedBuildingId}
+            >
+              {generateMutation.isPending ? (
+                <>
+                  <Loader2 className='size-4 animate-spin' />
+                  Generating…
+                </>
+              ) : (
+                <>
+                  <Plus className='size-4' />
+                  Generate Invoices
+                </>
+              )}
+            </Button>
+            {!selectedBuildingId && (
+              <span className='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md border'>
+                Select a building first
+              </span>
             )}
-          </Button>
+          </div>
         </div>
       }
     >
+      {/* Contract Filter Banner */}
+      {contractIdParam && (
+        <div className='mb-4 flex items-center gap-3 rounded-lg border border-info/20 bg-info/5 p-3'>
+          <FileText className='size-4 text-info shrink-0' />
+          <p className='text-sm'>
+            Showing invoices for a specific contract.{' '}
+            <button
+              type='button'
+              className='text-primary underline cursor-pointer'
+              onClick={clearFilters}
+            >
+              Show all invoices
+            </button>
+          </p>
+        </div>
+      )}
+
       {/* Filters */}
       <Card className='mb-6'>
         <CardContent className='pt-6'>
@@ -320,6 +414,7 @@ export default function InvoicesPage() {
                   value={selectedBuildingId}
                   onChange={(e) => setSelectedBuildingId(e.target.value)}
                 >
+                  <option value=''>All buildings</option>
                   {(buildingsData?.data ?? []).map((b) => (
                     <option key={b.id} value={b.id}>{b.name}</option>
                   ))}
@@ -365,7 +460,7 @@ export default function InvoicesPage() {
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as InvoiceStatus | '')}
               >
-                {statusOptions.map((opt) => (
+                {INVOICE_STATUS_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
               </Select>
@@ -386,6 +481,13 @@ export default function InvoicesPage() {
             <AlertTriangle className='size-8 text-destructive mx-auto mb-2' />
             <p className='font-medium text-destructive'>Failed to load invoices</p>
             <p className='text-sm text-muted-foreground'>{(error as Error).message}</p>
+            <Button
+              variant='outline'
+              className='mt-4'
+              onClick={() => queryClient.invalidateQueries({ queryKey: invoiceKeys.all })}
+            >
+              Retry
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -407,15 +509,20 @@ export default function InvoicesPage() {
           icon={<FileText className='size-6' />}
           title='No invoices found'
           description={
-            statusFilter
-              ? 'No invoices match your filters.'
+            hasActiveFilters
+              ? 'No invoices match the current building, period, or status filters.'
               : `No invoices for ${formatBillingPeriod(billingYear, billingMonth)}. Click "Generate Invoices" to create them.`
           }
         >
-          {!statusFilter && (
+          {!hasActiveFilters && (
             <Button onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
               <Plus className='size-4' />
               Generate Invoices
+            </Button>
+          )}
+          {hasActiveFilters && (
+            <Button variant='outline' onClick={clearFilters}>
+              Clear Filters
             </Button>
           )}
         </EmptyState>

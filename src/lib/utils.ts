@@ -5,6 +5,25 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function parseDateInput(date: string | Date): Date {
+  if (date instanceof Date) return date
+
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
+  if (dateOnlyMatch) {
+    const [, y, m, d] = dateOnlyMatch
+    return new Date(Number(y), Number(m) - 1, Number(d))
+  }
+
+  return new Date(date)
+}
+
+export function toLocalDateInputValue(date: Date = new Date()): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 /**
  * Format a number to Vietnamese currency (VND).
  */
@@ -33,7 +52,7 @@ export function formatDate(date: string | Date): string {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
-  }).format(new Date(date))
+  }).format(parseDateInput(date))
 }
 
 /**

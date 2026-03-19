@@ -1,4 +1,4 @@
-import { api, toQueryString } from '@/lib/api-client'
+import { api, toQueryString, requireData } from '@/lib/api-client'
 import type {
   ReservationDto,
   CreateReservationRequest,
@@ -38,17 +38,17 @@ export async function fetchReservations(filters: ReservationFilters = {}) {
 
 export async function fetchReservationById(id: string) {
   const response = await api.get<ReservationDto>(`/reservations/${id}`)
-  return response.data!
+  return requireData(response)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function createReservation(data: CreateReservationRequest) {
   const res = await api.post<ReservationDto>('/reservations', data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function changeReservationStatus(id: string, data: ChangeReservationStatusRequest) {
   const res = await api.patch<ReservationDto>(`/reservations/${id}/status`, data)
-  return res.data!
+  return requireData(res)
 }

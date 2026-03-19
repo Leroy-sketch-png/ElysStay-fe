@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Plus, FileText, AlertTriangle } from 'lucide-react'
+import { Plus, FileText, AlertTriangle, Building2 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
@@ -13,13 +13,14 @@ import { Pagination } from '@/components/ui/pagination'
 import { ContractStatusBadge, DepositStatusBadge } from '@/components/ui/status-badge'
 import { EmptyState } from '@/components/EmptyState'
 import { toast } from '@/components/ui/toaster'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, toLocalDateInputValue } from '@/lib/utils'
 import {
   contractKeys,
   fetchContracts,
   type ContractFilters,
 } from '@/lib/queries/contracts'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import type { ContractDto } from '@/types/api'
 import { ContractFormDialog } from './contract-form-dialog'
 
@@ -47,15 +48,16 @@ export default function ContractsPage() {
   })
 
   const { data: buildingsData } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
 
   // ─── Helpers ────────────────────────────────────────────
   const isExpiringSoon = (endDate: string) => {
-    const end = new Date(endDate)
-    const now = new Date()
-    const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const [year, month, day] = endDate.split('-').map(Number)
+    const end = new Date(year, month - 1, day)
+    const today = new Date(toLocalDateInputValue())
+    const daysLeft = Math.ceil((end.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
     return daysLeft >= 0 && daysLeft <= 30
   }
 
@@ -85,7 +87,7 @@ export default function ContractsPage() {
             {formatDate(row.startDate)} — {formatDate(row.endDate)}
           </span>
           {row.status === 'Active' && isExpiringSoon(row.endDate) && (
-            <p className='text-xs text-amber-600 dark:text-amber-400 font-medium'>Expiring soon</p>
+            <p className='text-xs text-warning font-medium'>Expiring soon</p>
           )}
         </div>
       ),
@@ -130,6 +132,23 @@ export default function ContractsPage() {
   ]
 
   const hasActiveFilters = !!buildingFilter || !!statusFilter
+
+  // ─── No Buildings Prerequisite ─────────────────────────
+  if (buildingsData && (buildingsData.data ?? []).length === 0) {
+    return (
+      <PageTransition>
+      <PageContainer title='Contracts' description='Manage rental contracts and agreements.'>
+        <EmptyState
+          icon={<Building2 className='size-12' />}
+          title='No buildings yet'
+          description='Add your first building to start managing contracts.'
+          actionLabel='Go to Buildings'
+          actionHref='/buildings'
+        />
+      </PageContainer>
+      </PageTransition>
+    )
+  }
 
   // ─── Render ─────────────────────────────────────────────
   return (
@@ -189,7 +208,7 @@ export default function ContractsPage() {
 
       {/* Error State */}
       {isError && (
-        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+        <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
           <p className='font-medium text-destructive'>Failed to load contracts</p>
           <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>

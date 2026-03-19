@@ -23,17 +23,32 @@ import { toast } from '@/components/ui/toaster'
 import { formatCurrency } from '@/lib/utils'
 import { contractKeys, terminateContract } from '@/lib/queries/contracts'
 import { roomKeys } from '@/lib/queries/rooms'
+import { invoiceKeys } from '@/lib/queries/invoices'
+import { reportKeys } from '@/lib/queries/reports'
+import { userKeys } from '@/lib/queries/users'
 import type { ContractDetailDto, TerminateContractRequest } from '@/types/api'
 
 // ─── Schema ─────────────────────────────────────────────
 
 const terminateSchema = z.object({
   terminationDate: z.string().min(1, 'Termination date is required'),
-  deductions: z.number().min(0, 'Cannot be negative'),
-  note: z.string().max(500).optional().or(z.literal('')),
+  deductions: z
+    .preprocess(
+      (v) => (v === '' || v == null || Number.isNaN(v) ? 0 : v),
+      z.number().min(0, 'Cannot be negative'),
+    ),
+  note: z.string().trim().max(500).optional().or(z.literal('')),
 })
 
-type TerminateFormData = z.infer<typeof terminateSchema>
+type TerminateFormInput = z.input<typeof terminateSchema>
+type TerminateFormData = z.output<typeof terminateSchema>
+
+function toLocalDateInputValue(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 // ─── Props ──────────────────────────────────────────────
 
@@ -56,7 +71,7 @@ export function TerminateContractDialog({
     reset,
     watch,
     formState: { errors },
-  } = useForm<TerminateFormData>({
+  } = useForm<TerminateFormInput, unknown, TerminateFormData>({
     resolver: zodResolver(
       terminateSchema.refine(
         (data) => data.deductions <= contract.depositAmount,
@@ -67,7 +82,7 @@ export function TerminateContractDialog({
       ),
     ),
     defaultValues: {
-      terminationDate: new Date().toISOString().split('T')[0],
+      terminationDate: toLocalDateInputValue(new Date()),
       deductions: 0,
       note: '',
     },
@@ -76,14 +91,15 @@ export function TerminateContractDialog({
   useEffect(() => {
     if (open) {
       reset({
-        terminationDate: new Date().toISOString().split('T')[0],
+        terminationDate: toLocalDateInputValue(new Date()),
         deductions: 0,
         note: '',
       })
     }
   }, [open, reset])
 
-  const watchedDeductions = watch('deductions') || 0
+  const watchedDeductionsValue = watch('deductions')
+  const watchedDeductions = typeof watchedDeductionsValue === 'number' ? watchedDeductionsValue : 0
   const refundAmount = Math.max(0, contract.depositAmount - watchedDeductions)
 
   const mutation = useMutation({
@@ -92,6 +108,9 @@ export function TerminateContractDialog({
       toast.success('Contract terminated', 'Room has been set back to Available.')
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
@@ -119,7 +138,7 @@ export function TerminateContractDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-5'>
             {/* Date */}
             <div className='space-y-2'>
@@ -127,6 +146,7 @@ export function TerminateContractDialog({
               <Input
                 id='term-date'
                 type='date'
+                min={contract.startDate}
                 {...register('terminationDate')}
                 aria-invalid={!!errors.terminationDate}
               />
@@ -144,7 +164,13 @@ export function TerminateContractDialog({
                 min={0}
                 max={contract.depositAmount}
                 step={10000}
-                {...register('deductions', { valueAsNumber: true })}
+                {...register('deductions', {
+                  setValueAs: (v) => {
+                    if (v === '' || v == null) return 0
+                    const parsed = Number(v)
+                    return Number.isFinite(parsed) ? parsed : 0
+                  },
+                })}
                 aria-invalid={!!errors.deductions}
               />
               {errors.deductions && (
@@ -166,7 +192,7 @@ export function TerminateContractDialog({
               </div>
               <div className='border-t pt-2 flex justify-between text-sm font-semibold'>
                 <span>Refund to Tenant</span>
-                <span className={refundAmount > 0 ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}>
+                <span className={refundAmount > 0 ? 'text-success' : 'text-muted-foreground'}>
                   {formatCurrency(refundAmount)}
                 </span>
               </div>

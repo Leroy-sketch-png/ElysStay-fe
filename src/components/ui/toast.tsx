@@ -6,15 +6,15 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const toastVariants = cva(
-	'group pointer-events-auto relative flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs shadow-sm transition-all duration-200 animate-slideInUp bg-background/95 backdrop-blur-sm border border-border',
+	'group pointer-events-auto relative flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs shadow-sm transition-colors duration-150 animate-slideInUp bg-background/95 backdrop-blur-sm border border-border',
 	{
 		variants: {
 			variant: {
 				default: 'text-muted-foreground',
-				success: 'text-muted-foreground [&>.toast-dot]:bg-green-500',
+				success: 'text-muted-foreground [&>.toast-dot]:bg-success',
 				error: 'text-muted-foreground [&>.toast-dot]:bg-destructive',
-				warning: 'text-muted-foreground [&>.toast-dot]:bg-amber-500',
-				info: 'text-muted-foreground [&>.toast-dot]:bg-blue-500',
+				warning: 'text-muted-foreground [&>.toast-dot]:bg-warning',
+				info: 'text-muted-foreground [&>.toast-dot]:bg-info',
 			},
 		},
 		defaultVariants: { variant: 'default' },

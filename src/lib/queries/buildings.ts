@@ -1,4 +1,4 @@
-import { api, toQueryString, type ApiResponse, type PagedResponse } from '@/lib/api-client'
+import { api, toQueryString, requireData, type PagedResponse } from '@/lib/api-client'
 import type {
   BuildingDto,
   BuildingDetailDto,
@@ -37,19 +37,19 @@ export async function fetchBuildings(filters: BuildingFilters = {}) {
 
 export async function fetchBuildingById(id: string) {
   const res = await api.get<BuildingDetailDto>(`/buildings/${id}`)
-  return res.data!
+  return requireData(res)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function createBuilding(data: CreateBuildingRequest) {
   const res = await api.post<BuildingDto>('/buildings', data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function updateBuilding(id: string, data: UpdateBuildingRequest) {
   const res = await api.put<BuildingDto>(`/buildings/${id}`, data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function deleteBuilding(id: string) {

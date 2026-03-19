@@ -127,7 +127,7 @@ export default function StaffPage() {
     >
       {/* Error State */}
       {isError && (
-        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center mb-4'>
+        <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center mb-4'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
           <p className='font-medium text-destructive'>Failed to load staff</p>
           <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>

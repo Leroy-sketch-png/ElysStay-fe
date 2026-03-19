@@ -28,16 +28,29 @@ import type { RoomDto, CreateRoomRequest, UpdateRoomRequest } from '@/types/api'
 
 function roomSchema(maxFloors: number) {
   return z.object({
-    roomNumber: z.string().min(1, 'Room number is required').max(20),
-    floor: z.number().int().min(1, 'Floor must be at least 1').max(maxFloors, `Max ${maxFloors} floors`),
-    area: z.number().min(1, 'Area must be positive'),
-    price: z.number().min(0, 'Price must be positive'),
-    maxOccupants: z.number().int().min(1, 'At least 1 occupant').max(20),
-    description: z.string().max(2000).optional().or(z.literal('')),
+    roomNumber: z.string().trim().min(1, 'Room number is required').max(20),
+    floor: z.preprocess(
+      (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
+      z.number().int().min(1, 'Floor must be at least 1').max(maxFloors, `Max ${maxFloors} floors`),
+    ),
+    area: z.preprocess(
+      (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
+      z.number().min(1, 'Area must be positive'),
+    ),
+    price: z.preprocess(
+      (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
+      z.number().positive('Price must be positive'),
+    ),
+    maxOccupants: z.preprocess(
+      (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
+      z.number().int().min(1, 'At least 1 occupant').max(20),
+    ),
+    description: z.string().trim().max(2000).optional().or(z.literal('')),
   })
 }
 
-type RoomFormData = z.infer<ReturnType<typeof roomSchema>>
+type RoomFormInput = z.input<ReturnType<typeof roomSchema>>
+type RoomFormData = z.output<ReturnType<typeof roomSchema>>
 
 // ─── Props ──────────────────────────────────────────────
 
@@ -67,13 +80,13 @@ export function RoomFormDialog({
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<RoomFormData>({
+  } = useForm<RoomFormInput, unknown, RoomFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       roomNumber: '',
       floor: 1,
       area: 20,
-      price: 0,
+      price: 1000000,
       maxOccupants: 2,
       description: '',
     },
@@ -100,6 +113,7 @@ export function RoomFormDialog({
     mutationFn: (data: CreateRoomRequest) => createRoom(buildingId, data),
     onSuccess: () => {
       toast.success('Room created')
+      queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.byBuilding(buildingId) })
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(buildingId) })
       onOpenChange(false)
@@ -117,6 +131,7 @@ export function RoomFormDialog({
     mutationFn: (data: UpdateRoomRequest) => updateRoom(room!.id, data),
     onSuccess: () => {
       toast.success('Room updated')
+      queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.byBuilding(buildingId) })
       queryClient.invalidateQueries({ queryKey: roomKeys.detail(room!.id) })
       onOpenChange(false)
@@ -155,7 +170,7 @@ export function RoomFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             <div className='grid grid-cols-2 gap-4'>
               <div className='space-y-2'>
@@ -200,7 +215,7 @@ export function RoomFormDialog({
                 <Input
                   id='room-price'
                   type='number'
-                  min={0}
+                  min={1}
                   step={100000}
                   {...register('price', { valueAsNumber: true })}
                   aria-invalid={!!errors.price}

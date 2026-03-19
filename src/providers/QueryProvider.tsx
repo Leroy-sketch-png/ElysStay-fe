@@ -3,6 +3,7 @@
 import { useState, type ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ApiError } from '@/lib/api-client'
 
 function makeQueryClient() {
   return new QueryClient({
@@ -12,15 +13,22 @@ function makeQueryClient() {
         refetchOnWindowFocus: false,
         retry: (failureCount, error) => {
           // Never retry on 4xx client errors (auth, validation, not-found)
-          if (error && typeof error === 'object' && 'status' in error) {
-            const status = (error as { status: number }).status
+          // except 429 Too Many Requests which should be retried with backoff
+          if (error instanceof ApiError) {
+            const { status } = error
+            if (status === 429) return failureCount < 3
             if (status >= 400 && status < 500) return false
           }
           // Retry up to 3 times for server/network errors
           return failureCount < 3
         },
-        retryDelay: (attemptIndex) =>
-          Math.min(1000 * 2 ** attemptIndex, 10000),
+        retryDelay: (attemptIndex, error) => {
+          if (error instanceof ApiError && typeof error.retryAfterMs === 'number') {
+            return error.retryAfterMs
+          }
+
+          return Math.min(1000 * 2 ** attemptIndex, 10000)
+        },
       },
       mutations: {
         retry: false,

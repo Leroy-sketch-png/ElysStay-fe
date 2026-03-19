@@ -1,4 +1,4 @@
-import { api } from '@/lib/api-client'
+import { api, requireData } from '@/lib/api-client'
 import type {
   TenantProfileDto,
   UpdateTenantProfileRequest,
@@ -15,7 +15,7 @@ export const tenantProfileKeys = {
 
 export async function fetchTenantProfile(userId: string): Promise<TenantProfileDto> {
   const res = await api.get<TenantProfileDto>(`/tenant-profiles/${userId}`)
-  return res.data!
+  return requireData(res)
 }
 
 // ─── Mutations ──────────────────────────────────────────
@@ -25,5 +25,5 @@ export async function updateTenantProfile(
   data: UpdateTenantProfileRequest,
 ): Promise<TenantProfileDto> {
   const res = await api.put<TenantProfileDto>(`/tenant-profiles/${userId}`, data)
-  return res.data!
+  return requireData(res)
 }

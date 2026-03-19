@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { DoorOpen, AlertTriangle } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
@@ -11,6 +11,8 @@ import { Select } from '@/components/ui/select'
 import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { RoomStatusBadge } from '@/components/ui/status-badge'
+import { EmptyState } from '@/components/EmptyState'
+import { ROOM_STATUS_OPTIONS, DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import { formatCurrency } from '@/lib/utils'
 import { roomKeys, fetchRooms, type RoomFilters } from '@/lib/queries/rooms'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
@@ -18,10 +20,12 @@ import type { RoomDto } from '@/types/api'
 
 export default function RoomsPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   const [buildingFilter, setBuildingFilter] = useState<string>('')
   const [statusFilter, setStatusFilter] = useState<string>('')
+  const hasActiveFilters = Boolean(buildingFilter || statusFilter)
 
   const filters: RoomFilters = {
     buildingId: buildingFilter || undefined,
@@ -37,8 +41,8 @@ export default function RoomsPage() {
 
   // Fetch buildings for the filter dropdown
   const { data: buildingsData } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
 
   const columns: Column<RoomDto>[] = [
@@ -109,6 +113,18 @@ export default function RoomsPage() {
     <PageContainer
       title='Rooms'
       description='All rooms across your buildings.'
+      actions={hasActiveFilters ? (
+        <Button
+          variant='outline'
+          onClick={() => {
+            setBuildingFilter('')
+            setStatusFilter('')
+            setPage(1)
+          }}
+        >
+          Clear Filters
+        </Button>
+      ) : undefined}
     >
       {/* Filters */}
       <div className='flex flex-wrap items-center gap-3 mb-4'>
@@ -128,26 +144,35 @@ export default function RoomsPage() {
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
           className='w-40'
         >
-          <option value=''>All statuses</option>
-          <option value='Available'>Available</option>
-          <option value='Booked'>Booked</option>
-          <option value='Occupied'>Occupied</option>
-          <option value='Maintenance'>Maintenance</option>
+          {ROOM_STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
         </Select>
       </div>
 
       {/* Error State */}
       {isError && (
-        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
-          <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
-          <p className='font-medium text-destructive'>Failed to load rooms</p>
-          <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>
-        </div>
+        <EmptyState
+          icon={<AlertTriangle className='size-8 text-destructive' />}
+          title='Failed to load rooms'
+          description={error?.message || 'An unexpected error occurred.'}
+          actionLabel='Retry'
+          onAction={() => queryClient.invalidateQueries({ queryKey: roomKeys.all })}
+        />
       )}
 
       {/* Table */}
       {!isError && (
         <>
+          {!isLoading && (buildingsData?.data?.length ?? 0) === 0 ? (
+            <EmptyState
+              icon={<DoorOpen className='size-10' />}
+              title='No buildings yet'
+              description='Rooms belong to buildings. Create a building first so room inventory has a real home.'
+              actionLabel='Go to Buildings'
+              onAction={() => router.push('/buildings')}
+            />
+          ) : (
           <DataTable
             columns={columns}
             data={data?.data ?? []}
@@ -157,8 +182,9 @@ export default function RoomsPage() {
             emptyMessage='No rooms found matching your filters.'
             emptyIcon={<DoorOpen className='size-10' />}
           />
+          )}
 
-          {data?.pagination && data.pagination.totalPages > 1 && (
+          {(buildingsData?.data?.length ?? 0) > 0 && data?.pagination && data.pagination.totalPages > 1 && (
             <div className='mt-4'>
               <Pagination
                 page={data.pagination.page}

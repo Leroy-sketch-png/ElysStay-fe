@@ -1,11 +1,12 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import {
   ArrowLeft, FileText, CalendarDays, DollarSign, Users, BadgeCheck, Clock,
-  AlertTriangle, Pencil, Ban, RefreshCw, Building2,
+  AlertTriangle, Pencil, Ban, RefreshCw, Building2, Receipt,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ContractStatusBadge, DepositStatusBadge } from '@/components/ui/status-badge'
-import { formatDate, formatCurrency } from '@/lib/utils'
+import { formatDate, formatCurrency, toLocalDateInputValue } from '@/lib/utils'
 import { contractKeys, fetchContractById } from '@/lib/queries/contracts'
 import { ContractTenantsSection } from './contract-tenants-section'
 import { EditContractDialog } from './edit-contract-dialog'
@@ -39,12 +40,12 @@ export default function ContractDetailPage() {
         <div className='space-y-6'>
           <Skeleton className='h-8 w-64' />
           <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
           </div>
-          <Skeleton className='h-48 rounded-xl' />
+          <Skeleton className='h-48 rounded-lg' />
         </div>
       </PageContainer>
     )
@@ -69,8 +70,11 @@ export default function ContractDetailPage() {
   }
 
   const isActive = contract.status === 'Active'
+  const [endYear, endMonth, endDay] = contract.endDate.split('-').map(Number)
+  const contractEndDate = new Date(endYear, endMonth - 1, endDay)
+  const today = new Date(toLocalDateInputValue())
   const daysUntilEnd = Math.ceil(
-    (new Date(contract.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+    (contractEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
   )
   const isExpiringSoon = isActive && daysUntilEnd <= 30 && daysUntilEnd > 0
   const isExpired = isActive && daysUntilEnd <= 0
@@ -107,9 +111,9 @@ export default function ContractDetailPage() {
     >
       {/* Expiry Warning */}
       {isExpiringSoon && (
-        <div className='mb-6 flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/50'>
-          <AlertTriangle className='size-5 text-amber-600 dark:text-amber-400 shrink-0' />
-          <p className='text-sm font-medium text-amber-800 dark:text-amber-200'>
+        <div className='mb-6 flex items-center gap-3 rounded-lg border border-warning/20 bg-warning/5 p-4'>
+          <AlertTriangle className='size-5 text-warning shrink-0' />
+          <p className='text-sm font-medium text-warning'>
             This contract expires in {daysUntilEnd} day{daysUntilEnd !== 1 ? 's' : ''}.
             Consider renewing or terminating the contract.
           </p>
@@ -117,9 +121,9 @@ export default function ContractDetailPage() {
       )}
 
       {isExpired && isActive && (
-        <div className='mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/50'>
-          <AlertTriangle className='size-5 text-red-600 dark:text-red-400 shrink-0' />
-          <p className='text-sm font-medium text-red-800 dark:text-red-200'>
+        <div className='mb-6 flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-4'>
+          <AlertTriangle className='size-5 text-destructive shrink-0' />
+          <p className='text-sm font-medium text-destructive'>
             This contract has passed its end date. Please renew or terminate it.
           </p>
         </div>
@@ -140,8 +144,8 @@ export default function ContractDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className='rounded-lg bg-green-100 p-2.5 dark:bg-green-900/20'>
-              <DollarSign className='size-5 text-green-600 dark:text-green-400' />
+            <div className='rounded-lg bg-success/10 p-2.5'>
+              <DollarSign className='size-5 text-success' />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Monthly Rent</p>
@@ -151,8 +155,8 @@ export default function ContractDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className='rounded-lg bg-blue-100 p-2.5 dark:bg-blue-900/20'>
-              <DollarSign className='size-5 text-blue-600 dark:text-blue-400' />
+            <div className='rounded-lg bg-info/10 p-2.5'>
+              <DollarSign className='size-5 text-info' />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Deposit</p>
@@ -165,8 +169,8 @@ export default function ContractDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className='rounded-lg bg-amber-100 p-2.5 dark:bg-amber-900/20'>
-              <CalendarDays className='size-5 text-amber-600 dark:text-amber-400' />
+            <div className='rounded-lg bg-warning/10 p-2.5'>
+              <CalendarDays className='size-5 text-warning' />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Contract Period</p>
@@ -189,9 +193,21 @@ export default function ContractDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            <InfoRow label='Building' value={contract.buildingName} />
-            <InfoRow label='Room' value={contract.roomNumber} />
-            <InfoRow label='Main Tenant' value={contract.tenantName} />
+            <InfoRow label='Building'>
+              <Link href={`/buildings/${contract.buildingId}`} className='text-sm font-medium hover:underline'>
+                {contract.buildingName}
+              </Link>
+            </InfoRow>
+            <InfoRow label='Room'>
+              <Link href={`/rooms/${contract.roomId}`} className='text-sm font-medium hover:underline'>
+                {contract.roomNumber}
+              </Link>
+            </InfoRow>
+            <InfoRow label='Main Tenant'>
+              <Link href={`/tenants/${contract.tenantUserId}`} className='text-sm font-medium hover:underline'>
+                {contract.tenantName}
+              </Link>
+            </InfoRow>
             <InfoRow label='Move-in Date' value={formatDate(contract.moveInDate)} />
           </CardContent>
         </Card>
@@ -251,6 +267,26 @@ export default function ContractDetailPage() {
         tenants={contract.tenants}
         isActive={isActive}
       />
+
+      {/* Invoice History Link */}
+      <Card className='mt-6'>
+        <CardContent className='flex items-center justify-between p-5'>
+          <div className='flex items-center gap-3'>
+            <div className='rounded-lg bg-info/10 p-2.5'>
+              <Receipt className='size-5 text-info' />
+            </div>
+            <div>
+              <p className='font-medium text-sm'>Invoice History</p>
+              <p className='text-sm text-muted-foreground'>View all invoices generated for this contract</p>
+            </div>
+          </div>
+          <Button variant='outline' size='sm' asChild>
+            <Link href={`/billing/invoices?contractId=${id}`}>
+              View Invoices
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Dialogs */}
       {isActive && (

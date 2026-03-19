@@ -23,9 +23,11 @@ import {
   ConfirmDialog,
 } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
-import { formatDate } from '@/lib/utils'
+import { formatDate, toLocalDateInputValue } from '@/lib/utils'
 import { contractKeys, addContractTenant, removeContractTenant } from '@/lib/queries/contracts'
 import { tenantKeys, fetchTenants } from '@/lib/queries/tenants'
+import { userKeys } from '@/lib/queries/users'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import type { ContractTenantDto, AddContractTenantRequest } from '@/types/api'
 
 // ─── Add Roommate Schema ────────────────────────────────
@@ -60,6 +62,7 @@ export function ContractTenantsSection({
     onSuccess: () => {
       toast.success('Roommate removed')
       queryClient.invalidateQueries({ queryKey: contractKeys.detail(contractId) })
+      queryClient.invalidateQueries({ queryKey: contractKeys.all })
       setRemovingTenant(null)
     },
     onError: (error: Error) => {
@@ -216,13 +219,13 @@ function AddRoommateDialog({
     formState: { errors },
   } = useForm<AddRoommateFormData>({
     resolver: zodResolver(addRoommateSchema),
-    defaultValues: { tenantUserId: '', moveInDate: new Date().toISOString().split('T')[0] },
+    defaultValues: { tenantUserId: '', moveInDate: toLocalDateInputValue() },
   })
 
   // Fetch available tenants
   const { data: tenantsData } = useQuery({
-    queryKey: tenantKeys.list({ pageSize: 200 }),
-    queryFn: () => fetchTenants({ pageSize: 200 }),
+    queryKey: tenantKeys.list({ pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchTenants({ pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: open,
   })
 
@@ -236,6 +239,8 @@ function AddRoommateDialog({
     onSuccess: () => {
       toast.success('Roommate added')
       queryClient.invalidateQueries({ queryKey: contractKeys.detail(contractId) })
+      queryClient.invalidateQueries({ queryKey: contractKeys.all })
+      reset({ tenantUserId: '', moveInDate: toLocalDateInputValue() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
@@ -262,9 +267,10 @@ function AddRoommateDialog({
         </DialogHeader>
 
         <form
+          noValidate
           onSubmit={handleSubmit(onSubmit)}
           onReset={() => {
-            reset()
+            reset({ tenantUserId: '', moveInDate: toLocalDateInputValue() })
             onOpenChange(false)
           }}
         >
@@ -295,6 +301,9 @@ function AddRoommateDialog({
                   </Select>
                 )}
               />
+              {availableTenants.length === 0 && (
+                <p className='text-xs text-muted-foreground'>There are no eligible active tenants left to add to this contract.</p>
+              )}
               {errors.tenantUserId && (
                 <p className='text-xs text-destructive'>{errors.tenantUserId.message}</p>
               )}
@@ -318,7 +327,7 @@ function AddRoommateDialog({
             <Button type='reset' variant='outline' disabled={mutation.isPending}>
               Cancel
             </Button>
-            <Button type='submit' disabled={mutation.isPending}>
+            <Button type='submit' disabled={mutation.isPending || availableTenants.length === 0}>
               {mutation.isPending ? 'Adding…' : 'Add Roommate'}
             </Button>
           </DialogFooter>

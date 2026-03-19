@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Plus,
   CalendarClock,
   Building2,
+  AlertTriangle,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
@@ -15,6 +16,7 @@ import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
 import { ReservationStatusBadge } from '@/components/ui/status-badge'
+import { RESERVATION_STATUS_OPTIONS, canManageReservation, DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   reservationKeys,
@@ -22,24 +24,14 @@ import {
   type ReservationFilters,
 } from '@/lib/queries/reservations'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
-import type { ReservationDto, ReservationStatus } from '@/types/api'
+import type { ReservationDto } from '@/types/api'
 import { CreateReservationDialog } from './create-reservation-dialog'
 import { ChangeReservationStatusDialog } from './change-status-dialog'
-
-// ─── Status filter options ──────────────────────────────
-
-const STATUS_OPTIONS: { label: string; value: ReservationStatus | '' }[] = [
-  { label: 'All statuses', value: '' },
-  { label: 'Pending', value: 'Pending' },
-  { label: 'Confirmed', value: 'Confirmed' },
-  { label: 'Converted', value: 'Converted' },
-  { label: 'Cancelled', value: 'Cancelled' },
-  { label: 'Expired', value: 'Expired' },
-]
 
 // ─── Page ───────────────────────────────────────────────
 
 export default function ReservationsPage() {
+  const queryClient = useQueryClient()
   // ─── State ─────────────────────────────────────────────
   const [selectedBuildingId, setSelectedBuildingId] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
@@ -47,6 +39,7 @@ export default function ReservationsPage() {
   const [pageSize, setPageSize] = useState(20)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [statusDialogReservation, setStatusDialogReservation] = useState<ReservationDto | null>(null)
+  const hasActiveFilters = Boolean(selectedBuildingId || statusFilter)
 
   // ─── Filters ───────────────────────────────────────────
   const filters: ReservationFilters = useMemo(
@@ -61,11 +54,11 @@ export default function ReservationsPage() {
 
   // ─── Queries ───────────────────────────────────────────
   const { data: buildings } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
 
-  const { data: reservationsData, isLoading } = useQuery({
+  const { data: reservationsData, isLoading, isError, error } = useQuery({
     queryKey: reservationKeys.list(filters),
     queryFn: () => fetchReservations(filters),
   })
@@ -85,6 +78,12 @@ export default function ReservationsPage() {
   function isExpired(reservation: ReservationDto): boolean {
     if (reservation.status !== 'Pending') return false
     return new Date(reservation.expiresAt) < new Date()
+  }
+
+  function clearFilters() {
+    setSelectedBuildingId('')
+    setStatusFilter('')
+    setPage(1)
   }
 
   // ─── Columns ───────────────────────────────────────────
@@ -118,7 +117,7 @@ export default function ReservationsPage() {
         const expiring = isExpiringSoon(r)
         const expired = isExpired(r)
         return (
-          <span className={expired ? 'text-destructive font-medium' : expiring ? 'text-amber-600 dark:text-amber-400 font-medium' : ''}>
+          <span className={expired ? 'text-destructive font-medium' : expiring ? 'text-warning font-medium' : ''}>
             {formatDate(r.expiresAt)}
             {expired && ' (expired)'}
             {expiring && ' (soon)'}
@@ -145,7 +144,7 @@ export default function ReservationsPage() {
       key: 'actions',
       header: '',
       render: (r) => {
-        const canAct = r.status === 'Pending' || r.status === 'Confirmed'
+        const canAct = canManageReservation(r.status) && !isExpired(r)
         if (!canAct) return null
         return (
           <Button
@@ -164,6 +163,23 @@ export default function ReservationsPage() {
     },
   ]
 
+  // ─── No Buildings Prerequisite ─────────────────────────
+  if (buildings && (buildings.data ?? []).length === 0) {
+    return (
+      <PageTransition>
+      <PageContainer title='Reservations' description='Manage room reservation pipeline'>
+        <EmptyState
+          icon={<Building2 className='size-12' />}
+          title='No buildings yet'
+          description='Add your first building to start managing reservations.'
+          actionLabel='Go to Buildings'
+          actionHref='/buildings'
+        />
+      </PageContainer>
+      </PageTransition>
+    )
+  }
+
   // ─── Render ────────────────────────────────────────────
   return (
     <PageTransition>
@@ -171,10 +187,17 @@ export default function ReservationsPage() {
       title='Reservations'
       description='Manage room reservation pipeline'
       actions={
-        <Button onClick={() => setCreateDialogOpen(true)}>
-          <Plus className='mr-2 size-4' />
-          New Reservation
-        </Button>
+        <div className='flex items-center gap-2'>
+          {hasActiveFilters && (
+            <Button variant='outline' onClick={clearFilters}>
+              Clear Filters
+            </Button>
+          )}
+          <Button onClick={() => setCreateDialogOpen(true)}>
+            <Plus className='size-4' />
+            New Reservation
+          </Button>
+        </div>
       }
     >
       {/* Filters */}
@@ -203,7 +226,7 @@ export default function ReservationsPage() {
               setPage(1)
             }}
           >
-            {STATUS_OPTIONS.map((o) => (
+            {RESERVATION_STATUS_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
                 {o.label}
               </option>
@@ -212,18 +235,27 @@ export default function ReservationsPage() {
         </div>
       </div>
 
-      {/* Table */}
-      <DataTable
-        columns={columns}
-        data={reservations}
-        rowKey={(r) => r.id}
-        loading={isLoading}
-        emptyMessage='No reservations found.'
-        emptyIcon={<CalendarClock className='size-6' />}
-      />
+      {isError ? (
+        <EmptyState
+          icon={<AlertTriangle className='size-6 text-destructive' />}
+          title='Failed to load reservations'
+          description={error instanceof Error ? error.message : 'An unexpected error occurred while loading reservations.'}
+          actionLabel='Retry'
+          onAction={() => queryClient.invalidateQueries({ queryKey: reservationKeys.all })}
+        />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={reservations}
+          rowKey={(r) => r.id}
+          loading={isLoading}
+          emptyMessage={hasActiveFilters ? 'No reservations match the current filters.' : 'No reservations found.'}
+          emptyIcon={<CalendarClock className='size-6' />}
+        />
+      )}
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
+      {!isError && pagination && pagination.totalPages > 1 && (
         <Pagination
           page={pagination.page}
           pageSize={pagination.pageSize}

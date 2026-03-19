@@ -25,9 +25,9 @@ import type { CreateTenantRequest } from '@/types/api'
 // ─── Validation ─────────────────────────────────────────
 
 const tenantSchema = z.object({
-  email: z.string().email('Valid email required'),
-  fullName: z.string().min(1, 'Full name is required').max(200),
-  phone: z.string().max(20).optional().or(z.literal('')),
+  email: z.string().trim().email('Valid email required'),
+  fullName: z.string().trim().min(1, 'Full name is required').max(200),
+  phone: z.string().trim().regex(/^\d{10}$/, 'Phone must be exactly 10 digits').optional().or(z.literal('')),
   password: z.string().min(8, 'Password must be at least 8 characters'),
 })
 
@@ -95,7 +95,7 @@ export function CreateTenantDialog({ open, onOpenChange }: CreateTenantDialogPro
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             <div className='space-y-2'>
               <Label htmlFor='tenant-name'>Full Name *</Label>
@@ -125,9 +125,10 @@ export function CreateTenantDialog({ open, onOpenChange }: CreateTenantDialogPro
               <Input
                 id='tenant-phone'
                 type='tel'
-                placeholder='Optional'
+                placeholder='10 digits (optional)'
                 {...register('phone')}
               />
+              {errors.phone && <p className='text-xs text-destructive'>{errors.phone.message}</p>}
             </div>
 
             <div className='space-y-2'>

@@ -12,6 +12,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
 import { PageTransition } from '@/components/Motion'
 import { toast } from '@/components/ui/toaster'
+import { userKeys } from '@/lib/queries/users'
 import { formatDate } from '@/lib/utils'
 import {
   buildingKeys,
@@ -45,6 +46,7 @@ export default function BuildingsPage() {
     onSuccess: () => {
       toast.success('Building deleted successfully')
       queryClient.invalidateQueries({ queryKey: buildingKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       setDeleteTarget(null)
     },
     onError: (error: Error & { status?: number }) => {
@@ -167,6 +169,7 @@ export default function BuildingsPage() {
             onChange={(e) => setSearchName(e.target.value)}
             onKeyDown={handleKeyDown}
             className='pl-9'
+            aria-label='Search buildings by name'
           />
         </div>
         <div className='relative flex-1 min-w-[200px] max-w-xs'>
@@ -177,6 +180,7 @@ export default function BuildingsPage() {
             onChange={(e) => setSearchAddress(e.target.value)}
             onKeyDown={handleKeyDown}
             className='pl-9'
+            aria-label='Search buildings by address'
           />
         </div>
         <Button variant='secondary' onClick={handleSearch}>
@@ -191,7 +195,7 @@ export default function BuildingsPage() {
 
       {/* Error State */}
       {isError && (
-        <div className='rounded-xl border border-destructive/30 bg-destructive/5 p-8 text-center'>
+        <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-8 text-center'>
           <AlertTriangle className='mx-auto size-10 text-destructive mb-3' />
           <p className='font-medium text-destructive'>Failed to load buildings</p>
           <p className='mt-1 text-sm text-muted-foreground'>{error?.message || 'An unexpected error occurred.'}</p>

@@ -32,9 +32,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   // Initialize from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null
-    if (stored && ['light', 'dark', 'system'].includes(stored)) {
-      setThemeState(stored)
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored && ['light', 'dark', 'system'].includes(stored)) {
+        setThemeState(stored as Theme)
+      }
+    } catch {
+      // localStorage unavailable (private browsing, etc.) — use default
     }
   }, [])
 
@@ -72,7 +76,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme)
-    localStorage.setItem(STORAGE_KEY, newTheme)
+    try {
+      localStorage.setItem(STORAGE_KEY, newTheme)
+    } catch {
+      // localStorage unavailable — theme still applies for this session
+    }
   }, [])
 
   return (

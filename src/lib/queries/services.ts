@@ -1,4 +1,4 @@
-import { api, type ApiResponse } from '@/lib/api-client'
+import { api, requireData } from '@/lib/api-client'
 import type {
   ServiceDto,
   CreateServiceRequest,
@@ -16,19 +16,19 @@ export const serviceKeys = {
 
 export async function fetchBuildingServices(buildingId: string) {
   const res = await api.get<ServiceDto[]>(`/buildings/${buildingId}/services`)
-  return res.data!
+  return requireData(res)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function createService(buildingId: string, data: CreateServiceRequest) {
   const res = await api.post<ServiceDto>(`/buildings/${buildingId}/services`, data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function updateService(id: string, data: UpdateServiceRequest) {
   const res = await api.put<ServiceDto>(`/services/${id}`, data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function deactivateService(id: string) {

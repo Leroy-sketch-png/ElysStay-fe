@@ -1,4 +1,4 @@
-import { api, toQueryString, type ApiResponse, type PagedResponse } from '@/lib/api-client'
+import { api, toQueryString, requireData, type PagedResponse } from '@/lib/api-client'
 import type {
   RoomDto,
   CreateRoomRequest,
@@ -52,19 +52,19 @@ export async function fetchBuildingRooms(buildingId: string, filters: Omit<RoomF
 
 export async function fetchRoomById(id: string) {
   const res = await api.get<RoomDto>(`/rooms/${id}`)
-  return res.data!
+  return requireData(res)
 }
 
 // ─── Mutations ──────────────────────────────────────────
 
 export async function createRoom(buildingId: string, data: CreateRoomRequest) {
   const res = await api.post<RoomDto>(`/buildings/${buildingId}/rooms`, data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function updateRoom(id: string, data: UpdateRoomRequest) {
   const res = await api.put<RoomDto>(`/rooms/${id}`, data)
-  return res.data!
+  return requireData(res)
 }
 
 export async function deleteRoom(id: string) {
@@ -73,5 +73,5 @@ export async function deleteRoom(id: string) {
 
 export async function changeRoomStatus(id: string, data: ChangeRoomStatusRequest) {
   const res = await api.patch<RoomDto>(`/rooms/${id}/status`, data)
-  return res.data!
+  return requireData(res)
 }

@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toaster'
 import { staffKeys, fetchStaffList, assignStaff } from '@/lib/queries/staff'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import type { UserDto } from '@/types/api'
 
 interface AssignStaffDialogProps {
@@ -40,8 +41,8 @@ export function AssignStaffDialog({
   // Fetch all staff users. The backend GET /users/staff doesn't support search param,
   // so we fetch a large page and filter client-side.
   const { data, isLoading } = useQuery({
-    queryKey: staffKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchStaffList({ page: 1, pageSize: 100 }),
+    queryKey: staffKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchStaffList({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: open,
   })
 

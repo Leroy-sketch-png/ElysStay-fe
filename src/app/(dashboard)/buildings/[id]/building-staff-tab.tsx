@@ -44,19 +44,19 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
 
   const columns: Column<StaffAssignmentDto>[] = [
     {
-      key: 'staffFullName',
+      key: 'fullName',
       header: 'Name',
       render: (row) => (
         <div>
-          <p className='font-medium'>{row.staffFullName}</p>
-          <p className='text-xs text-muted-foreground'>{row.staffEmail}</p>
+          <p className='font-medium'>{row.fullName}</p>
+          <p className='text-xs text-muted-foreground'>{row.email}</p>
         </div>
       ),
     },
     {
-      key: 'staffPhone',
+      key: 'phone',
       header: 'Phone',
-      render: (row) => row.staffPhone ?? '—',
+      render: (row) => row.phone ?? '—',
     },
     {
       key: 'assignedAt',
@@ -120,7 +120,7 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
         open={!!removeTarget}
         onOpenChange={(open) => !open && setRemoveTarget(null)}
         title='Unassign Staff'
-        description={`Remove "${removeTarget?.staffFullName}" from this building? They will no longer have access to manage it.`}
+        description={`Remove "${removeTarget?.fullName}" from this building? They will no longer have access to manage it.`}
         confirmLabel='Unassign'
         variant='destructive'
         loading={unassignMutation.isPending}

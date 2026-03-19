@@ -21,19 +21,27 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { toast } from '@/components/ui/toaster'
 import { buildingKeys, createBuilding, updateBuilding } from '@/lib/queries/buildings'
+import { userKeys } from '@/lib/queries/users'
 import type { BuildingDto, CreateBuildingRequest, UpdateBuildingRequest } from '@/types/api'
 
 // ─── Validation ─────────────────────────────────────────
 
 const buildingSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(200, 'Name too long'),
-  address: z.string().min(1, 'Address is required').max(500, 'Address too long'),
-  description: z.string().max(2000, 'Description too long').optional().or(z.literal('')),
-  totalFloors: z.number().int().min(1, 'At least 1 floor').max(100, 'Max 100 floors'),
-  invoiceDueDay: z.number().int().min(1, 'Min day 1').max(28, 'Max day 28'),
+  name: z.string().trim().min(1, 'Name is required').max(200, 'Name too long'),
+  address: z.string().trim().min(1, 'Address is required').max(500, 'Address too long'),
+  description: z.string().trim().max(2000, 'Description too long').optional().or(z.literal('')),
+  totalFloors: z.preprocess(
+    (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
+    z.number().int().min(1, 'At least 1 floor').max(100, 'Max 100 floors'),
+  ),
+  invoiceDueDay: z.preprocess(
+    (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
+    z.number().int().min(1, 'Min day 1').max(28, 'Max day 28'),
+  ),
 })
 
-type BuildingFormData = z.infer<typeof buildingSchema>
+type BuildingFormInput = z.input<typeof buildingSchema>
+type BuildingFormData = z.output<typeof buildingSchema>
 
 // ─── Props ──────────────────────────────────────────────
 
@@ -58,7 +66,7 @@ export function BuildingFormDialog({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<BuildingFormData>({
+  } = useForm<BuildingFormInput, unknown, BuildingFormData>({
     resolver: zodResolver(buildingSchema),
     defaultValues: {
       name: '',
@@ -97,6 +105,7 @@ export function BuildingFormDialog({
     onSuccess: () => {
       toast.success('Building created', 'Your building and default services are ready.')
       queryClient.invalidateQueries({ queryKey: buildingKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
@@ -109,6 +118,8 @@ export function BuildingFormDialog({
     onSuccess: () => {
       toast.success('Building updated')
       queryClient.invalidateQueries({ queryKey: buildingKeys.all })
+      queryClient.invalidateQueries({ queryKey: buildingKeys.detail(building!.id) })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => {
@@ -147,7 +158,7 @@ export function BuildingFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             {/* Name */}
             <div className='space-y-2'>

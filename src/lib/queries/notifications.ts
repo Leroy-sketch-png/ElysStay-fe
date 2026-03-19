@@ -1,4 +1,4 @@
-import { api, toQueryString } from '@/lib/api-client'
+import { api, toQueryString, requireData } from '@/lib/api-client'
 import type { NotificationDto } from '@/types/api'
 
 // ─── Query Keys ─────────────────────────────────────────
@@ -33,5 +33,5 @@ export async function markNotificationRead(id: string) {
 
 export async function markAllNotificationsRead() {
   const res = await api.patch<{ markedRead: number }>('/notifications/mark-all-read', {})
-  return res.data!
+  return requireData(res)
 }

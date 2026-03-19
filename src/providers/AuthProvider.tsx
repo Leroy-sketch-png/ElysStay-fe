@@ -79,19 +79,47 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
   const [token, setToken] = useState<string | undefined>(undefined)
   const keycloakRef = useRef<Keycloak | null>(null)
   const initCalledRef = useRef(false)
+  const refreshingRef = useRef(false)
 
   // Parse user from Keycloak token
   const parseUser = useCallback((kc: Keycloak): AuthUser | null => {
     if (!kc.tokenParsed) return null
     const parsed = kc.tokenParsed as Record<string, unknown>
+    const sub = parsed.sub
+    if (typeof sub !== 'string') return null
     const realmAccess = parsed.realm_access as { roles?: string[] } | undefined
     return {
-      keycloakId: parsed.sub as string,
-      email: (parsed.email as string) || '',
-      fullName: (parsed.name as string) || (parsed.preferred_username as string) || '',
-      roles: realmAccess?.roles?.filter(r => !r.startsWith('default-roles-')) || [],
+      keycloakId: sub,
+      email: typeof parsed.email === 'string' ? parsed.email : '',
+      fullName: typeof parsed.name === 'string'
+        ? parsed.name
+        : typeof parsed.preferred_username === 'string'
+          ? parsed.preferred_username
+          : '',
+      roles: Array.isArray(realmAccess?.roles)
+        ? realmAccess.roles.filter((r): r is string => typeof r === 'string' && !r.startsWith('default-roles-'))
+        : [],
     }
   }, [])
+
+  // Shared token refresh — prevents concurrent updateToken calls from race condition
+  const refreshToken = useCallback((kc: Keycloak) => {
+    if (refreshingRef.current) return
+    refreshingRef.current = true
+    kc.updateToken(MIN_TOKEN_VALIDITY)
+      .then(refreshed => {
+        if (refreshed) {
+          setToken(kc.token)
+          setUser(parseUser(kc))
+        }
+      })
+      .catch(() => {
+        kc.logout()
+      })
+      .finally(() => {
+        refreshingRef.current = false
+      })
+  }, [parseUser])
 
   // Initialize Keycloak
   useEffect(() => {
@@ -130,33 +158,14 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
 
     // Reactive token refresh (fallback when onTokenExpired fires)
     kc.onTokenExpired = () => {
-      kc.updateToken(MIN_TOKEN_VALIDITY)
-        .then(refreshed => {
-          if (refreshed) {
-            setToken(kc.token)
-            setUser(parseUser(kc))
-          }
-        })
-        .catch(() => {
-          kc.logout()
-        })
+      refreshToken(kc)
     }
 
     // Proactive token refresh — refresh well before expiry so requests never hit a stale token
     const REFRESH_INTERVAL_MS = 30_000 // check every 30s
     const refreshInterval = setInterval(() => {
       if (kc.authenticated) {
-        kc.updateToken(MIN_TOKEN_VALIDITY)
-          .then(refreshed => {
-            if (refreshed) {
-              setToken(kc.token)
-              setUser(parseUser(kc))
-            }
-          })
-          .catch(() => {
-            // Refresh failed — session likely expired, force logout
-            kc.logout()
-          })
+        refreshToken(kc)
       }
     }, REFRESH_INTERVAL_MS)
 
@@ -176,7 +185,7 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
     return () => {
       clearInterval(refreshInterval)
     }
-  }, [loginRequired, parseUser])
+  }, [loginRequired, parseUser, refreshToken])
 
   const login = useCallback(() => {
     keycloakRef.current?.login()

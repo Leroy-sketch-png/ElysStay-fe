@@ -1,6 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 interface EmptyStateProps {
@@ -41,15 +42,16 @@ export function EmptyState({
 				{children ? (
 					children
 				) : actionLabel ? (
-					actionHref ? (
-						<a
-							href={actionHref}
-							className='inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90'
-						>
-							{actionLabel}
-						</a>
+				actionHref ? (
+					<Link
+						href={actionHref}
+						className='inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90'
+					>
+						{actionLabel}
+					</Link>
 					) : (
 						<button
+							type='button'
 							onClick={onAction}
 							className='inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90'
 						>
