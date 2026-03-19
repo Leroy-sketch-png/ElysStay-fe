@@ -22,37 +22,45 @@ import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toaster'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
+import { reportKeys } from '@/lib/queries/reports'
 import { roomKeys, fetchRooms } from '@/lib/queries/rooms'
 import { expenseKeys, createExpense, updateExpense } from '@/lib/queries/expenses'
+import { userKeys } from '@/lib/queries/users'
+import { EXPENSE_CATEGORIES, DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
+import { toLocalDateInputValue } from '@/lib/utils'
 import type { ExpenseDto } from '@/types/api'
 
-// ─── Categories ─────────────────────────────────────────
-
-const EXPENSE_CATEGORIES = [
-  'Repair',
-  'Cleaning',
-  'Utilities',
-  'Equipment',
-  'Supplies',
-  'Insurance',
-  'Tax',
-  'Legal',
-  'Marketing',
-  'Other',
-]
-
 // ─── Schema ─────────────────────────────────────────────
+
+function getTodayDate(): string {
+  return toLocalDateInputValue()
+}
+
+function normalizeDateInputValue(value: string): string {
+  return value.includes('T') ? value.split('T')[0] : value
+}
 
 const expenseSchema = z.object({
   buildingId: z.string().min(1, 'Building is required'),
   roomId: z.string().optional().or(z.literal('')),
   category: z.string().min(1, 'Category is required').max(100),
-  description: z.string().min(1, 'Description is required').max(500),
-  amount: z.number().positive('Amount must be positive'),
+  description: z.string().trim().min(1, 'Description is required').max(500),
+  amount: z.preprocess(
+    (value) => {
+      if (value === '' || value === null || value === undefined) return undefined
+      if (typeof value === 'number' && Number.isNaN(value)) return undefined
+      return value
+    },
+    z.number({ error: 'Enter a valid amount' }).positive('Amount must be positive'),
+  ),
   expenseDate: z.string().min(1, 'Date is required'),
+}).refine((data) => data.expenseDate <= getTodayDate(), {
+  message: 'Expense date cannot be in the future',
+  path: ['expenseDate'],
 })
 
-type ExpenseFormData = z.infer<typeof expenseSchema>
+type ExpenseFormData = z.input<typeof expenseSchema>
+type ExpenseFormOutput = z.output<typeof expenseSchema>
 
 // ─── Props ──────────────────────────────────────────────
 
@@ -76,7 +84,7 @@ export function ExpenseFormDialog({
     reset,
     watch,
     formState: { errors },
-  } = useForm<ExpenseFormData>({
+  } = useForm<ExpenseFormData, unknown, ExpenseFormOutput>({
     resolver: zodResolver(expenseSchema),
     defaultValues: {
       buildingId: '',
@@ -84,7 +92,7 @@ export function ExpenseFormDialog({
       category: '',
       description: '',
       amount: 0,
-      expenseDate: new Date().toISOString().split('T')[0],
+      expenseDate: getTodayDate(),
     },
   })
 
@@ -92,13 +100,13 @@ export function ExpenseFormDialog({
 
   // ─── Data ──────────────────────────────────────────────
   const { data: buildingsData } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
 
   const { data: roomsData } = useQuery({
-    queryKey: roomKeys.list({ buildingId: watchedBuildingId, pageSize: 200 }),
-    queryFn: () => fetchRooms({ buildingId: watchedBuildingId, pageSize: 200 }),
+    queryKey: roomKeys.list({ buildingId: watchedBuildingId, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchRooms({ buildingId: watchedBuildingId, pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: !!watchedBuildingId,
   })
 
@@ -115,7 +123,7 @@ export function ExpenseFormDialog({
           category: expense.category,
           description: expense.description,
           amount: expense.amount,
-          expenseDate: expense.expenseDate,
+          expenseDate: normalizeDateInputValue(expense.expenseDate),
         })
       } else {
         reset({
@@ -124,7 +132,7 @@ export function ExpenseFormDialog({
           category: '',
           description: '',
           amount: 0,
-          expenseDate: new Date().toISOString().split('T')[0],
+          expenseDate: getTodayDate(),
         })
       }
     }
@@ -132,7 +140,7 @@ export function ExpenseFormDialog({
 
   // ─── Mutations ─────────────────────────────────────────
   const createMutation = useMutation({
-    mutationFn: (data: ExpenseFormData) =>
+    mutationFn: (data: ExpenseFormOutput) =>
       createExpense({
         buildingId: data.buildingId,
         roomId: data.roomId || undefined,
@@ -144,13 +152,15 @@ export function ExpenseFormDialog({
     onSuccess: () => {
       toast.success('Expense created')
       queryClient.invalidateQueries({ queryKey: expenseKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => toast.error('Failed to create expense', error.message),
   })
 
   const updateMutation = useMutation({
-    mutationFn: (data: ExpenseFormData) =>
+    mutationFn: (data: ExpenseFormOutput) =>
       updateExpense(expense!.id, {
         category: data.category,
         description: data.description,
@@ -160,6 +170,8 @@ export function ExpenseFormDialog({
     onSuccess: () => {
       toast.success('Expense updated')
       queryClient.invalidateQueries({ queryKey: expenseKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => toast.error('Failed to update expense', error.message),
@@ -167,7 +179,7 @@ export function ExpenseFormDialog({
 
   const isPending = createMutation.isPending || updateMutation.isPending
 
-  const onSubmit = (data: ExpenseFormData) => {
+  const onSubmit = (data: ExpenseFormOutput) => {
     if (isEdit) {
       updateMutation.mutate(data)
     } else {
@@ -190,7 +202,7 @@ export function ExpenseFormDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             {/* Building */}
             <div className='space-y-2'>
@@ -265,7 +277,9 @@ export function ExpenseFormDialog({
                 type='number'
                 min={1}
                 step={1000}
-                {...register('amount', { valueAsNumber: true })}
+                {...register('amount', {
+                  setValueAs: (value) => value === '' ? undefined : Number(value),
+                })}
                 aria-invalid={!!errors.amount}
               />
               {errors.amount && (
@@ -279,6 +293,7 @@ export function ExpenseFormDialog({
               <Input
                 id='exp-date'
                 type='date'
+                max={getTodayDate()}
                 {...register('expenseDate')}
                 aria-invalid={!!errors.expenseDate}
               />
