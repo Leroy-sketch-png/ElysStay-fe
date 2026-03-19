@@ -16,9 +16,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { RoomStatusBadge } from '@/components/ui/status-badge'
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
+import { ApiError } from '@/lib/api-client'
+import { getNextManualRoomStatus, canToggleRoomStatus } from '@/lib/domain-constants'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { roomKeys, fetchRoomById, changeRoomStatus, deleteRoom } from '@/lib/queries/rooms'
 import { buildingKeys, fetchBuildingById } from '@/lib/queries/buildings'
+import { userKeys } from '@/lib/queries/users'
 import { RoomFormDialog } from '../room-form-dialog'
 import { RoomServicesTab } from './room-services-tab'
 
@@ -49,6 +52,7 @@ export default function RoomDetailPage() {
       toast.success('Room status updated')
       queryClient.invalidateQueries({ queryKey: roomKeys.detail(id) })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => toast.error('Failed to change status', error.message),
   })
@@ -58,13 +62,14 @@ export default function RoomDetailPage() {
     onSuccess: () => {
       toast.success('Room deleted')
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       if (room?.buildingId) {
         queryClient.invalidateQueries({ queryKey: buildingKeys.detail(room.buildingId) })
       }
       router.push('/rooms')
     },
-    onError: (error: Error & { status?: number }) => {
-      if ((error as { status?: number }).status === 409) {
+    onError: (error: Error) => {
+      if (error instanceof ApiError && error.status === 409) {
         toast.error('Cannot delete room', 'Room has an active contract or reservation.')
       } else {
         toast.error('Failed to delete room', error.message)
@@ -79,9 +84,9 @@ export default function RoomDetailPage() {
         <div className='space-y-6'>
           <Skeleton className='h-8 w-64' />
           <div className='grid gap-4 sm:grid-cols-3'>
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
           </div>
         </div>
       </PageContainer>
@@ -106,8 +111,8 @@ export default function RoomDetailPage() {
     )
   }
 
-  const canToggleStatus = room.status === 'Available' || room.status === 'Maintenance'
-  const toggleTarget = room.status === 'Available' ? 'Maintenance' : 'Available'
+  const canToggleStatus = canToggleRoomStatus(room.status)
+  const toggleTarget = getNextManualRoomStatus(room.status)
 
   return (
     <PageContainer
@@ -123,14 +128,14 @@ export default function RoomDetailPage() {
           {canToggleStatus && (
             <Button
               variant='outline'
-              onClick={() => statusMutation.mutate(toggleTarget as 'Available' | 'Maintenance')}
+              onClick={() => toggleTarget && statusMutation.mutate(toggleTarget)}
               disabled={statusMutation.isPending}
             >
               <ToggleLeft className='size-4' />
               Set {toggleTarget}
             </Button>
           )}
-          <Button variant='outline' onClick={() => setEditOpen(true)}>
+          <Button variant='outline' onClick={() => setEditOpen(true)} disabled={!building}>
             <Pencil className='size-4' />
             Edit
           </Button>
@@ -155,8 +160,8 @@ export default function RoomDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-3 p-4'>
-            <div className='rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20'>
-              <Layers className='size-4 text-blue-600 dark:text-blue-400' />
+            <div className='rounded-lg bg-info/10 p-2'>
+              <Layers className='size-4 text-info' />
             </div>
             <div>
               <p className='text-xs text-muted-foreground'>Floor</p>
@@ -166,8 +171,8 @@ export default function RoomDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-3 p-4'>
-            <div className='rounded-lg bg-purple-100 p-2 dark:bg-purple-900/20'>
-              <Ruler className='size-4 text-purple-600 dark:text-purple-400' />
+            <div className='rounded-lg bg-accent p-2'>
+              <Ruler className='size-4 text-accent-foreground' />
             </div>
             <div>
               <p className='text-xs text-muted-foreground'>Area</p>
@@ -177,8 +182,8 @@ export default function RoomDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-3 p-4'>
-            <div className='rounded-lg bg-green-100 p-2 dark:bg-green-900/20'>
-              <Banknote className='size-4 text-green-600 dark:text-green-400' />
+            <div className='rounded-lg bg-success/10 p-2'>
+              <Banknote className='size-4 text-success' />
             </div>
             <div>
               <p className='text-xs text-muted-foreground'>Price</p>
@@ -188,8 +193,8 @@ export default function RoomDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-3 p-4'>
-            <div className='rounded-lg bg-amber-100 p-2 dark:bg-amber-900/20'>
-              <Users2 className='size-4 text-amber-600 dark:text-amber-400' />
+            <div className='rounded-lg bg-warning/10 p-2'>
+              <Users2 className='size-4 text-warning' />
             </div>
             <div>
               <p className='text-xs text-muted-foreground'>Max Occupants</p>
