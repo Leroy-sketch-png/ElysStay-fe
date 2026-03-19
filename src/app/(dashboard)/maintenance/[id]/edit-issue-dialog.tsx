@@ -26,8 +26,8 @@ import type { MaintenanceIssueDto } from '@/types/api'
 // ─── Schema ─────────────────────────────────────────────
 
 const editIssueSchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200),
-  description: z.string().min(1, 'Description is required').max(2000),
+  title: z.string().trim().min(1, 'Title is required').max(200),
+  description: z.string().trim().min(1, 'Description is required').max(2000),
 })
 
 type EditIssueFormData = z.infer<typeof editIssueSchema>
@@ -78,6 +78,7 @@ export function EditIssueDialog({
     onSuccess: () => {
       toast.success('Issue updated')
       queryClient.invalidateQueries({ queryKey: issueKeys.all })
+      queryClient.invalidateQueries({ queryKey: issueKeys.detail(issue.id) })
       onOpenChange(false)
     },
     onError: (error: Error) => toast.error('Failed to update issue', error.message),
@@ -94,7 +95,7 @@ export function EditIssueDialog({
           <DialogDescription>Update the issue title or description.</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             <div className='space-y-2'>
               <Label htmlFor='edit-title'>Title *</Label>

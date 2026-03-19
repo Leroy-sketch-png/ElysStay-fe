@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
-import { Plus, Wrench, Eye } from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Plus, Wrench, Eye, X, Building2 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,7 @@ import {
   type IssueFilters,
 } from '@/lib/queries/issues'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import type { MaintenanceIssueDto, IssueStatus, PriorityLevel } from '@/types/api'
 import { CreateIssueDialog } from './create-issue-dialog'
 
@@ -29,6 +30,7 @@ import { CreateIssueDialog } from './create-issue-dialog'
 
 export default function MaintenanceIssuesPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
 
   // ─── State ─────────────────────────────────────────────
   const [selectedBuildingId, setSelectedBuildingId] = useState('')
@@ -37,11 +39,12 @@ export default function MaintenanceIssuesPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
   const [createOpen, setCreateOpen] = useState(false)
+  const hasActiveFilters = Boolean(selectedBuildingId || statusFilter || priorityFilter)
 
   // ─── Data: Buildings ───────────────────────────────────
   const { data: buildingsData } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
 
   const buildings = buildingsData?.data ?? []
@@ -134,6 +137,23 @@ export default function MaintenanceIssuesPage() {
     },
   ]
 
+  // ─── No Buildings Prerequisite ─────────────────────────
+  if (buildingsData && buildings.length === 0) {
+    return (
+      <PageTransition>
+      <PageContainer title='Maintenance Issues' description='Track and manage building maintenance requests.'>
+        <EmptyState
+          icon={<Building2 className='size-12' />}
+          title='No buildings yet'
+          description='Add your first building to track maintenance issues.'
+          actionLabel='Go to Buildings'
+          actionHref='/buildings'
+        />
+      </PageContainer>
+      </PageTransition>
+    )
+  }
+
   // ─── Render ────────────────────────────────────────────
 
   return (
@@ -142,10 +162,26 @@ export default function MaintenanceIssuesPage() {
       title='Maintenance Issues'
       description='Track and manage building maintenance requests.'
       actions={
-        <Button onClick={() => setCreateOpen(true)}>
-          <Plus className='size-4' />
-          Report Issue
-        </Button>
+        <div className='flex items-center gap-2'>
+          {hasActiveFilters && (
+            <Button
+              variant='outline'
+              onClick={() => {
+                setSelectedBuildingId('')
+                setStatusFilter('')
+                setPriorityFilter('')
+                setPage(1)
+              }}
+            >
+              <X className='size-4' />
+              Clear filters
+            </Button>
+          )}
+          <Button onClick={() => setCreateOpen(true)}>
+            <Plus className='size-4' />
+            Report Issue
+          </Button>
+        </div>
       }
     >
       {/* Filters */}
@@ -205,11 +241,13 @@ export default function MaintenanceIssuesPage() {
 
       {/* Error */}
       {error && (
-        <Card className='mt-4 border-destructive'>
-          <CardContent className='py-4 text-destructive text-sm'>
-            Failed to load issues. {(error as Error).message}
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={<Wrench className='size-8' />}
+          title='Unable to load maintenance issues'
+          description={(error as Error).message}
+          actionLabel='Retry'
+          onAction={() => queryClient.invalidateQueries({ queryKey: issueKeys.all })}
+        />
       )}
 
       {/* Empty State */}
@@ -222,6 +260,13 @@ export default function MaintenanceIssuesPage() {
               ? 'No issues match your filters.'
               : 'No maintenance issues have been reported yet.'
           }
+          actionLabel={hasActiveFilters ? 'Clear Filters' : undefined}
+          onAction={hasActiveFilters ? () => {
+            setSelectedBuildingId('')
+            setStatusFilter('')
+            setPriorityFilter('')
+            setPage(1)
+          } : undefined}
         />
       )}
 

@@ -22,16 +22,19 @@ import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toaster'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import { roomKeys, fetchRooms } from '@/lib/queries/rooms'
 import { issueKeys, createIssue } from '@/lib/queries/issues'
+import { userKeys } from '@/lib/queries/users'
+import { useAuth } from '@/providers/AuthProvider'
 
 // ─── Schema ─────────────────────────────────────────────
 
 const issueSchema = z.object({
   buildingId: z.string().optional().or(z.literal('')),
   roomId: z.string().optional().or(z.literal('')),
-  title: z.string().min(1, 'Title is required').max(200),
-  description: z.string().min(1, 'Description is required').max(2000),
+  title: z.string().trim().min(1, 'Title is required').max(200),
+  description: z.string().trim().min(1, 'Description is required').max(2000),
 })
 
 type IssueFormData = z.infer<typeof issueSchema>
@@ -48,12 +51,17 @@ export function CreateIssueDialog({
   onOpenChange,
 }: CreateIssueDialogProps) {
   const queryClient = useQueryClient()
+  const { hasRole } = useAuth()
+  const isTenant = hasRole('tenant')
 
   const {
     register,
     handleSubmit,
     reset,
     watch,
+    setValue,
+    setError,
+    clearErrors,
     formState: { errors },
   } = useForm<IssueFormData>({
     resolver: zodResolver(issueSchema),
@@ -69,13 +77,13 @@ export function CreateIssueDialog({
 
   // ─── Data ──────────────────────────────────────────────
   const { data: buildingsData } = useQuery({
-    queryKey: buildingKeys.list({ page: 1, pageSize: 100 }),
-    queryFn: () => fetchBuildings({ page: 1, pageSize: 100 }),
+    queryKey: buildingKeys.list({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchBuildings({ page: 1, pageSize: DROPDOWN_PAGE_SIZE }),
   })
 
   const { data: roomsData } = useQuery({
-    queryKey: roomKeys.list({ buildingId: watchedBuildingId!, pageSize: 200 }),
-    queryFn: () => fetchRooms({ buildingId: watchedBuildingId!, pageSize: 200 }),
+    queryKey: roomKeys.list({ buildingId: watchedBuildingId!, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchRooms({ buildingId: watchedBuildingId!, pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: !!watchedBuildingId,
   })
 
@@ -89,6 +97,11 @@ export function CreateIssueDialog({
     }
   }, [open, reset])
 
+  // Clear room when building changes to avoid submitting a stale hidden roomId.
+  useEffect(() => {
+    setValue('roomId', '')
+  }, [watchedBuildingId, setValue])
+
   // ─── Mutation ──────────────────────────────────────────
   const mutation = useMutation({
     mutationFn: (data: IssueFormData) =>
@@ -101,12 +114,24 @@ export function CreateIssueDialog({
     onSuccess: () => {
       toast.success('Issue reported', 'Maintenance issue has been created.')
       queryClient.invalidateQueries({ queryKey: issueKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
     onError: (error: Error) => toast.error('Failed to report issue', error.message),
   })
 
-  const onSubmit = (data: IssueFormData) => mutation.mutate(data)
+  const onSubmit = (data: IssueFormData) => {
+    if (!isTenant && !data.buildingId) {
+      setError('buildingId', {
+        type: 'manual',
+        message: 'Building is required for owner/staff.',
+      })
+      return
+    }
+
+    clearErrors('buildingId')
+    mutation.mutate(data)
+  }
 
   // ─── Render ────────────────────────────────────────────
 
@@ -121,20 +146,25 @@ export function CreateIssueDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form noValidate onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className='space-y-4'>
             {/* Building (optional for tenants — auto-resolved from contract) */}
             <div className='space-y-2'>
-              <Label htmlFor='iss-building'>Building</Label>
+              <Label htmlFor='iss-building'>Building {isTenant ? '' : '*'}</Label>
               <Select id='iss-building' {...register('buildingId')}>
-                <option value=''>Auto-detect from contract</option>
+                <option value=''>{isTenant ? 'Auto-detect from contract' : 'Select building…'}</option>
                 {buildings.map((b) => (
                   <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
               </Select>
               <p className='text-xs text-muted-foreground'>
-                Tenants: leave blank to auto-detect from your active contract.
+                {isTenant
+                  ? 'Leave blank to auto-detect from your active contract.'
+                  : 'Required for owner/staff issue reports.'}
               </p>
+              {errors.buildingId && (
+                <p className='text-xs text-destructive'>{errors.buildingId.message}</p>
+              )}
             </div>
 
             {/* Room (optional) */}

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -22,6 +23,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { IssueStatusBadge, PriorityBadge } from '@/components/ui/status-badge'
+import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
 import { formatDate, timeAgo } from '@/lib/utils'
 import {
@@ -29,6 +31,7 @@ import {
   fetchIssueById,
   changeIssueStatus,
 } from '@/lib/queries/issues'
+import { userKeys } from '@/lib/queries/users'
 import type { MaintenanceIssueDto, IssueStatus } from '@/types/api'
 import { EditIssueDialog } from './edit-issue-dialog'
 
@@ -55,6 +58,7 @@ export default function IssueDetailPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [editOpen, setEditOpen] = useState(false)
+  const [confirmAction, setConfirmAction] = useState<{ status: IssueStatus; label: string; variant?: string } | null>(null)
 
   // Fetch single issue by ID via GET /issues/:id
   const { data: issue, isLoading } = useQuery({
@@ -69,6 +73,8 @@ export default function IssueDetailPage() {
     onSuccess: (updated) => {
       toast.success('Status updated', `Issue is now ${updated?.status ?? 'updated'}.`)
       queryClient.invalidateQueries({ queryKey: issueKeys.all })
+      queryClient.invalidateQueries({ queryKey: issueKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => toast.error('Failed to update status', error.message),
   })
@@ -151,11 +157,11 @@ export default function IssueDetailPage() {
             key={t.status}
             variant={t.variant ?? 'default'}
             size='sm'
-            onClick={() => statusMutation.mutate(t.status)}
+            onClick={() => setConfirmAction({ status: t.status, label: t.label, variant: t.variant })}
             disabled={statusMutation.isPending}
           >
             <t.icon className='size-4' />
-            {t.label}
+            {statusMutation.isPending ? 'Updating…' : t.label}
           </Button>
         ))}
       </div>
@@ -183,15 +189,19 @@ export default function IssueDetailPage() {
             <div className='flex items-center gap-3'>
               <Building2 className='size-4 text-muted-foreground' />
               <div>
-                <p className='text-sm font-medium'>{issue.buildingName}</p>
+                <Link href={`/buildings/${issue.buildingId}`} className='text-sm font-medium hover:underline'>
+                  {issue.buildingName}
+                </Link>
                 <p className='text-xs text-muted-foreground'>Building</p>
               </div>
             </div>
-            {issue.roomNumber && (
+            {issue.roomNumber && issue.roomId && (
               <div className='flex items-center gap-3'>
                 <DoorOpen className='size-4 text-muted-foreground' />
                 <div>
-                  <p className='text-sm font-medium'>Room {issue.roomNumber}</p>
+                  <Link href={`/rooms/${issue.roomId}`} className='text-sm font-medium hover:underline'>
+                    Room {issue.roomNumber}
+                  </Link>
                   <p className='text-xs text-muted-foreground'>Room</p>
                 </div>
               </div>
@@ -257,6 +267,28 @@ export default function IssueDetailPage() {
         open={editOpen}
         onOpenChange={setEditOpen}
         issue={issue}
+      />
+
+      {/* Status Transition Confirmation */}
+      <ConfirmDialog
+        open={!!confirmAction}
+        onOpenChange={(open) => { if (!open) setConfirmAction(null) }}
+        title={`${confirmAction?.label ?? 'Update'} Issue`}
+        description={
+          confirmAction?.status === 'Closed'
+            ? 'Closing this issue is permanent and cannot be undone. Are you sure?'
+            : `Are you sure you want to change the status to "${confirmAction?.status ?? ''}"?`
+        }
+        confirmLabel={confirmAction?.label ?? 'Confirm'}
+        variant={confirmAction?.status === 'Closed' ? 'destructive' : 'default'}
+        loading={statusMutation.isPending}
+        onConfirm={() => {
+          if (confirmAction) {
+            statusMutation.mutate(confirmAction.status, {
+              onSuccess: () => setConfirmAction(null),
+            })
+          }
+        }}
       />
     </PageContainer>
   )
