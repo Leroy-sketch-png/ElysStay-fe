@@ -41,6 +41,8 @@ export interface OwnerDashboardDto {
   occupiedRooms: number
   occupancyRate: number
   activeContracts: number
+  expiringContracts: number
+  pendingReservations: number
   overdueInvoiceCount: number
   overdueAmount: number
   monthlyRevenue: number
@@ -191,11 +193,10 @@ export interface RoomServiceOverride {
 // ─── Staff Assignment ───────────────────────────────────
 
 export interface StaffAssignmentDto {
-  buildingId: string
   staffId: string
-  staffFullName: string
-  staffEmail: string
-  staffPhone?: string
+  email: string
+  fullName: string
+  phone?: string
   assignedAt: string
 }
 
@@ -406,6 +407,18 @@ export interface InvoiceLineItemDto {
 
 export interface InvoiceDetailDto extends InvoiceDto {
   lineItems: InvoiceLineItemDto[]
+  payments: InvoicePaymentDto[]
+}
+
+export interface InvoicePaymentDto {
+  id: string
+  amount: number
+  type: string
+  paymentMethod?: string
+  paidAt: string
+  referenceCode?: string
+  note?: string
+  recordedByName: string
 }
 
 export interface GenerateInvoicesRequest {
@@ -436,6 +449,7 @@ export interface PaymentDto {
   id: string
   invoiceId?: string
   contractId?: string
+  reservationId?: string
   type: PaymentType
   amount: number
   paymentMethod?: string
@@ -444,6 +458,14 @@ export interface PaymentDto {
   recordedBy: string
   recorderName?: string
   createdAt: string
+}
+
+export interface PaymentSummaryDto {
+  totalAmount: number
+  rentPayments: number
+  depositsIn: number
+  depositsRefunded: number
+  paymentCount: number
 }
 
 export interface RecordPaymentRequest {
@@ -480,6 +502,11 @@ export interface ExpenseDto {
   recorderName?: string
   createdAt: string
   updatedAt: string
+}
+
+export interface ExpenseSummaryDto {
+  totalAmount: number
+  expenseCount: number
 }
 
 export interface CreateExpenseRequest {
@@ -541,6 +568,17 @@ export interface ChangeIssueStatusRequest {
 // ─── Reservations ───────────────────────────────────────
 
 export type ReservationStatus = 'Pending' | 'Confirmed' | 'Converted' | 'Cancelled' | 'Expired'
+export type NotificationType =
+  | 'INVOICE_SENT'
+  | 'INVOICE_VOIDED'
+  | 'PAYMENT_RECORDED'
+  | 'ISSUE'
+  | 'InvoiceGenerated'
+  | 'PaymentReceived'
+  | 'ContractExpiring'
+  | 'MaintenanceUpdate'
+  | 'ReservationUpdate'
+  | 'SystemAlert'
 
 export interface ReservationDto {
   id: string
@@ -585,7 +623,7 @@ export interface NotificationDto {
   title: string
   message: string
   isRead: boolean
-  type: string
+  type: NotificationType
   referenceId: string | null
   createdAt: string
 }
