@@ -154,7 +154,7 @@ function NotificationRow({
               }}
               disabled={isMarking}
               className='shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 cursor-pointer disabled:opacity-50'
-              title='Mark as read'
+              title='Đánh dấu đã đọc'
             >
               {isMarking ? (
                 <Loader2 className='size-4 animate-spin' />

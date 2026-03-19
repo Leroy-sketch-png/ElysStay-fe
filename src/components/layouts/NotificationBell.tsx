@@ -204,7 +204,7 @@ export function NotificationBell() {
                 onClick={() => setOpen(false)}
                 className='text-xs font-medium text-primary hover:underline'
               >
-                Xem tất cả notifications
+                Xem tất cả thông báo
               </Link>
             </div>
           )}

@@ -5,8 +5,8 @@ export default function NotFound() {
     <div className='flex min-h-screen items-center justify-center bg-background'>
       <ErrorState
         statusCode={404}
-        title='Page not found'
-        description="The page you're looking for doesn't exist or has been moved."
+        title='Không tìm thấy trang'
+        description='Trang bạn đang tìm không tồn tại hoặc đã được di chuyển.'
         showHomeLink
       />
     </div>

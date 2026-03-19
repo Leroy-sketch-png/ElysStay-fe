@@ -256,8 +256,8 @@ function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
+  confirmLabel = 'Xác nhận',
+  cancelLabel = 'Hủy',
   variant = 'default',
   loading = false,
   onConfirm,
@@ -279,7 +279,7 @@ function ConfirmDialog({
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? 'Processing…' : confirmLabel}
+            {loading ? 'Đang xử lý…' : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>

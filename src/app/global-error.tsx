@@ -15,7 +15,7 @@ export default function GlobalError({
   reset: () => void
 }) {
   return (
-    <html lang='en'>
+    <html lang='vi'>
       <body style={{
         margin: 0,
         fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -48,10 +48,10 @@ export default function GlobalError({
           </div>
 
           <h1 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            Something went seriously wrong
+            Đã xảy ra lỗi nghiêm trọng
           </h1>
           <p style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '2rem' }}>
-            A critical error occurred. Please try refreshing the page.
+            Đã xảy ra lỗi nghiêm trọng. Vui lòng thử tải lại trang.
           </p>
 
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -64,7 +64,7 @@ export default function GlobalError({
                 fontSize: '0.875rem', border: 'none', cursor: 'pointer',
               }}
             >
-              Try Again
+              Thử lại
             </button>
             <a
               href='/dashboard'
@@ -74,7 +74,7 @@ export default function GlobalError({
                 fontSize: '0.875rem', border: '1px solid #3f3f46', textDecoration: 'none',
               }}
             >
-              Dashboard
+              Tổng quan
             </a>
           </div>
         </div>

@@ -74,7 +74,7 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
 					<button
 						onClick={handleClose}
 						className='flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-60 hover:!opacity-100'
-						aria-label='Close'
+						aria-label='Đóng'
 					>
 						<X className='size-3' />
 					</button>

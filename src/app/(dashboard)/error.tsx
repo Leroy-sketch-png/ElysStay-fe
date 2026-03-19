@@ -21,9 +21,9 @@ export default function DashboardError({
 
   return (
     <ErrorState
-      title='Something went wrong'
+      title='Đã xảy ra lỗi'
       description={
-        error.message || 'An unexpected error occurred while loading this page.'
+        error.message || 'Đã xảy ra lỗi không mong muốn khi tải trang này.'
       }
       onRetry={reset}
       showHomeLink

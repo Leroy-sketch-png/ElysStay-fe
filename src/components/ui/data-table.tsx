@@ -83,7 +83,7 @@ function DataTable<T>({
   data,
   loading = false,
   loadingRows = 5,
-  emptyMessage = 'No data found.',
+  emptyMessage = 'Không tìm thấy dữ liệu.',
   emptyIcon,
   onRowClick,
   rowKey,
