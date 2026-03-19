@@ -37,9 +37,9 @@ export default function BuildingDetailPage() {
         <div className='space-y-6'>
           <Skeleton className='h-8 w-64' />
           <div className='grid gap-4 sm:grid-cols-3'>
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
-            <Skeleton className='h-24 rounded-xl' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
+            <Skeleton className='h-24 rounded-lg' />
           </div>
         </div>
       </PageContainer>
@@ -99,8 +99,8 @@ export default function BuildingDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className='rounded-lg bg-green-100 p-2.5 dark:bg-green-900/20'>
-              <Layers className='size-5 text-green-600 dark:text-green-400' />
+            <div className='rounded-lg bg-success/10 p-2.5'>
+              <Layers className='size-5 text-success' />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Occupancy</p>
@@ -110,8 +110,8 @@ export default function BuildingDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className='rounded-lg bg-blue-100 p-2.5 dark:bg-blue-900/20'>
-              <Layers className='size-5 text-blue-600 dark:text-blue-400' />
+            <div className='rounded-lg bg-info/10 p-2.5'>
+              <Layers className='size-5 text-info' />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Floors</p>
@@ -121,8 +121,8 @@ export default function BuildingDetailPage() {
         </Card>
         <Card>
           <CardContent className='flex items-center gap-4 p-5'>
-            <div className='rounded-lg bg-amber-100 p-2.5 dark:bg-amber-900/20'>
-              <CalendarDays className='size-5 text-amber-600 dark:text-amber-400' />
+            <div className='rounded-lg bg-warning/10 p-2.5'>
+              <CalendarDays className='size-5 text-warning' />
             </div>
             <div>
               <p className='text-sm text-muted-foreground'>Invoice Due</p>

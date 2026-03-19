@@ -11,6 +11,8 @@ import { Pagination } from '@/components/ui/pagination'
 import { RoomStatusBadge } from '@/components/ui/status-badge'
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
+import { ApiError } from '@/lib/api-client'
+import { ROOM_STATUS_OPTIONS, canToggleRoomStatus, getNextManualRoomStatus } from '@/lib/domain-constants'
 import { formatCurrency } from '@/lib/utils'
 import { roomKeys, fetchBuildingRooms, deleteRoom, changeRoomStatus } from '@/lib/queries/rooms'
 import { buildingKeys } from '@/lib/queries/buildings'
@@ -52,8 +54,8 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(buildingId) })
       setDeleteTarget(null)
     },
-    onError: (error: Error & { status?: number }) => {
-      if ((error as { status?: number }).status === 409) {
+    onError: (error: Error) => {
+      if (error instanceof ApiError && error.status === 409) {
         toast.error('Cannot delete room', 'Room has an active contract.')
       } else {
         toast.error('Failed to delete room', error.message)
@@ -114,7 +116,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
       header: '',
       render: (row) => (
         <div className='flex items-center justify-end gap-1'>
-          {(row.status === 'Available' || row.status === 'Maintenance') && (
+          {canToggleRoomStatus(row.status) && (
             <Button
               variant='ghost'
               size='sm'
@@ -122,7 +124,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
                 e.stopPropagation()
                 statusMutation.mutate({
                   id: row.id,
-                  status: row.status === 'Available' ? 'Maintenance' : 'Available',
+                  status: getNextManualRoomStatus(row.status)!,
                 })
               }}
               disabled={statusMutation.isPending}
@@ -156,11 +158,9 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
           onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
           className='w-40'
         >
-          <option value=''>All statuses</option>
-          <option value='Available'>Available</option>
-          <option value='Booked'>Booked</option>
-          <option value='Occupied'>Occupied</option>
-          <option value='Maintenance'>Maintenance</option>
+          {ROOM_STATUS_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
         </Select>
 
         <Select
