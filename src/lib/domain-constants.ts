@@ -96,7 +96,8 @@ export function getExpenseCategoryLabel(value: string): string {
   return EXPENSE_CATEGORIES.find((c) => c.value === value)?.label ?? value
 }
 
-// ─── Dropdown Page Size ──────────────────────────────────
-// Used for "fetch all" dropdown queries (buildings, staff, rooms).
-// Set high enough to cover any realistic deployment without pagination.
+// ─── Page Sizes ──────────────────────────────────────────
+// DEFAULT_TABLE_PAGE_SIZE: initial page size for all paginated list pages.
+// DROPDOWN_PAGE_SIZE: used for "fetch all" queries that populate dropdowns/selects.
+export const DEFAULT_TABLE_PAGE_SIZE = 20
 export const DROPDOWN_PAGE_SIZE = 999

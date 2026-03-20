@@ -25,7 +25,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { toast } from '@/components/ui/toaster'
 import { reportKeys } from '@/lib/queries/reports'
 import { userKeys } from '@/lib/queries/users'
-import { EXPENSE_CATEGORIES, DROPDOWN_PAGE_SIZE, getExpenseCategoryLabel } from '@/lib/domain-constants'
+import { EXPENSE_CATEGORIES, DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE, getExpenseCategoryLabel } from '@/lib/domain-constants'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   expenseKeys,
@@ -51,7 +51,7 @@ export default function ExpensesPage() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingExpense, setEditingExpense] = useState<ExpenseDto | null>(null)
   const [deletingExpense, setDeletingExpense] = useState<ExpenseDto | null>(null)

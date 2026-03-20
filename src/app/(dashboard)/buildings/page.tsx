@@ -20,6 +20,7 @@ import {
   deleteBuilding,
   type BuildingFilters,
 } from '@/lib/queries/buildings'
+import { DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import type { BuildingDto } from '@/types/api'
 import { BuildingFormDialog } from './building-form-dialog'
 import { ConfirmDialog } from '@/components/ui/dialog'
@@ -29,7 +30,7 @@ export default function BuildingsPage() {
   const queryClient = useQueryClient()
 
   // ─── State ──────────────────────────────────────────────
-  const [filters, setFilters] = useState<BuildingFilters>({ page: 1, pageSize: 20 })
+  const [filters, setFilters] = useState<BuildingFilters>({ page: 1, pageSize: DEFAULT_TABLE_PAGE_SIZE })
   const [searchName, setSearchName] = useState('')
   const [searchAddress, setSearchAddress] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
@@ -78,7 +79,7 @@ export default function BuildingsPage() {
   const handleClearFilters = useCallback(() => {
     setSearchName('')
     setSearchAddress('')
-    setFilters({ page: 1, pageSize: 20 })
+    setFilters({ page: 1, pageSize: DEFAULT_TABLE_PAGE_SIZE })
   }, [])
 
   // ─── Columns ────────────────────────────────────────────

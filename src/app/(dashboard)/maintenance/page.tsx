@@ -22,7 +22,7 @@ import {
   type IssueFilters,
 } from '@/lib/queries/issues'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
-import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
+import { DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import type { MaintenanceIssueDto, IssueStatus, PriorityLevel } from '@/types/api'
 import { CreateIssueDialog } from './create-issue-dialog'
 
@@ -37,7 +37,7 @@ export default function MaintenanceIssuesPage() {
   const [statusFilter, setStatusFilter] = useState<IssueStatus | ''>('')
   const [priorityFilter, setPriorityFilter] = useState<PriorityLevel | ''>('')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE)
   const [createOpen, setCreateOpen] = useState(false)
   const hasActiveFilters = Boolean(selectedBuildingId || statusFilter || priorityFilter)
 

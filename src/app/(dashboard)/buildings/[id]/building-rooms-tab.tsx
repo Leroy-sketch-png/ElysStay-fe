@@ -12,7 +12,7 @@ import { RoomStatusBadge } from '@/components/ui/status-badge'
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
 import { ApiError } from '@/lib/api-client'
-import { ROOM_STATUS_OPTIONS, canToggleRoomStatus, getNextManualRoomStatus } from '@/lib/domain-constants'
+import { ROOM_STATUS_OPTIONS, canToggleRoomStatus, getNextManualRoomStatus, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import { formatCurrency } from '@/lib/utils'
 import { roomKeys, fetchBuildingRooms, deleteRoom, changeRoomStatus } from '@/lib/queries/rooms'
 import { buildingKeys } from '@/lib/queries/buildings'
@@ -30,7 +30,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
   const router = useRouter()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE)
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [floorFilter, setFloorFilter] = useState<string>('')
   const [createOpen, setCreateOpen] = useState(false)

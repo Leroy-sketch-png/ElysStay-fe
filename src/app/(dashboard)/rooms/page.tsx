@@ -12,7 +12,7 @@ import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { RoomStatusBadge } from '@/components/ui/status-badge'
 import { EmptyState } from '@/components/EmptyState'
-import { ROOM_STATUS_OPTIONS, DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
+import { ROOM_STATUS_OPTIONS, DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import { formatCurrency } from '@/lib/utils'
 import { roomKeys, fetchRooms, type RoomFilters } from '@/lib/queries/rooms'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
@@ -22,7 +22,7 @@ export default function RoomsPage() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE)
   const [buildingFilter, setBuildingFilter] = useState<string>('')
   const [statusFilter, setStatusFilter] = useState<string>('')
   const hasActiveFilters = Boolean(buildingFilter || statusFilter)

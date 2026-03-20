@@ -16,7 +16,7 @@ import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
 import { ReservationStatusBadge } from '@/components/ui/status-badge'
-import { RESERVATION_STATUS_OPTIONS, canManageReservation, DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
+import { RESERVATION_STATUS_OPTIONS, canManageReservation, DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import {
   reservationKeys,
@@ -36,7 +36,7 @@ export default function ReservationsPage() {
   const [selectedBuildingId, setSelectedBuildingId] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [statusDialogReservation, setStatusDialogReservation] = useState<ReservationDto | null>(null)
   const hasActiveFilters = Boolean(selectedBuildingId || statusFilter)

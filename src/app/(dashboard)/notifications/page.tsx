@@ -26,6 +26,7 @@ import {
   markAllNotificationsRead,
   type NotificationFilters,
 } from '@/lib/queries/notifications'
+import { DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import type { NotificationDto, NotificationType } from '@/types/api'
 
 // ─── Types ──────────────────────────────────────────────
@@ -240,7 +241,7 @@ export default function NotificationsPage() {
 
   const [filters, setFilters] = useState<NotificationFilters>({
     page: 1,
-    pageSize: 20,
+    pageSize: DEFAULT_TABLE_PAGE_SIZE,
   })
   const [readFilter, setReadFilter] = useState<ReadFilter>('all')
   const [markingId, setMarkingId] = useState<string | null>(null)

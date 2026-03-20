@@ -13,13 +13,14 @@ import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
 import { formatDate } from '@/lib/utils'
 import { staffKeys, fetchStaffList, changeUserStatus } from '@/lib/queries/staff'
+import { DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import type { UserDto } from '@/types/api'
 import { CreateStaffDialog } from './create-staff-dialog'
 
 export default function StaffPage() {
   const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE)
   const [createOpen, setCreateOpen] = useState(false)
   const [statusTarget, setStatusTarget] = useState<UserDto | null>(null)
 

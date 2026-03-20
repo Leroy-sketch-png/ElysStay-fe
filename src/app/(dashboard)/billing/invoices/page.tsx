@@ -19,7 +19,7 @@ import { InvoiceStatusBadge } from '@/components/ui/status-badge'
 import { Pagination } from '@/components/ui/pagination'
 import { ConfirmDialog } from '@/components/ui/dialog'
 import { toast } from '@/components/ui/toaster'
-import { INVOICE_STATUS_OPTIONS, canSendInvoice, DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
+import { INVOICE_STATUS_OPTIONS, canSendInvoice, DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import { formatCurrency, formatDate, formatBillingPeriod, getCurrentBillingPeriod } from '@/lib/utils'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
 import {
@@ -51,7 +51,7 @@ export default function InvoicesPage() {
   const [billingMonth, setBillingMonth] = useState(defaultPeriod.month)
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | ''>('')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [batchSendOpen, setBatchSendOpen] = useState(false)
   const [sendTarget, setSendTarget] = useState<string | null>(null)

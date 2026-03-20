@@ -30,7 +30,7 @@ import {
   type PaymentSummaryFilters,
 } from '@/lib/queries/payments'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
-import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
+import { DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import type { PaymentDto, PaymentType } from '@/types/api'
 
 // ─── Type filter options ────────────────────────────────
@@ -51,7 +51,7 @@ export default function PaymentsPage() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(DEFAULT_TABLE_PAGE_SIZE)
   const hasInvalidDateRange = Boolean(fromDate && toDate && fromDate > toDate)
   const hasActiveFilters = Boolean(selectedBuildingId || typeFilter || fromDate || toDate)
 

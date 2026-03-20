@@ -20,7 +20,7 @@ import {
   type ContractFilters,
 } from '@/lib/queries/contracts'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
-import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
+import { DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import type { ContractDto } from '@/types/api'
 import { ContractFormDialog } from './contract-form-dialog'
 
@@ -29,7 +29,7 @@ export default function ContractsPage() {
   const queryClient = useQueryClient()
 
   // ─── State ──────────────────────────────────────────────
-  const [filters, setFilters] = useState<ContractFilters>({ page: 1, pageSize: 20 })
+  const [filters, setFilters] = useState<ContractFilters>({ page: 1, pageSize: DEFAULT_TABLE_PAGE_SIZE })
   const [buildingFilter, setBuildingFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
@@ -198,7 +198,7 @@ export default function ContractsPage() {
             onClick={() => {
               setBuildingFilter('')
               setStatusFilter('')
-              setFilters({ page: 1, pageSize: 20 })
+              setFilters({ page: 1, pageSize: DEFAULT_TABLE_PAGE_SIZE })
             }}
           >
             Xóa bộ lọc

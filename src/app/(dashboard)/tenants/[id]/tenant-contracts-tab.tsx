@@ -9,6 +9,7 @@ import { DataTable, type Column } from '@/components/ui/data-table'
 import { ContractStatusBadge, DepositStatusBadge } from '@/components/ui/status-badge'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { contractKeys, fetchContracts } from '@/lib/queries/contracts'
+import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import type { ContractDto } from '@/types/api'
 
 interface TenantContractsTabProps {
@@ -19,8 +20,8 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
   const router = useRouter()
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: contractKeys.list({ tenantUserId, pageSize: 50 }),
-    queryFn: () => fetchContracts({ tenantUserId, pageSize: 50 }),
+    queryKey: contractKeys.list({ tenantUserId, pageSize: DROPDOWN_PAGE_SIZE }),
+    queryFn: () => fetchContracts({ tenantUserId, pageSize: DROPDOWN_PAGE_SIZE }),
     enabled: !!tenantUserId,
   })
 

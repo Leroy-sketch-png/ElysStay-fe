@@ -21,6 +21,7 @@ import {
   changeTenantStatus,
   type TenantFilters,
 } from '@/lib/queries/tenants'
+import { DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import type { UserDto, ChangeUserStatusRequest } from '@/types/api'
 import { CreateTenantDialog } from './create-tenant-dialog'
 
@@ -29,7 +30,7 @@ export default function TenantsPage() {
   const queryClient = useQueryClient()
 
   // ─── State ──────────────────────────────────────────────
-  const [filters, setFilters] = useState<TenantFilters>({ page: 1, pageSize: 20 })
+  const [filters, setFilters] = useState<TenantFilters>({ page: 1, pageSize: DEFAULT_TABLE_PAGE_SIZE })
   const [searchValue, setSearchValue] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [statusTarget, setStatusTarget] = useState<UserDto | null>(null)
@@ -70,7 +71,7 @@ export default function TenantsPage() {
 
   const handleClearSearch = useCallback(() => {
     setSearchValue('')
-    setFilters({ page: 1, pageSize: 20 })
+    setFilters({ page: 1, pageSize: DEFAULT_TABLE_PAGE_SIZE })
   }, [])
 
   // ─── Columns ────────────────────────────────────────────
