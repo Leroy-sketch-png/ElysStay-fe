@@ -35,11 +35,11 @@ function roomSchema(maxFloors: number) {
     ),
     area: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-      z.number().min(1, 'Diện tích phải lớn hơn 0'),
+      z.number().min(1, 'Diện tích phải lớn hơn 0').max(1000, 'Tối đa 1000 m²'),
     ),
     price: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-      z.number().positive('Giá phải lớn hơn 0'),
+      z.number().nonnegative('Giá không được âm'),
     ),
     maxOccupants: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),

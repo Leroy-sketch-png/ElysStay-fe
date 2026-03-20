@@ -27,7 +27,7 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
   const [editTarget, setEditTarget] = useState<ServiceDto | null>(null)
   const [deactivateTarget, setDeactivateTarget] = useState<ServiceDto | null>(null)
 
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading, isError } = useQuery({
     queryKey: serviceKeys.byBuilding(buildingId),
     queryFn: () => fetchBuildingServices(buildingId),
   })
@@ -130,7 +130,7 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
         data={services ?? []}
         loading={isLoading}
         rowKey={(row) => row.id}
-        emptyMessage='Tòa nhà chưa có dịch vụ nào.'
+        emptyMessage={isError ? 'Đã xảy ra lỗi khi tải danh sách dịch vụ.' : 'Chưa có dịch vụ nào.'}
         emptyIcon={<Settings className='size-10' />}
       />
 

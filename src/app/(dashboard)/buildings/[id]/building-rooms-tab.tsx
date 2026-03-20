@@ -41,7 +41,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
     pageSize,
   }
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: roomKeys.byBuilding(buildingId, filters),
     queryFn: () => fetchBuildingRooms(buildingId, filters),
   })
@@ -191,7 +191,7 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
         loading={isLoading}
         rowKey={(row) => row.id}
         onRowClick={(row) => router.push(`/rooms/${row.id}`)}
-        emptyMessage='Chưa có phòng nào trong tòa nhà.'
+        emptyMessage={isError ? 'Đã xảy ra lỗi khi tải danh sách phòng.' : 'Chưa có phòng nào trong tòa nhà.'}
         emptyIcon={<DoorOpen className='size-10' />}
       />
 

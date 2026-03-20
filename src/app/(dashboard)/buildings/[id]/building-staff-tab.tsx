@@ -25,7 +25,7 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
   const [assignOpen, setAssignOpen] = useState(false)
   const [removeTarget, setRemoveTarget] = useState<StaffAssignmentDto | null>(null)
 
-  const { data: staff, isLoading } = useQuery({
+  const { data: staff, isLoading, isError } = useQuery({
     queryKey: staffKeys.byBuilding(buildingId),
     queryFn: () => fetchBuildingStaff(buildingId),
   })
@@ -103,7 +103,7 @@ export function BuildingStaffTab({ buildingId }: BuildingStaffTabProps) {
         data={staff ?? []}
         loading={isLoading}
         rowKey={(row) => row.staffId}
-        emptyMessage='Tòa nhà chưa có nhân viên nào.'
+        emptyMessage={isError ? 'Đã xảy ra lỗi khi tải danh sách nhân viên.' : 'Chưa phân công nhân viên nào.'}
         emptyIcon={<Users className='size-10' />}
       />
 

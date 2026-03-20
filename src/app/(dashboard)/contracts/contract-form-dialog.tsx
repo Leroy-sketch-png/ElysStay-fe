@@ -44,7 +44,7 @@ const contractSchema = z.object({
   moveInDate: z.string().min(1, 'Ngày dọn vào là bắt buộc'),
   monthlyRent: z.number({ error: 'Giá thuê hàng tháng là bắt buộc' }).positive('Giá thuê phải lớn hơn 0'),
   depositAmount: z.number({ error: 'Tiền cọc là bắt buộc' }).min(0, 'Tiền cọc không được âm'),
-  note: z.string().max(500).optional().or(z.literal('')),
+  note: z.string().max(2000).optional().or(z.literal('')),
 }).refine((data) => data.endDate > data.startDate, {
   message: 'Ngày kết thúc phải sau ngày bắt đầu',
   path: ['endDate'],

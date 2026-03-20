@@ -273,8 +273,8 @@ export default function NotificationsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all })
     },
-    onError: () => {
-      toast.error('Không thể đánh dấu thông báo đã đọc')
+    onError: (error: Error) => {
+      toast.error('Không thể đánh dấu thông báo đã đọc', error.message)
     },
     onSettled: () => setMarkingId(null),
   })
@@ -285,8 +285,8 @@ export default function NotificationsPage() {
       queryClient.invalidateQueries({ queryKey: notificationKeys.all })
       toast.success(`Đã đánh dấu ${result.markedRead} thông báo là đã đọc`)
     },
-    onError: () => {
-      toast.error('Không thể đánh dấu tất cả đã đọc')
+    onError: (error: Error) => {
+      toast.error('Không thể đánh dấu tất cả đã đọc', error.message)
     },
   })
 

@@ -70,6 +70,7 @@ export default function ContractDetailPage() {
   }
 
   const isActive = contract.status === 'Active'
+  const canRenew = isActive && contract.depositStatus === 'Held'
   const [endYear, endMonth, endDay] = contract.endDate.split('-').map(Number)
   const contractEndDate = new Date(endYear, endMonth - 1, endDay)
   const today = new Date(toLocalDateInputValue())
@@ -96,10 +97,12 @@ export default function ContractDetailPage() {
                 <Pencil className='size-4' />
                 Sửa
               </Button>
-              <Button variant='outline' onClick={() => setRenewOpen(true)}>
-                <RefreshCw className='size-4' />
-                Gia hạn
-              </Button>
+              {canRenew && (
+                <Button variant='outline' onClick={() => setRenewOpen(true)}>
+                  <RefreshCw className='size-4' />
+                  Gia hạn
+                </Button>
+              )}
               <Button variant='destructive' onClick={() => setTerminateOpen(true)}>
                 <Ban className='size-4' />
                 Chấm dứt

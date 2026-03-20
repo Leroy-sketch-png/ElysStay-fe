@@ -32,7 +32,7 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
   const [overrides, setOverrides] = useState<Record<string, ServiceOverrideState>>({})
   const [isDirty, setIsDirty] = useState(false)
 
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading, isError } = useQuery({
     queryKey: roomServiceKeys.byRoom(roomId),
     queryFn: () => fetchRoomServices(roomId),
   })
@@ -109,6 +109,16 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
               <div key={i} className='h-14 bg-muted rounded' />
             ))}
           </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className='p-6 text-center text-sm text-muted-foreground'>
+          Đã xảy ra lỗi khi tải dịch vụ phòng.
         </CardContent>
       </Card>
     )

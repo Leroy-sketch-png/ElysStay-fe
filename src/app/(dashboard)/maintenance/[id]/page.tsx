@@ -61,7 +61,7 @@ export default function IssueDetailPage() {
   const [confirmAction, setConfirmAction] = useState<{ status: IssueStatus; label: string; variant?: string } | null>(null)
 
   // Fetch single issue by ID via GET /issues/:id
-  const { data: issue, isLoading } = useQuery({
+  const { data: issue, isLoading, error } = useQuery({
     queryKey: issueKeys.detail(id),
     queryFn: () => fetchIssueById(id),
   })
@@ -93,11 +93,11 @@ export default function IssueDetailPage() {
     )
   }
 
-  if (!issue) {
+  if (error || !issue) {
     return (
       <PageContainer title='Không tìm thấy vấn đề'>
         <div className='py-12 text-center'>
-          <p className='text-muted-foreground'>Không tìm thấy vấn đề này.</p>
+          <p className='text-muted-foreground'>{error?.message ?? 'Không tìm thấy vấn đề này.'}</p>
           <Button
             variant='outline'
             className='mt-4'

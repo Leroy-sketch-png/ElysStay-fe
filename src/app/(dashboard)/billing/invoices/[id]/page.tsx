@@ -18,6 +18,7 @@ import { toast } from '@/components/ui/toaster'
 import { canRecordInvoicePayment, canSendInvoice, canVoidInvoice, isInvoiceClosed } from '@/lib/domain-constants'
 import { formatCurrency, formatDate, formatBillingPeriod, toLocalDateInputValue } from '@/lib/utils'
 import { invoiceKeys, fetchInvoiceById, sendInvoice, voidInvoice } from '@/lib/queries/invoices'
+import { paymentKeys } from '@/lib/queries/payments'
 import { reportKeys } from '@/lib/queries/reports'
 import { userKeys } from '@/lib/queries/users'
 import { RecordPaymentDialog } from './record-payment-dialog'
@@ -56,6 +57,7 @@ export default function InvoiceDetailPage() {
       toast.success('Đã hủy hóa đơn')
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: invoiceKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: paymentKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },

@@ -18,7 +18,7 @@ interface TenantContractsTabProps {
 export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
   const router = useRouter()
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: contractKeys.list({ tenantUserId, pageSize: 50 }),
     queryFn: () => fetchContracts({ tenantUserId, pageSize: 50 }),
     enabled: !!tenantUserId,
@@ -93,7 +93,7 @@ export function TenantContractsTab({ tenantUserId }: TenantContractsTabProps) {
           loadingRows={3}
           rowKey={(row) => row.id}
           onRowClick={(row) => router.push(`/contracts/${row.id}`)}
-          emptyMessage='Khách thuê chưa có hợp đồng nào.'
+          emptyMessage={isError ? 'Đã xảy ra lỗi khi tải danh sách hợp đồng.' : 'Khách thuê chưa có hợp đồng nào.'}
           emptyIcon={<FileText className='size-10' />}
         />
       </CardContent>

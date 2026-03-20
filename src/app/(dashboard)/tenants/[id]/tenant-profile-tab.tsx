@@ -25,7 +25,7 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<UpdateTenantProfileRequest>({})
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, isError } = useQuery({
     queryKey: tenantProfileKeys.detail(userId),
     queryFn: () => fetchTenantProfile(userId),
     enabled: !!userId,
@@ -92,6 +92,16 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
               <div key={i} className='h-10 bg-muted rounded' />
             ))}
           </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className='p-6 text-center text-sm text-muted-foreground'>
+          Đã xảy ra lỗi khi tải hồ sơ.
         </CardContent>
       </Card>
     )
