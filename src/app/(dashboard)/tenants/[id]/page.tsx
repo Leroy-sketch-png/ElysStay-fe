@@ -93,7 +93,7 @@ export default function TenantDetailPage() {
               <Phone className='size-5 text-info' />
             </div>
             <div>
-              <p className='text-sm text-muted-foreground'>Phone</p>
+              <p className='text-sm text-muted-foreground'>Điện thoại</p>
               <p className='text-sm font-medium'>{tenant.phone || '—'}</p>
             </div>
           </CardContent>

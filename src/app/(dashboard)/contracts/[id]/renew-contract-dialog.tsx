@@ -22,6 +22,7 @@ import { toast } from '@/components/ui/toaster'
 import { formatCurrency, formatDate, parseDateInput } from '@/lib/utils'
 import { contractKeys, renewContract } from '@/lib/queries/contracts'
 import { roomKeys } from '@/lib/queries/rooms'
+import { paymentKeys } from '@/lib/queries/payments'
 import { reportKeys } from '@/lib/queries/reports'
 import { userKeys } from '@/lib/queries/users'
 import type { ContractDetailDto, RenewContractRequest } from '@/types/api'
@@ -123,6 +124,7 @@ export function RenewContractDialog({
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
       queryClient.invalidateQueries({ queryKey: contractKeys.detail(contract.id) })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: paymentKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)

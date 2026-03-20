@@ -236,7 +236,7 @@ function ProfileField({
             onChange={(e) => onChange(e.target.value)}
             className='mt-1'
           >
-            <option value=''>{placeholder || 'Select…'}</option>
+            <option value=''>{placeholder || 'Chọn…'}</option>
             {selectOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}

@@ -38,32 +38,32 @@ function getNotificationTypeLabel(type: NotificationType): string {
   const map: Record<NotificationType, string> = {
     INVOICE_SENT: 'Hóa đơn',
     INVOICE_VOIDED: 'Hóa đơn',
+    INVOICE_OVERDUE: 'Hóa đơn',
     PAYMENT_RECORDED: 'Thanh toán',
     ISSUE: 'Bảo trì',
-    InvoiceGenerated: 'Hóa đơn',
-    PaymentReceived: 'Thanh toán',
-    ContractExpiring: 'Hợp đồng',
-    MaintenanceUpdate: 'Bảo trì',
-    ReservationUpdate: 'Đặt cọc',
-    SystemAlert: 'Hệ thống',
+    CONTRACT_CREATED: 'Hợp đồng',
+    CONTRACT_RENEWED: 'Hợp đồng',
+    CONTRACT_TERMINATED: 'Hợp đồng',
+    CONTRACT_EXPIRY_ALERT: 'Hợp đồng',
+    RESERVATION_EXPIRED: 'Đặt phòng',
   }
-  return map[type]
+  return map[type] ?? type
 }
 
 function getNotificationTypeColor(type: NotificationType): string {
   const map: Record<NotificationType, string> = {
     INVOICE_SENT: 'bg-info/10 text-info',
     INVOICE_VOIDED: 'bg-destructive/10 text-destructive',
+    INVOICE_OVERDUE: 'bg-warning/10 text-warning',
     PAYMENT_RECORDED: 'bg-success/10 text-success',
     ISSUE: 'bg-warning/10 text-warning',
-    InvoiceGenerated: 'bg-info/10 text-info',
-    PaymentReceived: 'bg-success/10 text-success',
-    ContractExpiring: 'bg-warning/10 text-warning',
-    MaintenanceUpdate: 'bg-warning/10 text-warning',
-    ReservationUpdate: 'bg-info/10 text-info',
-    SystemAlert: 'bg-destructive/10 text-destructive',
+    CONTRACT_CREATED: 'bg-success/10 text-success',
+    CONTRACT_RENEWED: 'bg-info/10 text-info',
+    CONTRACT_TERMINATED: 'bg-destructive/10 text-destructive',
+    CONTRACT_EXPIRY_ALERT: 'bg-warning/10 text-warning',
+    RESERVATION_EXPIRED: 'bg-destructive/10 text-destructive',
   }
-  return map[type]
+  return map[type] ?? 'bg-muted text-muted-foreground'
 }
 
 // ─── Notification type → detail page mapping ────────────
@@ -73,10 +73,13 @@ function getNotificationHref(type: NotificationType, referenceId?: string | null
   const map: Partial<Record<NotificationType, string>> = {
     INVOICE_SENT: `/billing/invoices/${referenceId}`,
     INVOICE_VOIDED: `/billing/invoices/${referenceId}`,
+    INVOICE_OVERDUE: `/billing/invoices/${referenceId}`,
     PAYMENT_RECORDED: `/billing/invoices/${referenceId}`,
     ISSUE: `/maintenance/${referenceId}`,
-    InvoiceGenerated: `/billing/invoices/${referenceId}`,
-    MaintenanceUpdate: `/maintenance/${referenceId}`,
+    CONTRACT_CREATED: `/contracts/${referenceId}`,
+    CONTRACT_RENEWED: `/contracts/${referenceId}`,
+    CONTRACT_TERMINATED: `/contracts/${referenceId}`,
+    CONTRACT_EXPIRY_ALERT: `/contracts/${referenceId}`,
   }
   return map[type] ?? null
 }

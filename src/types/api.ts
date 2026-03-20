@@ -577,14 +577,14 @@ export type ReservationStatus = 'Pending' | 'Confirmed' | 'Converted' | 'Cancell
 export type NotificationType =
   | 'INVOICE_SENT'
   | 'INVOICE_VOIDED'
+  | 'INVOICE_OVERDUE'
   | 'PAYMENT_RECORDED'
   | 'ISSUE'
-  | 'InvoiceGenerated'
-  | 'PaymentReceived'
-  | 'ContractExpiring'
-  | 'MaintenanceUpdate'
-  | 'ReservationUpdate'
-  | 'SystemAlert'
+  | 'CONTRACT_CREATED'
+  | 'CONTRACT_RENEWED'
+  | 'CONTRACT_TERMINATED'
+  | 'CONTRACT_EXPIRY_ALERT'
+  | 'RESERVATION_EXPIRED'
 
 export interface ReservationDto {
   id: string
