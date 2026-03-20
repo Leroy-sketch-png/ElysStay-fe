@@ -26,6 +26,7 @@ import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import { roomKeys, fetchRooms } from '@/lib/queries/rooms'
 import { reservationKeys, createReservation } from '@/lib/queries/reservations'
 import { tenantKeys, fetchTenants } from '@/lib/queries/tenants'
+import { reportKeys } from '@/lib/queries/reports'
 import { userKeys } from '@/lib/queries/users'
 import { formatCurrency } from '@/lib/utils'
 
@@ -164,6 +165,7 @@ export function CreateReservationDialog({
       toast.success('Đã tạo đặt cọc')
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },

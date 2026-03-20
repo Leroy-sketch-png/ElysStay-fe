@@ -30,6 +30,7 @@ import { tenantKeys, fetchTenants } from '@/lib/queries/tenants'
 import { paymentKeys } from '@/lib/queries/payments'
 import { invoiceKeys } from '@/lib/queries/invoices'
 import { reservationKeys } from '@/lib/queries/reservations'
+import { reportKeys } from '@/lib/queries/reports'
 import { userKeys } from '@/lib/queries/users'
 import type { CreateContractRequest, ReservationDto } from '@/types/api'
 
@@ -194,6 +195,7 @@ export function ContractFormDialog({ open, onOpenChange, fromReservation }: Cont
       queryClient.invalidateQueries({ queryKey: paymentKeys.all })
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },

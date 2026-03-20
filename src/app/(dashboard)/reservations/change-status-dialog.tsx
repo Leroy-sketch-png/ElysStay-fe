@@ -27,6 +27,7 @@ import { canCancelReservation, canConfirmReservation, canConvertReservation } fr
 import { reservationKeys, changeReservationStatus } from '@/lib/queries/reservations'
 import { roomKeys } from '@/lib/queries/rooms'
 import { paymentKeys } from '@/lib/queries/payments'
+import { reportKeys } from '@/lib/queries/reports'
 import { userKeys } from '@/lib/queries/users'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import type { ReservationDto, ReservationAction } from '@/types/api'
@@ -90,6 +91,7 @@ export function ChangeReservationStatusDialog({
       toast.success('Đã xác nhận đặt cọc')
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
@@ -110,6 +112,7 @@ export function ChangeReservationStatusDialog({
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: paymentKeys.all })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },

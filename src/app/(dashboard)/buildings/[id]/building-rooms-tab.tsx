@@ -16,6 +16,8 @@ import { ROOM_STATUS_OPTIONS, canToggleRoomStatus, getNextManualRoomStatus } fro
 import { formatCurrency } from '@/lib/utils'
 import { roomKeys, fetchBuildingRooms, deleteRoom, changeRoomStatus } from '@/lib/queries/rooms'
 import { buildingKeys } from '@/lib/queries/buildings'
+import { reportKeys } from '@/lib/queries/reports'
+import { userKeys } from '@/lib/queries/users'
 import type { RoomDto } from '@/types/api'
 import { RoomFormDialog } from '../../rooms/room-form-dialog'
 
@@ -52,6 +54,8 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
       toast.success('Đã xóa phòng')
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(buildingId) })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       setDeleteTarget(null)
     },
     onError: (error: Error) => {
@@ -70,6 +74,8 @@ export function BuildingRoomsTab({ buildingId, totalFloors }: BuildingRoomsTabPr
       toast.success('Đã cập nhật trạng thái phòng')
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(buildingId) })
+      queryClient.invalidateQueries({ queryKey: reportKeys.all })
+      queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
     },
     onError: (error: Error) => {
       toast.error('Đổi trạng thái thất bại', error.message)
