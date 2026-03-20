@@ -94,10 +94,16 @@ export function setTokenAccessor(accessor: () => string | undefined) {
 // ─── Auth Error Handler ─────────────────────────────────
 
 let onUnauthorized: (() => void) | null = null
+let tryRefreshToken: (() => Promise<boolean>) | null = null
 
 /** Register a callback invoked on 401 responses (e.g. redirect to login) */
 export function setOnUnauthorized(handler: () => void) {
   onUnauthorized = handler
+}
+
+/** Register an async token refresh function — returns true if refresh succeeded */
+export function setTokenRefresher(refresher: () => Promise<boolean>) {
+  tryRefreshToken = refresher
 }
 
 // ─── Core Fetch ─────────────────────────────────────────
@@ -105,6 +111,7 @@ export function setOnUnauthorized(handler: () => void) {
 async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
+  isRetry = false,
 ): Promise<T> {
   const token = getToken?.()
 
@@ -146,8 +153,14 @@ async function apiFetch<T>(
   if (!response.ok) {
     const retryAfterMs = getRetryAfterMs(response)
 
-    // 401 Unauthorized — token expired or invalid, trigger auth redirect
-    if (response.status === 401) {
+    // 401 Unauthorized — try silent token refresh + retry before redirecting
+    if (response.status === 401 && tryRefreshToken && !isRetry) {
+      const refreshed = await tryRefreshToken().catch(() => false)
+      if (refreshed) {
+        return apiFetch<T>(path, options, true)
+      }
+      onUnauthorized?.()
+    } else if (response.status === 401) {
       onUnauthorized?.()
     }
 

@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from 'react'
 import Keycloak from 'keycloak-js'
-import { setTokenAccessor, setOnUnauthorized } from '@/lib/api-client'
+import { setTokenAccessor, setOnUnauthorized, setTokenRefresher } from '@/lib/api-client'
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -147,8 +147,21 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
           setUser(parseUser(kc))
           setToken(kc.token)
           setTokenAccessor(() => kc.token)
-          // Redirect to login on any 401 API response
+          // Redirect to login on any 401 API response (after refresh attempt fails)
           setOnUnauthorized(() => kc.login())
+          // Allow api-client to silently refresh token on 401 before redirecting
+          setTokenRefresher(async () => {
+            try {
+              const refreshed = await kc.updateToken(-1)
+              if (refreshed) {
+                setToken(kc.token)
+                setUser(parseUser(kc))
+              }
+              return true // token is valid (refreshed or still valid)
+            } catch {
+              return false
+            }
+          })
         }
         setInitialized(true)
       })
