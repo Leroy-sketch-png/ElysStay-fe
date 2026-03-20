@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -54,6 +55,7 @@ export function EditContractDialog({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<EditFormData>({
     resolver: zodResolver(editSchema),
@@ -84,7 +86,9 @@ export function EditContractDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Cập nhật hợp đồng thất bại', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Cập nhật hợp đồng thất bại', error.message)
+      }
     },
   })
 

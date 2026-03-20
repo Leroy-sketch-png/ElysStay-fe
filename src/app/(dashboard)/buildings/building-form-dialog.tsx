@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -32,7 +33,7 @@ const buildingSchema = z.object({
   description: z.string().trim().max(2000, 'Mô tả quá dài').optional().or(z.literal('')),
   totalFloors: z.preprocess(
     (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
-    z.number().int().min(1, 'Tối thiểu 1 tầng').max(100, 'Tối đa 100 tầng'),
+    z.number().int().min(1, 'Tối thiểu 1 tầng').max(200, 'Tối đa 200 tầng'),
   ),
   invoiceDueDay: z.preprocess(
     (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
@@ -65,6 +66,7 @@ export function BuildingFormDialog({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<BuildingFormInput, unknown, BuildingFormData>({
     resolver: zodResolver(buildingSchema),
@@ -109,7 +111,9 @@ export function BuildingFormDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Không thể tạo tòa nhà', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Không thể tạo tòa nhà', error.message)
+      }
     },
   })
 
@@ -123,7 +127,9 @@ export function BuildingFormDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Không thể cập nhật tòa nhà', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Không thể cập nhật tòa nhà', error.message)
+      }
     },
   })
 
@@ -185,7 +191,7 @@ export function BuildingFormDialog({
             <div className='grid grid-cols-2 gap-4'>
               <div className='space-y-2'>
                 <Label htmlFor='totalFloors'>Số tầng *</Label>
-                <Input id='totalFloors' type='number' min={1} max={100} {...register('totalFloors', { valueAsNumber: true })} aria-invalid={!!errors.totalFloors} />
+                <Input id='totalFloors' type='number' min={1} max={200} {...register('totalFloors', { valueAsNumber: true })} aria-invalid={!!errors.totalFloors} />
                 {errors.totalFloors && <p className='text-xs text-destructive'>{errors.totalFloors.message}</p>}
               </div>
               <div className='space-y-2'>

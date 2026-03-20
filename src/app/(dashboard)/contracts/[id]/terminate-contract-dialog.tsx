@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -71,6 +72,7 @@ export function TerminateContractDialog({
     handleSubmit,
     reset,
     watch,
+    setError,
     formState: { errors },
   } = useForm<TerminateFormInput, unknown, TerminateFormData>({
     resolver: zodResolver(
@@ -116,7 +118,9 @@ export function TerminateContractDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Chấm dứt hợp đồng thất bại', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Chấm dứt hợp đồng thất bại', error.message)
+      }
     },
   })
 

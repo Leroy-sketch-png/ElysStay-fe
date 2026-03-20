@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -58,6 +59,7 @@ export function ServiceFormDialog({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
@@ -86,7 +88,11 @@ export function ServiceFormDialog({
       queryClient.invalidateQueries({ queryKey: serviceKeys.byBuilding(buildingId) })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Tạo dịch vụ thất bại', error.message),
+    onError: (error: Error) => {
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Tạo dịch vụ thất bại', error.message)
+      }
+    },
   })
 
   const updateMutation = useMutation({
@@ -96,7 +102,11 @@ export function ServiceFormDialog({
       queryClient.invalidateQueries({ queryKey: serviceKeys.byBuilding(buildingId) })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Cập nhật dịch vụ thất bại', error.message),
+    onError: (error: Error) => {
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Cập nhật dịch vụ thất bại', error.message)
+      }
+    },
   })
 
   const onSubmit = (data: ServiceFormData) => {

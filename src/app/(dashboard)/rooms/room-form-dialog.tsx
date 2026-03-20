@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -79,6 +80,7 @@ export function RoomFormDialog({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<RoomFormInput, unknown, RoomFormData>({
     resolver: zodResolver(schema),
@@ -119,6 +121,7 @@ export function RoomFormDialog({
       onOpenChange(false)
     },
     onError: (error: Error & { status?: number }) => {
+      if (mapApiErrorsToForm(error, setError)) return
       if ((error as { status?: number }).status === 409) {
         toast.error('Trùng số phòng', 'Phòng với số này đã tồn tại trong tòa nhà.')
       } else {
@@ -136,7 +139,11 @@ export function RoomFormDialog({
       queryClient.invalidateQueries({ queryKey: roomKeys.detail(room!.id) })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Cập nhật phòng thất bại', error.message),
+    onError: (error: Error) => {
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Cập nhật phòng thất bại', error.message)
+      }
+    },
   })
 
   const onSubmit = (data: RoomFormData) => {

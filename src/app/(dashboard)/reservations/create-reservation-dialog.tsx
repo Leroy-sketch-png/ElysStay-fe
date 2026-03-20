@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -92,6 +93,7 @@ export function CreateReservationDialog({
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<ReservationFormData, unknown, ReservationFormOutput>({
     resolver: zodResolver(reservationSchema),
@@ -170,7 +172,9 @@ export function CreateReservationDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Không thể tạo đặt cọc', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Không thể tạo đặt cọc', error.message)
+      }
     },
   })
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -50,6 +51,7 @@ export function CreateStaffDialog({ open, onOpenChange }: CreateStaffDialogProps
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<StaffFormData>({
     resolver: zodResolver(staffSchema),
@@ -71,6 +73,7 @@ export function CreateStaffDialog({ open, onOpenChange }: CreateStaffDialogProps
       queryClient.invalidateQueries({ queryKey: staffKeys.all })
     },
     onError: (error: Error & { status?: number }) => {
+      if (mapApiErrorsToForm(error, setError)) return
       if ((error as { status?: number }).status === 409) {
         toast.error('Email đã tồn tại', 'Đã có tài khoản sử dụng email này.')
       } else {

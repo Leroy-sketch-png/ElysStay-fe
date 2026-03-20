@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -63,7 +64,9 @@ export default function SettingsPage() {
       queryClient.invalidateQueries({ queryKey: userKeys.me() })
     },
     onError: (error: Error) => {
-      toast.error('Không thể cập nhật hồ sơ', error.message)
+      if (!mapApiErrorsToForm(error, profileForm.setError)) {
+        toast.error('Không thể cập nhật hồ sơ', error.message)
+      }
     },
   })
 

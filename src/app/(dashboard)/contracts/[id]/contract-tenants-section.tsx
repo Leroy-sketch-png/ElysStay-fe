@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -216,6 +217,7 @@ function AddRoommateDialog({
     handleSubmit,
     reset,
     control,
+    setError,
     formState: { errors },
   } = useForm<AddRoommateFormData>({
     resolver: zodResolver(addRoommateSchema),
@@ -244,7 +246,9 @@ function AddRoommateDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Thêm người ở cùng thất bại', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Thêm người ở cùng thất bại', error.message)
+      }
     },
   })
 

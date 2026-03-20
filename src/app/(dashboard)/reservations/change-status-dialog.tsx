@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -70,6 +71,7 @@ export function ChangeReservationStatusDialog({
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<CancelFormData>({
     resolver: zodResolver(buildCancelSchema(reservation.depositAmount)),
@@ -117,7 +119,9 @@ export function ChangeReservationStatusDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Không thể hủy đặt cọc', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Không thể hủy đặt cọc', error.message)
+      }
     },
   })
 

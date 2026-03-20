@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -97,6 +98,7 @@ export function RenewContractDialog({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<RenewFormInput, unknown, RenewFormData>({
     resolver: zodResolver(buildRenewSchema(newStartDate)),
@@ -132,7 +134,9 @@ export function RenewContractDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Gia hạn hợp đồng thất bại', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Gia hạn hợp đồng thất bại', error.message)
+      }
     },
   })
 

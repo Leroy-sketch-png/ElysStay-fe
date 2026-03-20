@@ -1,4 +1,5 @@
 import { AuthGuard } from '@/components/layouts/AuthGuard'
+import { RoleGuard } from '@/components/layouts/RoleGuard'
 import { AppShell } from '@/components/layouts/AppShell'
 
 export default function DashboardLayout({
@@ -8,7 +9,9 @@ export default function DashboardLayout({
 }) {
   return (
     <AuthGuard>
-      <AppShell>{children}</AppShell>
+      <RoleGuard>
+        <AppShell>{children}</AppShell>
+      </RoleGuard>
     </AuthGuard>
   )
 }

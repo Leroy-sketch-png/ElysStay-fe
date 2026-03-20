@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -117,7 +118,11 @@ export function CreateIssueDialog({
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Không thể báo vấn đề', error.message),
+    onError: (error: Error) => {
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Không thể báo vấn đề', error.message)
+      }
+    },
   })
 
   const onSubmit = (data: IssueFormData) => {

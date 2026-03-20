@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useForm, Controller } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -80,6 +81,7 @@ export function ContractFormDialog({ open, onOpenChange, fromReservation }: Cont
     control,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<ContractFormData, unknown, ContractFormOutput>({
     resolver: zodResolver(contractSchema),
@@ -200,6 +202,7 @@ export function ContractFormDialog({ open, onOpenChange, fromReservation }: Cont
       onOpenChange(false)
     },
     onError: (error: Error & { status?: number }) => {
+      if (mapApiErrorsToForm(error, setError)) return
       if ((error as { status?: number }).status === 409) {
         toast.error('Phòng đã có hợp đồng', 'Mỗi phòng chỉ được phép có một hợp đồng đang hoạt động.')
       } else {

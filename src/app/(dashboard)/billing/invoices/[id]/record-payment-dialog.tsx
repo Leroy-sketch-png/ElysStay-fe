@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -76,6 +77,7 @@ export function RecordPaymentDialog({
     handleSubmit,
     reset,
     watch,
+    setError,
     formState: { errors },
   } = useForm<PaymentFormData>({
     resolver: zodResolver(paymentSchema),
@@ -118,7 +120,9 @@ export function RecordPaymentDialog({
       onOpenChange(false)
     },
     onError: (error: Error) => {
-      toast.error('Ghi nhận thanh toán thất bại', error.message)
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Ghi nhận thanh toán thất bại', error.message)
+      }
     },
   })
 

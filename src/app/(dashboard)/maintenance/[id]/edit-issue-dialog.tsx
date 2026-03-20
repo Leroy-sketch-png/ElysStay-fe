@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
@@ -51,6 +52,7 @@ export function EditIssueDialog({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<EditIssueFormData>({
     resolver: zodResolver(editIssueSchema),
@@ -81,7 +83,11 @@ export function EditIssueDialog({
       queryClient.invalidateQueries({ queryKey: issueKeys.detail(issue.id) })
       onOpenChange(false)
     },
-    onError: (error: Error) => toast.error('Cập nhật vấn đề thất bại', error.message),
+    onError: (error: Error) => {
+      if (!mapApiErrorsToForm(error, setError)) {
+        toast.error('Cập nhật vấn đề thất bại', error.message)
+      }
+    },
   })
 
   const onSubmit = (data: EditIssueFormData) => mutation.mutate(data)
