@@ -243,6 +243,14 @@ export default function ReservationsPage() {
           actionLabel='Thử lại'
           onAction={() => queryClient.invalidateQueries({ queryKey: reservationKeys.all })}
         />
+      ) : !isLoading && reservations.length === 0 && !hasActiveFilters ? (
+        <EmptyState
+          icon={<CalendarClock className='size-8' />}
+          title='Chưa có đặt cọc nào'
+          description='Tạo đặt cọc đầu tiên để bắt đầu quy trình tiếp nhận khách thuê.'
+          actionLabel='Đặt cọc mới'
+          onAction={() => setCreateDialogOpen(true)}
+        />
       ) : (
         <DataTable
           columns={columns}

@@ -172,6 +172,14 @@ export default function RoomsPage() {
               actionLabel='Đến trang Tòa nhà'
               onAction={() => router.push('/buildings')}
             />
+          ) : !isLoading && (data?.data ?? []).length === 0 && !hasActiveFilters ? (
+            <EmptyState
+              icon={<DoorOpen className='size-10' />}
+              title='Chưa có phòng'
+              description='Thêm phòng cho tòa nhà trong trang chi tiết tòa nhà.'
+              actionLabel='Đến trang Tòa nhà'
+              onAction={() => router.push('/buildings')}
+            />
           ) : (
           <DataTable
             columns={columns}

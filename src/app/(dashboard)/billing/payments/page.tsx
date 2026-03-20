@@ -266,7 +266,7 @@ export default function PaymentsPage() {
 
       {hasInvalidDateRange && (
         <div className='rounded-lg border border-warning/30 bg-warning/5 p-4 text-sm text-warning'>
-          The date range is invalid. “From” must be on or before “To”.
+          Khoảng thời gian không hợp lệ. Ngày &quot;Từ&quot; phải trước hoặc bằng ngày &quot;Đến&quot;.
         </div>
       )}
 

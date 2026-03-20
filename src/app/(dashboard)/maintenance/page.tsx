@@ -260,13 +260,13 @@ export default function MaintenanceIssuesPage() {
               ? 'Không có vấn đề phù hợp với bộ lọc.'
               : 'Chưa có vấn đề bảo trì nào được báo cáo.'
           }
-          actionLabel={hasActiveFilters ? 'Xóa bộ lọc' : undefined}
+          actionLabel={hasActiveFilters ? 'Xóa bộ lọc' : 'Báo vấn đề'}
           onAction={hasActiveFilters ? () => {
             setSelectedBuildingId('')
             setStatusFilter('')
             setPriorityFilter('')
             setPage(1)
-          } : undefined}
+          } : () => setCreateOpen(true)}
         />
       )}
 
