@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   ArrowLeft, DoorOpen, Building2, Pencil, Layers, Users2, Ruler,
-  Banknote, Settings, ToggleLeft,
+  Banknote, Settings, ToggleLeft, FileText, User,
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -21,6 +21,7 @@ import { getNextManualRoomStatus, canToggleRoomStatus } from '@/lib/domain-const
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { roomKeys, fetchRoomById, changeRoomStatus, deleteRoom } from '@/lib/queries/rooms'
 import { buildingKeys, fetchBuildingById } from '@/lib/queries/buildings'
+import { contractKeys, fetchContracts } from '@/lib/queries/contracts'
 import { userKeys } from '@/lib/queries/users'
 import { RoomFormDialog } from '../room-form-dialog'
 import { RoomServicesTab } from './room-services-tab'
@@ -45,6 +46,14 @@ export default function RoomDetailPage() {
     queryFn: () => fetchBuildingById(room!.buildingId),
     enabled: !!room?.buildingId,
   })
+
+  // Fetch active contract for this room (current occupant)
+  const { data: activeContracts } = useQuery({
+    queryKey: contractKeys.list({ roomId: id, status: 'Active', pageSize: 1 }),
+    queryFn: () => fetchContracts({ roomId: id, status: 'Active', pageSize: 1 }),
+    enabled: !!id && room?.status === 'Occupied',
+  })
+  const activeContract = activeContracts?.data?.[0]
 
   const statusMutation = useMutation({
     mutationFn: (status: 'Available' | 'Maintenance') => changeRoomStatus(id, { status }),
@@ -276,6 +285,62 @@ export default function RoomDetailPage() {
               </dl>
             </CardContent>
           </Card>
+
+          {/* Current Occupant */}
+          {activeContract && (
+            <Card className='mt-4'>
+              <CardHeader>
+                <CardTitle className='text-base'>Khách thuê hiện tại</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <dl className='grid grid-cols-2 gap-4 text-sm'>
+                  <div>
+                    <dt className='text-muted-foreground'>Khách thuê</dt>
+                    <dd className='font-medium'>
+                      <button
+                        type='button'
+                        className='text-primary hover:underline inline-flex items-center gap-1'
+                        onClick={() => router.push(`/tenants/${activeContract.tenantUserId}`)}
+                      >
+                        <User className='size-3.5' />
+                        {activeContract.tenantName}
+                      </button>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className='text-muted-foreground'>Hợp đồng</dt>
+                    <dd className='font-medium'>
+                      <button
+                        type='button'
+                        className='text-primary hover:underline inline-flex items-center gap-1'
+                        onClick={() => router.push(`/contracts/${activeContract.id}`)}
+                      >
+                        <FileText className='size-3.5' />
+                        Xem hợp đồng
+                      </button>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className='text-muted-foreground'>Tiền thuê/tháng</dt>
+                    <dd className='font-medium'>{formatCurrency(activeContract.monthlyRent)}</dd>
+                  </div>
+                  <div>
+                    <dt className='text-muted-foreground'>Thời hạn</dt>
+                    <dd className='font-medium'>
+                      {formatDate(activeContract.startDate)} — {formatDate(activeContract.endDate)}
+                    </dd>
+                  </div>
+                </dl>
+              </CardContent>
+            </Card>
+          )}
+          {room.status === 'Occupied' && !activeContract && !activeContracts && (
+            <Card className='mt-4'>
+              <CardContent className='p-4'>
+                <p className='text-sm text-muted-foreground'>Đang tải thông tin khách thuê...</p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value='services'>

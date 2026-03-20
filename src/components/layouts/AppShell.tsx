@@ -45,21 +45,55 @@ interface NavItem {
   roles?: string[]
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Tổng quan', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Tòa nhà', href: '/buildings', icon: Building2, roles: ['Owner', 'Staff'] },
-  { label: 'Phòng', href: '/rooms', icon: DoorOpen, roles: ['Owner', 'Staff'] },
-  { label: 'Khách thuê', href: '/tenants', icon: Users, roles: ['Owner', 'Staff'] },
-  { label: 'Đặt cọc', href: '/reservations', icon: CalendarClock, roles: ['Owner', 'Staff'] },
-  { label: 'Hợp đồng', href: '/contracts', icon: FileText, roles: ['Owner', 'Staff'] },
-  { label: 'Hóa đơn', href: '/billing/invoices', icon: Receipt },
-  { label: 'Thanh toán', href: '/billing/payments', icon: CreditCard },
-  { label: 'Đồng hồ', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
-  { label: 'Chi phí', href: '/expenses', icon: DollarSign, roles: ['Owner', 'Staff'] },
-  { label: 'Bảo trì', href: '/maintenance', icon: Wrench },
-  { label: 'Thông báo', href: '/notifications', icon: Bell },
-  { label: 'Báo cáo L/L', href: '/reports/pnl', icon: BarChart3, roles: ['Owner'] },
-  { label: 'Nhân viên', href: '/staff', icon: UserCog, roles: ['Owner'] },
+interface NavGroup {
+  label?: string
+  items: NavItem[]
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    items: [
+      { label: 'Tổng quan', href: '/dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: 'Bất động sản',
+    items: [
+      { label: 'Tòa nhà', href: '/buildings', icon: Building2, roles: ['Owner', 'Staff'] },
+      { label: 'Phòng', href: '/rooms', icon: DoorOpen, roles: ['Owner', 'Staff'] },
+    ],
+  },
+  {
+    label: 'Khách thuê',
+    items: [
+      { label: 'Khách thuê', href: '/tenants', icon: Users, roles: ['Owner', 'Staff'] },
+      { label: 'Đặt cọc', href: '/reservations', icon: CalendarClock, roles: ['Owner', 'Staff'] },
+      { label: 'Hợp đồng', href: '/contracts', icon: FileText, roles: ['Owner', 'Staff'] },
+    ],
+  },
+  {
+    label: 'Tài chính',
+    items: [
+      { label: 'Hóa đơn', href: '/billing/invoices', icon: Receipt },
+      { label: 'Thanh toán', href: '/billing/payments', icon: CreditCard },
+      { label: 'Đồng hồ', href: '/billing/meter-readings', icon: Gauge, roles: ['Owner', 'Staff'] },
+      { label: 'Chi phí', href: '/expenses', icon: DollarSign, roles: ['Owner', 'Staff'] },
+    ],
+  },
+  {
+    label: 'Vận hành',
+    items: [
+      { label: 'Bảo trì', href: '/maintenance', icon: Wrench },
+      { label: 'Thông báo', href: '/notifications', icon: Bell },
+    ],
+  },
+  {
+    label: 'Quản lý',
+    items: [
+      { label: 'Báo cáo L/L', href: '/reports/pnl', icon: BarChart3, roles: ['Owner'] },
+      { label: 'Nhân viên', href: '/staff', icon: UserCog, roles: ['Owner'] },
+    ],
+  },
 ]
 
 // ─── Header Breadcrumbs ─────────────────────────────────
@@ -70,7 +104,7 @@ const ROUTE_LABELS: Record<string, string> = {
   rooms: 'Phòng',
   tenants: 'Khách thuê',
   contracts: 'Hợp đồng',
-  billing: 'Thanh toán',
+  billing: 'Tài chính',
   invoices: 'Hóa đơn',
   payments: 'Thanh toán',
   'meter-readings': 'Đồng hồ',
@@ -160,11 +194,16 @@ export function AppShell({ children }: AppShellProps) {
     return () => window.removeEventListener('keydown', handler)
   }, [toggleCollapsed])
 
-  // Filter nav items by user role
-  const visibleItems = NAV_ITEMS.filter(item => {
-    if (!item.roles) return true
-    return item.roles.some(role => user?.roles.some(r => r.toLowerCase() === role.toLowerCase()))
-  })
+  // Filter nav groups by user role
+  const visibleGroups = useMemo(() => {
+    return NAV_GROUPS.map(group => ({
+      ...group,
+      items: group.items.filter(item => {
+        if (!item.roles) return true
+        return item.roles.some(role => user?.roles.some(r => r.toLowerCase() === role.toLowerCase()))
+      }),
+    })).filter(group => group.items.length > 0)
+  }, [user?.roles])
 
   const sidebarWidth = collapsed ? SIDEBAR.collapsedWidth : SIDEBAR.expandedWidth
 
@@ -201,40 +240,50 @@ export function AppShell({ children }: AppShellProps) {
         }}
       >
         {/* Logo / Brand */}
-        <div
-          className='flex items-center border-b px-4 shrink-0'
+        <Link
+          href='/dashboard'
+          className='flex items-center border-b px-4 shrink-0 hover:bg-accent/50 transition-colors'
           style={{ height: HEADER.height }}
         >
           <Building2 className='size-6 text-primary shrink-0' />
           {(!collapsed || mobileOpen) && (
             <span className='ml-3 text-lg font-bold tracking-tight'>ElysStay</span>
           )}
-        </div>
+        </Link>
 
         {/* Nav Items */}
         <nav className='flex-1 overflow-y-auto p-2'>
-          <ul className='space-y-1'>
-            {visibleItems.map(item => {
-              const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
-                      'hover:bg-accent hover:text-accent-foreground',
-                      isActive && 'bg-primary/10 text-primary',
-                      collapsed && !mobileOpen && 'justify-center px-0',
-                    )}
-                    title={collapsed ? item.label : undefined}
-                  >
-                    <item.icon className='size-5 shrink-0' />
-                    {(!collapsed || mobileOpen) && <span>{item.label}</span>}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
+          {visibleGroups.map((group, gi) => (
+            <div key={gi} className={cn(gi > 0 && 'mt-3 pt-3 border-t border-border/50')}>
+              {group.label && (!collapsed || mobileOpen) && (
+                <p className='px-3 mb-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/70'>
+                  {group.label}
+                </p>
+              )}
+              <ul className='space-y-0.5'>
+                {group.items.map(item => {
+                  const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
+                          'hover:bg-accent hover:text-accent-foreground',
+                          isActive && 'bg-primary/10 text-primary',
+                          collapsed && !mobileOpen && 'justify-center px-0',
+                        )}
+                        title={collapsed ? item.label : undefined}
+                      >
+                        <item.icon className='size-5 shrink-0' />
+                        {(!collapsed || mobileOpen) && <span>{item.label}</span>}
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
 
         {/* Collapse toggle (desktop) */}
