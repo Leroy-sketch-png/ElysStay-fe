@@ -204,6 +204,11 @@ export default function InvoicesPage() {
         render: (row) => row.tenantName,
       },
       {
+        key: 'billingPeriod',
+        header: 'Kỳ',
+        render: (row) => `T${row.billingMonth}/${row.billingYear}`,
+      },
+      {
         key: 'totalAmount',
         header: 'Tổng',
         render: (row) => formatCurrency(row.totalAmount),
@@ -298,7 +303,12 @@ export default function InvoicesPage() {
       {/* Batch Send Confirm Dialog */}
       <ConfirmDialog
         open={batchSendOpen}
-        onOpenChange={setBatchSendOpen}
+        onOpenChange={(open) => {
+          setBatchSendOpen(open)
+          if (!open && !batchSendMutation.isPending) {
+            setSelectedIds([])
+          }
+        }}
         title='Gửi hóa đơn đã chọn'
         description={`Bạn có chắc muốn gửi ${selectedIds.length} hóa đơn đã chọn cho khách thuê?`}
         confirmLabel='Gửi tất cả'

@@ -148,9 +148,11 @@ export default function RoomDetailPage() {
             <Pencil className='size-4' />
             Sửa
           </Button>
-          <Button variant='destructive' onClick={() => setDeleteOpen(true)}>
-            Xóa
-          </Button>
+          {(room.status === 'Available' || room.status === 'Maintenance') && (
+            <Button variant='destructive' onClick={() => setDeleteOpen(true)}>
+              Xóa
+            </Button>
+          )}
         </div>
       }
     >

@@ -121,6 +121,7 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
           value={`${Math.round(data.occupancyRate * 100)}%`}
           icon={<TrendingUp className='size-5' />}
           variant={data.occupancyRate >= 0.8 ? 'success' : data.occupancyRate >= 0.5 ? 'default' : 'warning'}
+          href='/rooms'
         />
       </AnimatedCard>
       <AnimatedCard>
@@ -221,8 +222,35 @@ function StaffDashboard({ data }: { data: StaffDashboardDto }) {
 // ─── Tenant Dashboard ───────────────────────────────────
 
 function TenantDashboard({ data }: { data: TenantDashboardDto }) {
+  const isExpiringSoon = (() => {
+    if (!data.contractEndDate) return false
+    const end = new Date(data.contractEndDate)
+    const now = new Date()
+    const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    return daysLeft >= 0 && daysLeft <= 30
+  })()
+
+  const isExpired = (() => {
+    if (!data.contractEndDate) return false
+    return new Date(data.contractEndDate) < new Date()
+  })()
+
   return (
     <div className='space-y-6'>
+      {/* Contract expiry warning */}
+      {isExpired && (
+        <div className='rounded-lg border border-destructive/30 bg-destructive/5 p-4 flex items-center gap-3'>
+          <AlertTriangle className='size-5 text-destructive shrink-0' />
+          <p className='text-sm text-destructive font-medium'>Hợp đồng của bạn đã hết hạn. Vui lòng liên hệ chủ nhà để gia hạn.</p>
+        </div>
+      )}
+      {isExpiringSoon && !isExpired && (
+        <div className='rounded-lg border border-warning/30 bg-warning/5 p-4 flex items-center gap-3'>
+          <Clock className='size-5 text-warning shrink-0' />
+          <p className='text-sm text-warning font-medium'>Hợp đồng sắp hết hạn vào {formatDate(data.contractEndDate!)}. Vui lòng liên hệ chủ nhà để gia hạn.</p>
+        </div>
+      )}
+
       {/* Room info card */}
       {data.roomNumber && (
         <div className='rounded-lg border bg-card p-6'>
@@ -239,13 +267,17 @@ function TenantDashboard({ data }: { data: TenantDashboardDto }) {
             {data.contractStatus && (
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>Hợp đồng</span>
-                <span className='font-medium'>{data.contractStatus}</span>
+                <span className={cn('font-medium', data.contractStatus === 'Active' ? 'text-emerald-600' : 'text-muted-foreground')}>
+                  {data.contractStatus === 'Active' ? 'Đang hiệu lực' : 'Đã chấm dứt'}
+                </span>
               </div>
             )}
             {data.contractEndDate && (
               <div className='flex justify-between'>
                 <span className='text-muted-foreground'>Kết thúc</span>
-                <span className='font-medium'>{formatDate(data.contractEndDate)}</span>
+                <span className={cn('font-medium', isExpiringSoon && 'text-warning', isExpired && 'text-destructive')}>
+                  {formatDate(data.contractEndDate)}
+                </span>
               </div>
             )}
           </div>

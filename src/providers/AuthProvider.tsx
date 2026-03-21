@@ -31,6 +31,8 @@ export interface AuthContextValue {
   user: AuthUser | null
   /** The raw Keycloak access token (for debug; prefer api-client auto-injection) */
   token: string | undefined
+  /** User-facing auth bootstrap error, if Keycloak could not be reached */
+  authError: string | null
   /** Redirect to Keycloak login page */
   login: () => void
   /** Redirect to Keycloak logout page */
@@ -77,6 +79,7 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
   const [authenticated, setAuthenticated] = useState(false)
   const [user, setUser] = useState<AuthUser | null>(null)
   const [token, setToken] = useState<string | undefined>(undefined)
+  const [authError, setAuthError] = useState<string | null>(null)
   const keycloakRef = useRef<Keycloak | null>(null)
   const initCalledRef = useRef(false)
   const refreshingRef = useRef(false)
@@ -108,13 +111,15 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
     refreshingRef.current = true
     kc.updateToken(MIN_TOKEN_VALIDITY)
       .then(refreshed => {
+        setAuthError(null)
         if (refreshed) {
           setToken(kc.token)
           setUser(parseUser(kc))
         }
       })
       .catch(() => {
-        kc.logout()
+        // Transient refresh failures should not immediately destroy the session.
+        // The next API request will still attempt refresh once more before redirecting.
       })
       .finally(() => {
         refreshingRef.current = false
@@ -142,6 +147,7 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
         : undefined,
     })
       .then(auth => {
+        setAuthError(null)
         setAuthenticated(auth)
         if (auth) {
           setUser(parseUser(kc))
@@ -166,6 +172,10 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
         setInitialized(true)
       })
       .catch(() => {
+        setAuthenticated(false)
+        setUser(null)
+        setToken(undefined)
+        setAuthError('Không thể kết nối tới máy chủ xác thực. Vui lòng thử lại sau.')
         setInitialized(true)
       })
 
@@ -190,9 +200,7 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
     }
 
     kc.onAuthRefreshError = () => {
-      setAuthenticated(false)
-      setUser(null)
-      setToken(undefined)
+      setAuthError('Phiên đăng nhập tạm thời không thể làm mới. Hệ thống sẽ thử lại khi cần.')
     }
 
     return () => {
@@ -201,6 +209,7 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
   }, [loginRequired, parseUser, refreshToken])
 
   const login = useCallback(() => {
+    setAuthError(null)
     keycloakRef.current?.login()
   }, [])
 
@@ -214,8 +223,8 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
   )
 
   const value = useMemo<AuthContextValue>(
-    () => ({ initialized, authenticated, user, token, login, logout, hasRole }),
-    [initialized, authenticated, user, token, login, logout, hasRole],
+    () => ({ initialized, authenticated, user, token, authError, login, logout, hasRole }),
+    [initialized, authenticated, user, token, authError, login, logout, hasRole],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

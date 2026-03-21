@@ -42,6 +42,8 @@ function makeQueryClient() {
 
         if (error instanceof ApiError && error.status === 429) {
           toast.warning('Quá nhiều yêu cầu', 'Vui lòng đợi một lát rồi thử lại.')
+        } else if (error instanceof ApiError && error.status === 403) {
+          toast.error('Không có quyền truy cập', error.message)
         } else {
           toast.error('Thao tác thất bại', error.message)
         }

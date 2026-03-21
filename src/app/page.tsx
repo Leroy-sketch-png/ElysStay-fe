@@ -101,21 +101,14 @@ export default function HomePage() {
             </p>
 
             {/* CTA */}
-            <div className='mt-10 flex flex-col sm:flex-row items-center justify-center gap-4'>
+            <div className='mt-10 flex items-center justify-center'>
               <button
                 type='button'
                 onClick={login}
                 className='group relative inline-flex items-center gap-2 rounded-md bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-lg transition-colors duration-150 hover:shadow-xl cursor-pointer'
               >
-                Bắt đầu
-                <ChevronRight className='size-4 transition-transform motion-reduce:transition-none group-hover:translate-x-0.5' />
-              </button>
-              <button
-                type='button'
-                onClick={login}
-                className='inline-flex items-center gap-2 rounded-md border border-white/30 bg-white/10 px-8 py-3.5 text-sm font-medium text-white backdrop-blur-sm transition-colors duration-150 hover:bg-white/20 cursor-pointer'
-              >
                 Đăng nhập
+                <ChevronRight className='size-4 transition-transform motion-reduce:transition-none group-hover:translate-x-0.5' />
               </button>
             </div>
           </div>

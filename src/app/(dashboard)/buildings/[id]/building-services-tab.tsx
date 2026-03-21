@@ -14,6 +14,7 @@ import {
   fetchBuildingServices,
   deactivateService,
 } from '@/lib/queries/services'
+import { roomServiceKeys } from '@/lib/queries/room-services'
 import type { ServiceDto } from '@/types/api'
 import { ServiceFormDialog } from './service-form-dialog'
 
@@ -37,6 +38,7 @@ export function BuildingServicesTab({ buildingId }: BuildingServicesTabProps) {
     onSuccess: () => {
       toast.success('Đã ngưng dịch vụ')
       queryClient.invalidateQueries({ queryKey: serviceKeys.byBuilding(buildingId) })
+      queryClient.invalidateQueries({ queryKey: roomServiceKeys.all })
       setDeactivateTarget(null)
     },
     onError: (error: Error) => {

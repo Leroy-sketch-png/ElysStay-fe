@@ -15,6 +15,7 @@ import {
   updateRoomServices,
   removeRoomServiceOverride,
 } from '@/lib/queries/room-services'
+import { roomKeys } from '@/lib/queries/rooms'
 import type { RoomServiceDto, RoomServiceOverride } from '@/types/api'
 
 interface RoomServicesTabProps {
@@ -66,6 +67,7 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
     onSuccess: () => {
       toast.success('Đã cập nhật dịch vụ phòng')
       queryClient.invalidateQueries({ queryKey: roomServiceKeys.byRoom(roomId) })
+      queryClient.invalidateQueries({ queryKey: roomKeys.detail(roomId) })
       setIsDirty(false)
     },
     onError: (error: Error) => toast.error('Lưu dịch vụ thất bại', error.message),
