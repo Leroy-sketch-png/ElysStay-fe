@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:bdd": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -25,14 +29,24 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^12.7.0",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.91.3",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "jsdom": "^29.0.1",
+    "msw": "^2.12.14",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "vitest": "^4.1.0"
   }
 }
