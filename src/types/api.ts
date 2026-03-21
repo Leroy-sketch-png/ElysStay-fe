@@ -118,6 +118,7 @@ export interface RoomDto {
   price: number
   maxOccupants: number
   description?: string
+  images?: string
   status: RoomStatus
   createdAt: string
   updatedAt: string
@@ -593,14 +594,14 @@ export interface ReservationDto {
   buildingId: string
   buildingName: string
   tenantUserId: string
-  tenantName: string | null
+  tenantName?: string
   depositAmount: number
   status: ReservationStatus
   expiresAt: string
-  note: string | null
-  refundAmount: number | null
-  refundedAt: string | null
-  refundNote: string | null
+  note?: string
+  refundAmount?: number
+  refundedAt?: string
+  refundNote?: string
   createdAt: string
   updatedAt: string
 }
@@ -630,7 +631,7 @@ export interface NotificationDto {
   message: string
   isRead: boolean
   type: NotificationType
-  referenceId: string | null
+  referenceId?: string
   createdAt: string
 }
 
@@ -658,7 +659,7 @@ export interface PnlMonthDto {
 }
 
 export interface PnlReportDto {
-  buildingId: string | null
+  buildingId?: string
   year: number
   months: PnlMonthDto[]
 }

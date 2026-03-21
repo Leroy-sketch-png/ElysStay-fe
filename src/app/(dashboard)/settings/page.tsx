@@ -23,8 +23,8 @@ import { useAuth } from '@/providers/AuthProvider'
 const ROLE_LABELS: Record<string, string> = { Owner: 'Chủ nhà', Staff: 'Nhân viên', Tenant: 'Khách thuê' }
 
 const profileSchema = z.object({
-  fullName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự').max(100),
-  phone: z.string().max(20).regex(/^[+\d][\d\s\-().]*$/, 'Số điện thoại không hợp lệ').optional().or(z.literal('')),
+  fullName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự').max(200, 'Họ tên không vượt quá 200 ký tự'),
+  phone: z.string().regex(/^\d{10}$/, 'Số điện thoại phải đúng 10 chữ số').optional().or(z.literal('')),
 })
 
 type ProfileFormData = z.infer<typeof profileSchema>

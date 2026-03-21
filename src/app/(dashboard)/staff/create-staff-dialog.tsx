@@ -27,8 +27,8 @@ import type { CreateStaffRequest, CreateUserResultDto } from '@/types/api'
 // ─── Validation ─────────────────────────────────────────
 
 const staffSchema = z.object({
-  email: z.string().trim().email('Email không hợp lệ'),
-  fullName: z.string().trim().min(1, 'Họ tên là bắt buộc').max(200),
+  email: z.string().trim().email('Email không hợp lệ').max(254, 'Email không vượt quá 254 ký tự'),
+  fullName: z.string().trim().min(1, 'Họ tên là bắt buộc').max(200, 'Họ tên không vượt quá 200 ký tự'),
   phone: z.string().trim().regex(/^\d{10}$/, 'Số điện thoại phải đủ 10 chữ số').optional().or(z.literal('')),
   password: z.string().min(8, 'Mật khẩu tối thiểu 8 ký tự'),
 })

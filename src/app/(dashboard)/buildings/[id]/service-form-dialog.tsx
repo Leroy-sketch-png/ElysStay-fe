@@ -27,8 +27,8 @@ import type { ServiceDto, CreateServiceRequest, UpdateServiceRequest } from '@/t
 // ─── Validation ─────────────────────────────────────────
 
 const serviceSchema = z.object({
-  name: z.string().min(1, 'Tên là bắt buộc').max(200),
-  unit: z.string().min(1, 'Đơn vị là bắt buộc').max(50),
+  name: z.string().min(1, 'Tên là bắt buộc').max(100, 'Tên không vượt quá 100 ký tự'),
+  unit: z.string().min(1, 'Đơn vị là bắt buộc').max(50, 'Đơn vị không vượt quá 50 ký tự'),
   unitPrice: z.number().positive('Giá phải lớn hơn 0'),
   isMetered: z.enum(['true', 'false']),
 })
@@ -76,7 +76,7 @@ export function ServiceFormDialog({
           isMetered: service.isMetered ? 'true' : 'false',
         })
       } else {
-        reset({ name: '', unit: '', unitPrice: 0, isMetered: 'false' })
+        reset({ name: '', unit: '', unitPrice: '' as unknown as number, isMetered: 'false' })
       }
     }
   }, [open, isEdit, service, reset])

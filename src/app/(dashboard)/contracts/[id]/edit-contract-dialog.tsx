@@ -31,7 +31,7 @@ import type { ContractDetailDto, UpdateContractRequest } from '@/types/api'
 const editSchema = z.object({
   endDate: z.string().min(1, 'Ngày kết thúc là bắt buộc'),
   monthlyRent: z.number().positive('Tiền thuê phải lớn hơn 0'),
-  note: z.string().max(2000).optional().or(z.literal('')),
+  note: z.string().max(2000, 'Ghi chú không vượt quá 2000 ký tự').optional().or(z.literal('')),
 })
 
 type EditFormData = z.infer<typeof editSchema>
@@ -81,6 +81,7 @@ export function EditContractDialog({
     onSuccess: () => {
       toast.success('Đã cập nhật hợp đồng')
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
+      queryClient.invalidateQueries({ queryKey: contractKeys.detail(contract.id) })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
       onOpenChange(false)

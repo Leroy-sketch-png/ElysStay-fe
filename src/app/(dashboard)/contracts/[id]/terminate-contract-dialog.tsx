@@ -39,7 +39,7 @@ const terminateSchema = z.object({
       (v) => (v === '' || v == null || Number.isNaN(v) ? 0 : v),
       z.number().min(0, 'Không thể âm'),
     ),
-  note: z.string().trim().max(2000).optional().or(z.literal('')),
+  note: z.string().trim().max(2000, 'Ghi chú không vượt quá 2000 ký tự').optional().or(z.literal('')),
 })
 
 type TerminateFormInput = z.input<typeof terminateSchema>
@@ -110,6 +110,7 @@ export function TerminateContractDialog({
     onSuccess: () => {
       toast.success('Đã chấm dứt hợp đồng', 'Phòng đã được chuyển về Trống.')
       queryClient.invalidateQueries({ queryKey: contractKeys.all })
+      queryClient.invalidateQueries({ queryKey: contractKeys.detail(contract.id) })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: invoiceKeys.all })
       queryClient.invalidateQueries({ queryKey: paymentKeys.all })

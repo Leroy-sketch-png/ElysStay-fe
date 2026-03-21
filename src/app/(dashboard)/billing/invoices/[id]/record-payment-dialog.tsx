@@ -68,8 +68,8 @@ export function RecordPaymentDialog({
     amount: z.number()
       .positive('Số tiền phải dương')
       .max(amountDue, `Thanh toán không được vượt quá số dư còn lại ${formatCurrency(amountDue)}`),
-    paymentMethod: z.string().optional(),
-    note: z.string().max(500).optional().or(z.literal('')),
+    paymentMethod: z.string().max(50, 'Phương thức không vượt quá 50 ký tự').optional(),
+    note: z.string().max(500, 'Ghi chú không vượt quá 500 ký tự').optional().or(z.literal('')),
   })
 
   const {

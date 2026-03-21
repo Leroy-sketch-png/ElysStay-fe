@@ -106,7 +106,7 @@ export function RoomFormDialog({
           description: room.description ?? '',
         })
       } else {
-        reset({ roomNumber: '', floor: 1, area: 20, price: 0, maxOccupants: 2, description: '' })
+        reset({ roomNumber: '', floor: 1, area: 20, price: '' as unknown as number, maxOccupants: 2, description: '' })
       }
     }
   }, [open, isEdit, room, reset])

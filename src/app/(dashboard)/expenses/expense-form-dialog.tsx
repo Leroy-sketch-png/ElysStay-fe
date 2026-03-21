@@ -45,7 +45,7 @@ const expenseSchema = z.object({
   buildingId: z.string().min(1, 'Vui lòng chọn tòa nhà'),
   roomId: z.string().optional().or(z.literal('')),
   category: z.string().min(1, 'Vui lòng chọn danh mục').max(100),
-  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(500),
+  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(500, 'Mô tả không vượt quá 500 ký tự'),
   amount: z.preprocess(
     (value) => {
       if (value === '' || value === null || value === undefined) return undefined
