@@ -61,7 +61,7 @@ const reservationSchema = z.object({
     z.number({ error: 'Nhập số tiền hợp lệ' }).positive('Số tiền cọc phải lớn hơn 0').optional(),
   ),
   expiresAt: z.string().optional(),
-  note: z.string().trim().max(500, 'Ghi chú không vượt quá 500 ký tự').optional(),
+  note: z.string().trim().max(1000, 'Ghi chú không vượt quá 1000 ký tự').optional(),
 }).refine((data) => {
   if (!data.expiresAt) return true
   const expiresAt = new Date(data.expiresAt)

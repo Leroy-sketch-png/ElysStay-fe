@@ -29,7 +29,7 @@ import type { RoomDto, CreateRoomRequest, UpdateRoomRequest } from '@/types/api'
 
 function roomSchema(maxFloors: number) {
   return z.object({
-    roomNumber: z.string().trim().min(1, 'Số phòng là bắt buộc').max(20),
+    roomNumber: z.string().trim().min(1, 'Số phòng là bắt buộc').max(50, 'Số phòng không vượt quá 50 ký tự'),
     floor: z.preprocess(
       (v) => (v === '' || v == null || Number.isNaN(v) ? undefined : v),
       z.number().int().min(1, 'Tầng phải từ 1').max(maxFloors, `Tối đa ${maxFloors} tầng`),

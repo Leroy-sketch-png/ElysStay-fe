@@ -35,7 +35,7 @@ const issueSchema = z.object({
   buildingId: z.string().optional().or(z.literal('')),
   roomId: z.string().optional().or(z.literal('')),
   title: z.string().trim().min(1, 'Tiêu đề là bắt buộc').max(200),
-  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(2000),
+  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(5000, 'Mô tả không vượt quá 5000 ký tự'),
 })
 
 type IssueFormData = z.infer<typeof issueSchema>

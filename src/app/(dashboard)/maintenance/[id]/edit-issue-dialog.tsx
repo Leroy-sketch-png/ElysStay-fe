@@ -28,7 +28,7 @@ import type { MaintenanceIssueDto } from '@/types/api'
 
 const editIssueSchema = z.object({
   title: z.string().trim().min(1, 'Tiêu đề là bắt buộc').max(200),
-  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(2000),
+  description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(5000, 'Mô tả không vượt quá 5000 ký tự'),
 })
 
 type EditIssueFormData = z.infer<typeof editIssueSchema>

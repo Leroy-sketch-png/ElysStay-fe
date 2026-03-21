@@ -39,7 +39,7 @@ const terminateSchema = z.object({
       (v) => (v === '' || v == null || Number.isNaN(v) ? 0 : v),
       z.number().min(0, 'Không thể âm'),
     ),
-  note: z.string().trim().max(2000, 'Ghi chú không vượt quá 2000 ký tự').optional().or(z.literal('')),
+  note: z.string().trim().max(1000, 'Ghi chú không vượt quá 1000 ký tự').optional().or(z.literal('')),
 })
 
 type TerminateFormInput = z.input<typeof terminateSchema>

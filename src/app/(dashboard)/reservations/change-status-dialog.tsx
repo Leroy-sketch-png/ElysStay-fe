@@ -42,7 +42,7 @@ function buildCancelSchema(depositAmount: number) {
       .number({ error: 'Nhập số tiền hợp lệ' })
       .min(0, 'Tiền hoàn không được âm')
       .max(depositAmount, `Tiền hoàn không vượt quá ${formatCurrency(depositAmount)}`),
-    refundNote: z.string().trim().max(500, 'Ghi chú không vượt quá 500 ký tự').optional(),
+    refundNote: z.string().trim().max(1000, 'Ghi chú không vượt quá 1000 ký tự').optional(),
   })
 }
 
