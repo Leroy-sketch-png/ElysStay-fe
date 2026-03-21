@@ -1,4 +1,4 @@
-import type { InvoiceStatus, ReservationStatus, RoomStatus } from '@/types/api'
+import type { InvoiceStatus, NotificationType, ReservationStatus, RoomStatus } from '@/types/api'
 
 export const ROOM_STATUS_OPTIONS: { label: string; value: RoomStatus | '' }[] = [
   { label: 'Tất cả trạng thái', value: '' },
@@ -101,3 +101,22 @@ export function getExpenseCategoryLabel(value: string): string {
 // DROPDOWN_PAGE_SIZE: used for "fetch all" queries that populate dropdowns/selects.
 export const DEFAULT_TABLE_PAGE_SIZE = 20
 export const DROPDOWN_PAGE_SIZE = 999
+
+// ─── Notification Type → Route Mapping ───────────────────
+
+export function getNotificationHref(type: NotificationType, referenceId?: string | null): string | null {
+  if (!referenceId) return null
+  const map: Partial<Record<NotificationType, string>> = {
+    INVOICE_SENT: `/billing/invoices/${referenceId}`,
+    INVOICE_VOIDED: `/billing/invoices/${referenceId}`,
+    INVOICE_OVERDUE: `/billing/invoices/${referenceId}`,
+    PAYMENT_RECORDED: `/billing/invoices/${referenceId}`,
+    ISSUE: `/maintenance/${referenceId}`,
+    CONTRACT_CREATED: `/contracts/${referenceId}`,
+    CONTRACT_RENEWED: `/contracts/${referenceId}`,
+    CONTRACT_TERMINATED: `/contracts/${referenceId}`,
+    CONTRACT_EXPIRY_ALERT: `/contracts/${referenceId}`,
+    RESERVATION_EXPIRED: '/reservations',
+  }
+  return map[type] ?? null
+}

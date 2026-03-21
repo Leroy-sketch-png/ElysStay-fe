@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Bell, Check, CheckCheck, Loader2 } from 'lucide-react'
 import { cn, timeAgo } from '@/lib/utils'
+import { getNotificationHref } from '@/lib/domain-constants'
 import {
   notificationKeys,
   fetchNotifications,
@@ -18,15 +19,20 @@ import type { NotificationDto } from '@/types/api'
 function NotificationItem({
   notification,
   onMarkRead,
+  onNavigate,
 }: {
   notification: NotificationDto
   onMarkRead: (id: string) => void
+  onNavigate: () => void
 }) {
-  return (
+  const href = getNotificationHref(notification.type, notification.referenceId)
+
+  const inner = (
     <div
       className={cn(
         'flex gap-3 px-4 py-3 border-b last:border-b-0 transition-colors',
         !notification.isRead && 'bg-primary/5',
+        href && 'hover:bg-accent/50 cursor-pointer',
       )}
     >
       {/* Unread dot */}
@@ -52,6 +58,7 @@ function NotificationItem({
         <button
           onClick={(e) => {
             e.stopPropagation()
+            e.preventDefault()
             onMarkRead(notification.id)
           }}
           className='shrink-0 p-1 text-muted-foreground hover:text-primary transition-colors cursor-pointer'
@@ -62,6 +69,16 @@ function NotificationItem({
       )}
     </div>
   )
+
+  if (href) {
+    return (
+      <Link href={href} onClick={onNavigate}>
+        {inner}
+      </Link>
+    )
+  }
+
+  return inner
 }
 
 // ─── NotificationBell ───────────────────────────────────
@@ -191,6 +208,7 @@ export function NotificationBell() {
                   key={n.id}
                   notification={n}
                   onMarkRead={(id) => markReadMutation.mutate(id)}
+                  onNavigate={() => setOpen(false)}
                 />
               ))
             )}

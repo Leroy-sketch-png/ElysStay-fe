@@ -17,7 +17,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
 import { ReservationStatusBadge } from '@/components/ui/status-badge'
 import { RESERVATION_STATUS_OPTIONS, canManageReservation, DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
 import {
   reservationKeys,
   fetchReservations,
@@ -118,7 +118,7 @@ export default function ReservationsPage() {
         const expired = isExpired(r)
         return (
           <span className={expired ? 'text-destructive font-medium' : expiring ? 'text-warning font-medium' : ''}>
-            {formatDate(r.expiresAt)}
+            {formatDateTime(r.expiresAt)}
             {expired && ' (đã hết hạn)'}
             {expiring && ' (sắp hết)'}
           </span>

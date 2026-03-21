@@ -26,7 +26,7 @@ import {
   markAllNotificationsRead,
   type NotificationFilters,
 } from '@/lib/queries/notifications'
-import { DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
+import { DEFAULT_TABLE_PAGE_SIZE, getNotificationHref } from '@/lib/domain-constants'
 import type { NotificationDto, NotificationType } from '@/types/api'
 
 // ─── Types ──────────────────────────────────────────────
@@ -65,24 +65,6 @@ function getNotificationTypeColor(type: NotificationType): string {
     RESERVATION_EXPIRED: 'bg-destructive/10 text-destructive',
   }
   return map[type] ?? 'bg-muted text-muted-foreground'
-}
-
-// ─── Notification type → detail page mapping ────────────
-
-function getNotificationHref(type: NotificationType, referenceId?: string | null): string | null {
-  if (!referenceId) return null
-  const map: Partial<Record<NotificationType, string>> = {
-    INVOICE_SENT: `/billing/invoices/${referenceId}`,
-    INVOICE_VOIDED: `/billing/invoices/${referenceId}`,
-    INVOICE_OVERDUE: `/billing/invoices/${referenceId}`,
-    PAYMENT_RECORDED: `/billing/invoices/${referenceId}`,
-    ISSUE: `/maintenance/${referenceId}`,
-    CONTRACT_CREATED: `/contracts/${referenceId}`,
-    CONTRACT_RENEWED: `/contracts/${referenceId}`,
-    CONTRACT_TERMINATED: `/contracts/${referenceId}`,
-    CONTRACT_EXPIRY_ALERT: `/contracts/${referenceId}`,
-  }
-  return map[type] ?? null
 }
 
 // ─── Notification Row ───────────────────────────────────

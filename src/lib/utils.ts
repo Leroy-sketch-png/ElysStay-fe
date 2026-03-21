@@ -56,6 +56,20 @@ export function formatDate(date: string | Date): string {
 }
 
 /**
+ * Format a datetime string to dd/MM/yyyy HH:mm (Vietnamese convention).
+ */
+export function formatDateTime(date: string | Date): string {
+  const d = date instanceof Date ? date : new Date(date)
+  return new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(d)
+}
+
+/**
  * Format a billing period as "Tháng M/YYYY".
  */
 export function formatBillingPeriod(year: number, month: number): string {

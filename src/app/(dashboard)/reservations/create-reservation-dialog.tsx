@@ -160,7 +160,7 @@ export function CreateReservationDialog({
         roomId: data.roomId,
         tenantUserId: data.tenantUserId,
         depositAmount: data.depositAmount || undefined,
-        expiresAt: data.expiresAt || undefined,
+        expiresAt: data.expiresAt ? new Date(data.expiresAt).toISOString() : undefined,
         note: data.note || undefined,
       }),
     onSuccess: () => {
