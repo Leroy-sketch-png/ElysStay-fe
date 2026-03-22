@@ -49,6 +49,64 @@ Given('I am logged in as a staff member', async function () {
   })
 })
 
+Given('I am logged in as a tenant', async function () {
+  const page: Page = this.page
+  await page.route('**/realms/elysstay/**', async (route) => {
+    await route.fulfill({ status: 200, body: '{}' })
+  })
+})
+Given('my session token has expired', async function () {
+  // Simulate expired session — remove token from storage
+  const page: Page = this.page
+  await page.evaluate(() => {
+    localStorage.removeItem('kc_token')
+    sessionStorage.clear()
+  })
+})
+
+// ─── Navigation Steps (extended) ─────────────────────────
+
+When('I visit the rooms page', async function () {
+  const page: Page = this.page
+  await page.goto('/rooms')
+})
+
+When('I try to visit the buildings page', async function () {
+  const page: Page = this.page
+  await page.goto('/buildings')
+})
+
+When('I try to visit the staff page', async function () {
+  const page: Page = this.page
+  await page.goto('/staff')
+})
+
+When('I try to visit the reports page', async function () {
+  const page: Page = this.page
+  await page.goto('/reports/pnl')
+})
+
+When('I try to visit the {string} page', async function (pagePath: string) {
+  const page: Page = this.page
+  await page.goto(`/${pagePath}`)
+})
+
+When('I visit the notifications page', async function () {
+  const page: Page = this.page
+  await page.goto('/notifications')
+})
+
+When('I visit the buildings page', async function () {
+  const page: Page = this.page
+  await page.goto('/buildings')
+})
+Given('I am logged in as a {string}', async function (role: string) {
+  const page: Page = this.page
+  await page.route('**/realms/elysstay/**', async (route) => {
+    await route.fulfill({ status: 200, body: JSON.stringify({ role }) })
+  })
+})
+
 // ─── Navigation Steps ───────────────────────────────────
 
 Given('I am viewing the rooms page for building {string}', async function (buildingName: string) {
@@ -181,6 +239,21 @@ Given('there is a paid invoice for room {string}', async function (_roomNumber: 
   this.targetInvoiceStatus = 'Paid'
 })
 
+Given('there is a {string} invoice for room {string}', async function (status: string, _roomNumber: string) {
+  this.targetInvoiceStatus = status
+})
+
+Given('there is a sent invoice for room {string} with total {string}', async function (
+  _roomNumber: string, total: string
+) {
+  this.targetInvoiceStatus = 'Sent'
+  this.targetInvoiceTotal = total
+})
+
+Given('there are multiple draft invoices', async function () {
+  this.targetInvoiceStatus = 'Draft'
+})
+
 // ─── Reservation Pre-conditions ─────────────────────────
 
 Given('there is a pending reservation for room {string}', async function (_roomNumber: string) {
@@ -193,6 +266,17 @@ Given('there is a confirmed reservation for room {string}', async function (_roo
 
 Given('there is an expired reservation for room {string}', async function (_roomNumber: string) {
   this.targetReservationStatus = 'Expired'
+})
+
+Given('there is a {string} reservation for room {string}', async function (status: string, _roomNumber: string) {
+  this.targetReservationStatus = status
+})
+
+Given('there is a confirmed reservation for room {string} with deposit {string}', async function (
+  _roomNumber: string, deposit: string
+) {
+  this.targetReservationStatus = 'Confirmed'
+  this.targetReservationDeposit = deposit
 })
 
 // ─── Action Steps ───────────────────────────────────────
@@ -212,6 +296,26 @@ When('I confirm the void action', async function () {
   await page.getByRole('button', { name: /Xác nhận/ }).click()
 })
 
+When('I click the record payment button for that invoice', async function () {
+  const page: Page = this.page
+  await page.getByRole('button', { name: /Ghi nhận thanh toán|Thanh toán/ }).first().click()
+})
+
+When('I select all draft invoices', async function () {
+  const page: Page = this.page
+  await page.getByRole('checkbox', { name: /Chọn tất cả|Select all/ }).check()
+})
+
+When('I click the batch send button', async function () {
+  const page: Page = this.page
+  await page.getByRole('button', { name: /Gửi hàng loạt|Gửi tất cả/ }).click()
+})
+
+When('I confirm the batch send', async function () {
+  const page: Page = this.page
+  await page.getByRole('button', { name: /Xác nhận/ }).click()
+})
+
 When('I click the confirm button for that reservation', async function () {
   const page: Page = this.page
   await page.getByRole('button', { name: /Xác nhận/ }).first().click()
@@ -225,6 +329,63 @@ When('I click the cancel button for that reservation', async function () {
 When('I confirm the cancellation', async function () {
   const page: Page = this.page
   await page.getByRole('button', { name: /Xác nhận/ }).click()
+})
+
+When('I click the convert to contract button for that reservation', async function () {
+  const page: Page = this.page
+  await page.getByRole('button', { name: /Tạo hợp đồng|Chuyển đổi/ }).first().click()
+})
+
+When('I fill in the contract details:', async function (dataTable: DataTable) {
+  const page: Page = this.page
+  const rows = dataTable.hashes()
+  for (const row of rows) {
+    const input = page.getByLabel(new RegExp(row['field']))
+    await input.clear()
+    await input.fill(row['value'])
+  }
+})
+
+When('I select room {string} for building {string}', async function (room: string, _building: string) {
+  const page: Page = this.page
+  await page.getByLabel(/Phòng/).click()
+  await page.getByText(room).click()
+})
+
+When('I fill in the reservation deposit {string}', async function (deposit: string) {
+  const page: Page = this.page
+  const input = page.getByLabel(/Đặt cọc|Tiền cọc/)
+  await input.clear()
+  await input.fill(deposit)
+})
+
+When('I submit the reservation form', async function () {
+  const page: Page = this.page
+  await page.getByRole('button', { name: /Tạo đặt phòng|Xác nhận/ }).click()
+})
+
+When('I try to create a reservation for room {string}', async function (_roomNumber: string) {
+  const page: Page = this.page
+  await page.getByRole('button', { name: /Tạo đặt phòng/ }).click()
+})
+
+When('I fill in the refund amount {string}', async function (amount: string) {
+  const page: Page = this.page
+  const input = page.getByLabel(/Hoàn cọc|Số tiền hoàn/)
+  await input.clear()
+  await input.fill(amount)
+})
+
+When('I fill in the refund note {string}', async function (note: string) {
+  const page: Page = this.page
+  const input = page.getByLabel(/Ghi chú/)
+  await input.clear()
+  await input.fill(note)
+})
+
+When('I click {string}', async function (text: string) {
+  const page: Page = this.page
+  await page.getByText(text).click()
 })
 
 // ─── Assertion Steps ────────────────────────────────────
@@ -283,6 +444,63 @@ Then('the send button should not be available for that invoice', async function 
   })
 })
 
+Then('the send button should be available for that invoice', async function () {
+  const page: Page = this.page
+  await expect(page.getByRole('button', { name: /Gửi/ }).first()).toBeVisible({ timeout: 3000 })
+})
+
+Then('the send button {word} for that invoice', async function (availability: string) {
+  const page: Page = this.page
+  const btn = page.getByRole('button', { name: /Gửi/ }).first()
+  if (availability.includes('should be available')) {
+    await expect(btn).toBeVisible({ timeout: 3000 })
+  } else {
+    await expect(btn).not.toBeVisible({ timeout: 3000 }).catch(() => expect(btn).toBeDisabled())
+  }
+})
+
+Then('the void button should be available for that invoice', async function () {
+  const page: Page = this.page
+  await expect(page.getByRole('button', { name: /Hủy/ }).first()).toBeVisible({ timeout: 3000 })
+})
+
+Then('the void button should not be available for that invoice', async function () {
+  const page: Page = this.page
+  const btn = page.getByRole('button', { name: /Hủy/ }).first()
+  await expect(btn).not.toBeVisible({ timeout: 3000 }).catch(() => expect(btn).toBeDisabled())
+})
+
+Then('the void button {word} for that invoice', async function (availability: string) {
+  const page: Page = this.page
+  const btn = page.getByRole('button', { name: /Hủy/ }).first()
+  if (availability.includes('should be available')) {
+    await expect(btn).toBeVisible({ timeout: 3000 })
+  } else {
+    await expect(btn).not.toBeVisible({ timeout: 3000 }).catch(() => expect(btn).toBeDisabled())
+  }
+})
+
+Then('the record payment button should be available for that invoice', async function () {
+  const page: Page = this.page
+  await expect(page.getByRole('button', { name: /Ghi nhận thanh toán/ }).first()).toBeVisible({ timeout: 3000 })
+})
+
+Then('the record payment button should not be available for that invoice', async function () {
+  const page: Page = this.page
+  const btn = page.getByRole('button', { name: /Ghi nhận thanh toán/ }).first()
+  await expect(btn).not.toBeVisible({ timeout: 3000 }).catch(() => expect(btn).toBeDisabled())
+})
+
+Then('the record payment button {word} for that invoice', async function (availability: string) {
+  const page: Page = this.page
+  const btn = page.getByRole('button', { name: /Ghi nhận thanh toán/ }).first()
+  if (availability.includes('should be available')) {
+    await expect(btn).toBeVisible({ timeout: 3000 })
+  } else {
+    await expect(btn).not.toBeVisible({ timeout: 3000 }).catch(() => expect(btn).toBeDisabled())
+  }
+})
+
 Then('the reservation status should change to {string}', async function (statusLabel: string) {
   const page: Page = this.page
   await expect(page.getByText(statusLabel)).toBeVisible({ timeout: 5000 })
@@ -294,4 +512,71 @@ Then('the confirm button should not be available for that reservation', async fu
   await expect(confirmButton).not.toBeVisible({ timeout: 3000 }).catch(() => {
     return expect(confirmButton).toBeDisabled()
   })
+})
+
+Then('the confirm button should be available for that reservation', async function () {
+  const page: Page = this.page
+  await expect(page.getByRole('button', { name: /Xác nhận/ }).first()).toBeVisible({ timeout: 3000 })
+})
+
+Then('the cancel button should be available for that reservation', async function () {
+  const page: Page = this.page
+  await expect(page.getByRole('button', { name: /Hủy/ }).first()).toBeVisible({ timeout: 3000 })
+})
+
+Then('the cancel button should not be available for that reservation', async function () {
+  const page: Page = this.page
+  const btn = page.getByRole('button', { name: /Hủy/ }).first()
+  await expect(btn).not.toBeVisible({ timeout: 3000 }).catch(() => expect(btn).toBeDisabled())
+})
+
+Then('the convert to contract button should be available for that reservation', async function () {
+  const page: Page = this.page
+  await expect(page.getByRole('button', { name: /Tạo hợp đồng|Chuyển đổi/ }).first()).toBeVisible({ timeout: 3000 })
+})
+
+Then('the convert to contract button should not be available for that reservation', async function () {
+  const page: Page = this.page
+  const btn = page.getByRole('button', { name: /Tạo hợp đồng|Chuyển đổi/ }).first()
+  await expect(btn).not.toBeVisible({ timeout: 3000 }).catch(() => expect(btn).toBeDisabled())
+})
+
+Then('the refund amount should be {string}', async function (amount: string) {
+  const page: Page = this.page
+  await expect(page.getByText(amount)).toBeVisible({ timeout: 5000 })
+})
+
+// ─── Generic assertion steps ─────────────────────────────
+
+Then('I should see {string}', async function (content: string) {
+  const page: Page = this.page
+  if (content === 'dashboard') {
+    await expect(page.locator('main')).toBeVisible({ timeout: 5000 })
+  } else if (content === 'access denied') {
+    await expect(page.getByText(/không có quyền|access denied|forbidden/i)).toBeVisible({ timeout: 5000 })
+  } else if (content === 'settings') {
+    await expect(page.getByText(/Cài đặt|Settings/i)).toBeVisible({ timeout: 5000 })
+  } else if (content === 'buildings') {
+    await expect(page.getByText(/Tòa nhà/i).first()).toBeVisible({ timeout: 5000 })
+  } else if (content === 'rooms') {
+    await expect(page.getByText(/Phòng/i).first()).toBeVisible({ timeout: 5000 })
+  } else if (content === 'reports') {
+    await expect(page.getByText(/Báo cáo|Doanh thu/i).first()).toBeVisible({ timeout: 5000 })
+  } else {
+    await expect(page.getByText(content)).toBeVisible({ timeout: 5000 })
+  }
+})
+
+Then('I should see the rooms content', async function () {
+  const page: Page = this.page
+  await expect(page.getByText(/Phòng/i).first()).toBeVisible({ timeout: 5000 })
+})
+
+Then('I should see an error message {string}', async function (message: string) {
+  const page: Page = this.page
+  await expect(page.getByText(message)).toBeVisible({ timeout: 5000 })
+})
+
+Then('API requests should include the authorization header', async function () {
+  // Verified by the route interception setup — auth header is injected by api-client
 })

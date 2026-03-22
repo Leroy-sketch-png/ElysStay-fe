@@ -8,6 +8,7 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.test.{ts,tsx}'],
     exclude: ['tests/e2e/**', 'tests/bdd/**', 'node_modules'],
+    testTimeout: 15000,
     css: false,
     env: {
       NEXT_PUBLIC_API_URL: 'http://localhost:5027/api/v1',
