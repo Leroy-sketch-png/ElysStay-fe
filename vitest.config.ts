@@ -10,6 +10,12 @@ export default defineConfig({
     exclude: ['tests/e2e/**', 'tests/bdd/**', 'node_modules'],
     testTimeout: 15000,
     css: false,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/lib/**', 'src/components/**'],
+      exclude: ['src/**/*.d.ts', 'src/types/**', 'src/**/*.config.*'],
+    },
     env: {
       NEXT_PUBLIC_API_URL: 'http://localhost:5027/api/v1',
       NEXT_PUBLIC_KEYCLOAK_URL: 'http://localhost:8080',
@@ -20,6 +26,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@test': path.resolve(__dirname, './tests'),
     },
   },
 })

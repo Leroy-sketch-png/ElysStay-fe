@@ -8,9 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "test:unit": "vitest run tests/unit",
+    "test:integration": "vitest run tests/integration",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:bdd": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js"
+    "test:bdd": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js",
+    "test:bdd:dry": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --dry-run"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -39,6 +43,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "jsdom": "^29.0.1",
