@@ -14,7 +14,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:bdd": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js",
-    "test:bdd:dry": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --dry-run"
+    "test:bdd:dry": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --dry-run",
+    "test:bdd:auth": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@auth --format=summary",
+    "test:bdd:summary": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --format=summary"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

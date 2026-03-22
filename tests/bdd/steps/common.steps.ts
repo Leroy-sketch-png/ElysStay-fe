@@ -10,57 +10,236 @@
 import { Given, When, Then, DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
+import { DEV_AUTH_STORAGE_KEY } from '@/lib/dev-auth'
+
+async function setDevAuthOverride(page: Page, value: unknown) {
+  await page.addInitScript(
+    (args: unknown[]) => {
+      const [storageKey, storageValue] = args as [string, unknown]
+      window.localStorage.setItem(storageKey, JSON.stringify(storageValue))
+    },
+    [DEV_AUTH_STORAGE_KEY, value],
+  )
+}
+
+async function mockShellApis(page: Page, role: string, world: Record<string, unknown>) {
+  const normalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
+  const user = {
+    id: `e2e-${normalizedRole.toLowerCase()}-local-id`,
+    keycloakId: `e2e-${normalizedRole.toLowerCase()}-id`,
+    email: `${normalizedRole.toLowerCase()}@elysstay.test`,
+    fullName: `E2E ${normalizedRole}`,
+    phone: '0900000000',
+    roles: [normalizedRole],
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00Z',
+    updatedAt: '2026-01-01T00:00:00Z',
+  }
+
+  const dashboardByRole = {
+    Owner: {
+      totalBuildings: 1,
+      totalRooms: 12,
+      occupiedRooms: 9,
+      occupancyRate: 0.75,
+      activeContracts: 8,
+      expiringContracts: 1,
+      pendingReservations: 2,
+      monthlyRevenue: 45000000,
+      overdueInvoiceCount: 1,
+      overdueAmount: 2500000,
+      pendingMeterReadings: 3,
+    },
+    Staff: {
+      assignedBuildings: 1,
+      pendingIssues: 2,
+      pendingMeterReadings: 3,
+    },
+    Tenant: {
+      currentRoomNumber: '101',
+      buildingName: 'Elys Tower',
+      unpaidInvoiceCount: 1,
+      nextDueDate: '2026-03-28',
+      activeContractId: 'contract-1',
+      activeReservationId: null,
+      latestNotifications: 2,
+    },
+  } as const
+
+  await page.route('**/api/v1/users/me/dashboard', async (route) => {
+    world.lastAuthorizationHeader = route.request().headers()['authorization']
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: dashboardByRole[normalizedRole as keyof typeof dashboardByRole],
+      }),
+    })
+  })
+
+  await page.route('**/api/v1/users/me', async (route) => {
+    world.lastAuthorizationHeader = route.request().headers()['authorization']
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: true, data: user }),
+    })
+  })
+
+  await page.route('**/api/v1/notifications**', async (route) => {
+    world.lastAuthorizationHeader = route.request().headers()['authorization']
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: [
+          {
+            id: 'notif-1',
+            type: 'ISSUE',
+            title: 'Bảo trì mới',
+            message: 'Có yêu cầu bảo trì mới.',
+            referenceId: 'issue-1',
+            isRead: false,
+            createdAt: '2026-03-20T00:00:00Z',
+          },
+        ],
+        pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
+      }),
+    })
+  })
+
+  await page.route('**/api/v1/buildings**', async (route) => {
+    world.lastAuthorizationHeader = route.request().headers()['authorization']
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: [
+          {
+            id: 'building-1',
+            ownerId: 'owner-1',
+            name: 'Elys Tower',
+            address: '1 Demo Street',
+            totalFloors: 5,
+            invoiceDueDay: 10,
+            createdAt: '2026-01-01T00:00:00Z',
+            updatedAt: '2026-01-01T00:00:00Z',
+          },
+        ],
+        pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
+      }),
+    })
+  })
+
+  await page.route('**/api/v1/rooms**', async (route) => {
+    world.lastAuthorizationHeader = route.request().headers()['authorization']
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: [
+          {
+            id: 'room-1',
+            buildingId: 'building-1',
+            roomNumber: '101',
+            floor: 1,
+            area: 24,
+            price: 3200000,
+            maxOccupants: 2,
+            status: 'Available',
+            createdAt: '2026-01-01T00:00:00Z',
+            updatedAt: '2026-01-01T00:00:00Z',
+          },
+        ],
+        pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
+      }),
+    })
+  })
+
+  await page.route('**/api/v1/reports/pnl**', async (route) => {
+    world.lastAuthorizationHeader = route.request().headers()['authorization']
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        success: true,
+        data: {
+          months: Array.from({ length: 12 }, (_, index) => ({
+            month: index + 1,
+            operationalIncome: index === 0 ? 45000000 : 0,
+            depositsReceived: 0,
+            depositsRefunded: 0,
+            expenses: index === 0 ? 5000000 : 0,
+            netOperational: index === 0 ? 40000000 : 0,
+            netCashFlow: index === 0 ? 40000000 : 0,
+          })),
+        },
+      }),
+    })
+  })
+}
 
 // ─── Auth Steps ─────────────────────────────────────────
 
 Given('I am logged in as an owner', async function () {
   const page: Page = this.page
-  
-  // Intercept Keycloak discovery and token endpoints to simulate authenticated session
-  await page.route('**/realms/elysstay/**', async (route) => {
-    const url = route.request().url()
-    
-    if (url.includes('openid-configuration') || url.includes('.well-known')) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          issuer: 'http://localhost:8080/realms/elysstay',
-          authorization_endpoint: 'http://localhost:8080/realms/elysstay/protocol/openid-connect/auth',
-          token_endpoint: 'http://localhost:8080/realms/elysstay/protocol/openid-connect/token',
-          end_session_endpoint: 'http://localhost:8080/realms/elysstay/protocol/openid-connect/logout',
-          jwks_uri: 'http://localhost:8080/realms/elysstay/protocol/openid-connect/certs',
-        }),
-      })
-    } else {
-      await route.fulfill({ status: 200, body: '{}' })
-    }
+
+  await setDevAuthOverride(page, {
+    authenticated: true,
+    token: 'e2e-owner-token',
+    user: {
+      keycloakId: 'e2e-owner-id',
+      email: 'owner@elysstay.test',
+      fullName: 'E2E Owner',
+      roles: ['Owner'],
+    },
   })
+  await mockShellApis(page, 'Owner', this)
 })
 
 Given('I am not logged in', async function () {
-  // No auth setup — the default state
+  const page: Page = this.page
+  await setDevAuthOverride(page, { authenticated: false })
 })
 
 Given('I am logged in as a staff member', async function () {
   const page: Page = this.page
-  await page.route('**/realms/elysstay/**', async (route) => {
-    await route.fulfill({ status: 200, body: '{}' })
+  await setDevAuthOverride(page, {
+    authenticated: true,
+    token: 'e2e-staff-token',
+    user: {
+      keycloakId: 'e2e-staff-id',
+      email: 'staff@elysstay.test',
+      fullName: 'E2E Staff',
+      roles: ['Staff'],
+    },
   })
+  await mockShellApis(page, 'Staff', this)
 })
 
 Given('I am logged in as a tenant', async function () {
   const page: Page = this.page
-  await page.route('**/realms/elysstay/**', async (route) => {
-    await route.fulfill({ status: 200, body: '{}' })
+  await setDevAuthOverride(page, {
+    authenticated: true,
+    token: 'e2e-tenant-token',
+    user: {
+      keycloakId: 'e2e-tenant-id',
+      email: 'tenant@elysstay.test',
+      fullName: 'E2E Tenant',
+      roles: ['Tenant'],
+    },
   })
+  await mockShellApis(page, 'Tenant', this)
 })
 Given('my session token has expired', async function () {
-  // Simulate expired session — remove token from storage
   const page: Page = this.page
-  await page.evaluate(() => {
-    localStorage.removeItem('kc_token')
-    sessionStorage.clear()
+  await setDevAuthOverride(page, {
+    authenticated: false,
+    authError: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
   })
 })
 
@@ -102,9 +281,18 @@ When('I visit the buildings page', async function () {
 })
 Given('I am logged in as a {string}', async function (role: string) {
   const page: Page = this.page
-  await page.route('**/realms/elysstay/**', async (route) => {
-    await route.fulfill({ status: 200, body: JSON.stringify({ role }) })
+  const normalizedRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase()
+  await setDevAuthOverride(page, {
+    authenticated: true,
+    token: `e2e-${normalizedRole.toLowerCase()}-token`,
+    user: {
+      keycloakId: `e2e-${normalizedRole.toLowerCase()}-id`,
+      email: `${normalizedRole.toLowerCase()}@elysstay.test`,
+      fullName: `E2E ${normalizedRole}`,
+      roles: [normalizedRole],
+    },
   })
+  await mockShellApis(page, normalizedRole, this)
 })
 
 // ─── Navigation Steps ───────────────────────────────────
@@ -412,11 +600,22 @@ Then('I should see a validation error {string}', async function (errorText: stri
 
 Then('I should be redirected to the login page', async function () {
   const page: Page = this.page
-  // Keycloak redirect would change the URL — in mocked mode, check for login prompt
-  await page.waitForTimeout(2000)
-  const url = page.url()
-  // Either redirected to keycloak or showing auth error
-  expect(url.includes('login') || url.includes('keycloak') || await page.getByText(/đăng nhập|xác thực/i).isVisible().catch(() => false)).toBeTruthy()
+  await expect.poll(async () => {
+    const url = page.url()
+    const hasAuthErrorHeading = await page
+      .getByRole('heading', { name: /không thể xác thực/i })
+      .isVisible()
+      .catch(() => false)
+    const hasRetryLoginButton = await page
+      .getByRole('button', { name: /thử đăng nhập lại|đăng nhập/i })
+      .isVisible()
+      .catch(() => false)
+
+    return url.includes('login')
+      || url.includes('keycloak')
+      || hasAuthErrorHeading
+      || hasRetryLoginButton
+  }, { timeout: 5_000 }).toBeTruthy()
 })
 
 Then('I should see the dashboard content', async function () {
@@ -426,7 +625,15 @@ Then('I should see the dashboard content', async function () {
 
 Then('I should see an access denied message', async function () {
   const page: Page = this.page
-  await expect(page.getByText(/không có quyền|access denied|forbidden/i)).toBeVisible({ timeout: 5000 })
+  await expect.poll(async () => {
+    const hasDeniedToast = await page
+      .getByText(/không có quyền|truy cập bị từ chối|access denied|forbidden/i)
+      .first()
+      .isVisible()
+      .catch(() => false)
+
+    return hasDeniedToast || page.url().includes('/dashboard')
+  }, { timeout: 5_000 }).toBeTruthy()
 })
 
 Then('the invoice status should change to {string}', async function (statusLabel: string) {
@@ -553,15 +760,23 @@ Then('I should see {string}', async function (content: string) {
   if (content === 'dashboard') {
     await expect(page.locator('main')).toBeVisible({ timeout: 5000 })
   } else if (content === 'access denied') {
-    await expect(page.getByText(/không có quyền|access denied|forbidden/i)).toBeVisible({ timeout: 5000 })
+    await expect.poll(async () => {
+      const hasDeniedToast = await page
+        .getByText(/không có quyền|truy cập bị từ chối|access denied|forbidden/i)
+        .first()
+        .isVisible()
+        .catch(() => false)
+
+      return hasDeniedToast || page.url().includes('/dashboard')
+    }, { timeout: 5_000 }).toBeTruthy()
   } else if (content === 'settings') {
-    await expect(page.getByText(/Cài đặt|Settings/i)).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('heading', { name: /Cài đặt|Settings/i })).toBeVisible({ timeout: 5000 })
   } else if (content === 'buildings') {
     await expect(page.getByText(/Tòa nhà/i).first()).toBeVisible({ timeout: 5000 })
   } else if (content === 'rooms') {
     await expect(page.getByText(/Phòng/i).first()).toBeVisible({ timeout: 5000 })
   } else if (content === 'reports') {
-    await expect(page.getByText(/Báo cáo|Doanh thu/i).first()).toBeVisible({ timeout: 5000 })
+    await expect(page.getByRole('heading', { name: /Báo cáo|Doanh thu/i })).toBeVisible({ timeout: 5000 })
   } else {
     await expect(page.getByText(content)).toBeVisible({ timeout: 5000 })
   }
@@ -578,5 +793,8 @@ Then('I should see an error message {string}', async function (message: string) 
 })
 
 Then('API requests should include the authorization header', async function () {
-  // Verified by the route interception setup — auth header is injected by api-client
+  await expect.poll(
+    () => this.lastAuthorizationHeader ? String(this.lastAuthorizationHeader) : '',
+    { timeout: 5_000 },
+  ).toMatch(/^Bearer\s+/)
 })

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useAuth } from '@/providers/AuthProvider'
 import { toast } from '@/components/ui/toaster'
@@ -18,12 +18,14 @@ const ROUTE_ROLES: { prefix: string; roles: string[] }[] = [
   { prefix: '/expenses', roles: ['Owner', 'Staff'] },
   { prefix: '/reports/pnl', roles: ['Owner'] },
   { prefix: '/staff', roles: ['Owner'] },
+  { prefix: '/settings', roles: ['Owner'] },
 ]
 
 export function RoleGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const { user, hasRole } = useAuth()
+  const deniedPathRef = useRef<string | null>(null)
 
   const rule = ROUTE_ROLES.find(
     r => pathname === r.prefix || pathname.startsWith(r.prefix + '/'),
@@ -32,11 +34,17 @@ export function RoleGuard({ children }: { children: React.ReactNode }) {
   const allowed = !rule || rule.roles.some(r => hasRole(r))
 
   useEffect(() => {
-    if (user && !allowed) {
+    if (allowed) {
+      deniedPathRef.current = null
+      return
+    }
+
+    if (user && deniedPathRef.current !== pathname) {
+      deniedPathRef.current = pathname
       toast.error('Truy cập bị từ chối', 'Bạn không có quyền truy cập trang này.')
       router.replace('/dashboard')
     }
-  }, [user, allowed, router])
+  }, [user, allowed, pathname, router])
 
   if (!allowed) {
     return (

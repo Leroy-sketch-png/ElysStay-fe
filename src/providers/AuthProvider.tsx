@@ -12,6 +12,7 @@ import {
 } from 'react'
 import Keycloak from 'keycloak-js'
 import { setTokenAccessor, setOnUnauthorized, setTokenRefresher } from '@/lib/api-client'
+import { DEV_AUTH_STORAGE_KEY, readDevAuthOverride } from '@/lib/dev-auth'
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -131,6 +132,32 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
     if (initCalledRef.current) return
     initCalledRef.current = true
 
+    const devOverride = readDevAuthOverride()
+    if (devOverride) {
+      const devToken = devOverride.authenticated ? devOverride.token ?? 'dev-auth-token' : undefined
+      const devAuthError = devOverride.authenticated
+        ? devOverride.authError ?? null
+        : devOverride.authError ?? 'Vui lòng đăng nhập để tiếp tục.'
+
+      setAuthError(devAuthError)
+      setAuthenticated(devOverride.authenticated)
+      setUser(devOverride.authenticated ? devOverride.user ?? null : null)
+      setToken(devToken)
+      setTokenAccessor(() => devToken)
+      setTokenRefresher(async () => devOverride.authenticated)
+      setOnUnauthorized(() => {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem(DEV_AUTH_STORAGE_KEY)
+        }
+        setAuthenticated(false)
+        setUser(null)
+        setToken(undefined)
+        setAuthError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+      })
+      setInitialized(true)
+      return
+    }
+
     const kc = new Keycloak({
       url: KEYCLOAK_URL,
       realm: KEYCLOAK_REALM,
@@ -209,11 +236,28 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
   }, [loginRequired, parseUser, refreshToken])
 
   const login = useCallback(() => {
+    const devOverride = typeof window !== 'undefined' ? readDevAuthOverride() : undefined
+    if (devOverride) {
+      if (!devOverride.authenticated) {
+        setAuthError(devOverride.authError ?? 'Vui lòng đăng nhập để tiếp tục.')
+      } else {
+        setAuthError(null)
+      }
+      return
+    }
+
     setAuthError(null)
     keycloakRef.current?.login()
   }, [])
 
   const logout = useCallback(() => {
+    if (typeof window !== 'undefined' && readDevAuthOverride()) {
+      window.localStorage.removeItem(DEV_AUTH_STORAGE_KEY)
+      setAuthenticated(false)
+      setUser(null)
+      setToken(undefined)
+      return
+    }
     keycloakRef.current?.logout({ redirectUri: window.location.origin })
   }, [])
 

@@ -8,6 +8,8 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     include: ['tests/**/*.test.{ts,tsx}'],
     exclude: ['tests/e2e/**', 'tests/bdd/**', 'node_modules'],
+    pool: 'threads',
+    fileParallelism: false,
     testTimeout: 15000,
     css: false,
     coverage: {
