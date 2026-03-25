@@ -219,8 +219,8 @@ export function CreateStaffDialog({ open, onOpenChange }: CreateStaffDialogProps
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={createMutation.isPending}>
               Hủy
             </Button>
-            <Button type='submit' disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Đang tạo…' : 'Tạo nhân viên'}
+            <Button type='submit' loading={createMutation.isPending}>
+              Tạo nhân viên
             </Button>
           </DialogFooter>
         </form>

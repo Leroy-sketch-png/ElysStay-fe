@@ -132,9 +132,9 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
               <X className='size-3.5' />
               Hủy
             </Button>
-            <Button size='sm' onClick={handleSave} disabled={updateMutation.isPending}>
+            <Button size='sm' onClick={handleSave} loading={updateMutation.isPending}>
               <Save className='size-3.5' />
-              {updateMutation.isPending ? 'Đang lưu…' : 'Lưu'}
+              Lưu
             </Button>
           </div>
         )}

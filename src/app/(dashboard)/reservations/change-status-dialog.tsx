@@ -224,9 +224,10 @@ export function ChangeReservationStatusDialog({
                     variant='outline'
                     className='w-full justify-start'
                     onClick={() => confirmMutation.mutate()}
-                    disabled={isPending}
+                    loading={confirmMutation.isPending}
+                    disabled={isPending && !confirmMutation.isPending}
                   >
-                    {confirmMutation.isPending ? 'Đang xác nhận…' : 'Xác nhận đặt cọc'}
+                    Xác nhận đặt cọc
                   </Button>
                 )}
                 {canCancel && (
@@ -334,9 +335,9 @@ export function ChangeReservationStatusDialog({
               <Button
                 type='submit'
                 variant='destructive'
-                disabled={cancelMutation.isPending}
+                loading={cancelMutation.isPending}
               >
-                {cancelMutation.isPending ? 'Đang hủy…' : 'Hủy đặt cọc'}
+                Hủy đặt cọc
               </Button>
             </DialogFooter>
           </form>

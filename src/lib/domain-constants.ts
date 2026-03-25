@@ -3,8 +3,8 @@ import type { InvoiceStatus, NotificationType, ReservationStatus, RoomStatus } f
 export const ROOM_STATUS_OPTIONS: { label: string; value: RoomStatus | '' }[] = [
   { label: 'Tất cả trạng thái', value: '' },
   { label: 'Trống', value: 'Available' },
-  { label: 'Đã đặt', value: 'Booked' },
-  { label: 'Đang ở', value: 'Occupied' },
+  { label: 'Đã đặt (đặt cọc, chưa ký HĐ)', value: 'Booked' },
+  { label: 'Đang ở (có hợp đồng)', value: 'Occupied' },
   { label: 'Bảo trì', value: 'Maintenance' },
 ]
 
@@ -70,6 +70,12 @@ export function canConvertReservation(status: ReservationStatus) {
 
 export function canManageReservation(status: ReservationStatus) {
   return canConfirmReservation(status) || canCancelReservation(status) || canConvertReservation(status)
+}
+
+/** Short hint text explaining what the manager should do next for this reservation status. */
+export const RESERVATION_NEXT_ACTION: Partial<Record<ReservationStatus, string>> = {
+  Pending: 'Cần xác nhận hoặc hủy',
+  Confirmed: 'Có thể tạo hợp đồng',
 }
 
 // ─── Expense Categories ──────────────────────────────────

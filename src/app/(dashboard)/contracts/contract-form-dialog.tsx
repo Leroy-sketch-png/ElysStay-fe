@@ -424,8 +424,8 @@ export function ContractFormDialog({ open, onOpenChange, fromReservation }: Cont
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={createMutation.isPending}>
               Hủy
             </Button>
-            <Button type='submit' disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Đang tạo…' : fromReservation ? 'Tạo hợp đồng' : 'Tạo hợp đồng'}
+            <Button type='submit' loading={createMutation.isPending}>
+              Tạo hợp đồng
             </Button>
           </DialogFooter>
         </form>

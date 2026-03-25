@@ -85,15 +85,21 @@ function MonthRow({ month, now, selectedYear }: { month: PnlMonthDto; now: Date;
   const isFuture = selectedYear > now.getFullYear() || (isCurrentYear && month.month > now.getMonth() + 1)
   const isEmpty = month.operationalIncome === 0 && month.expenses === 0 && month.depositsReceived === 0
 
+  // Future months with no data: render a placeholder row so users know data hasn't landed yet
+  if (isFuture && isEmpty) {
+    return (
+      <tr className='text-muted-foreground/40 italic'>
+        <td className='px-4 py-3 text-sm font-medium'>{MONTH_FULL[month.month - 1]}</td>
+        <td className='px-4 py-3 text-sm text-right' colSpan={6}>
+          <span className='text-xs'>— chưa có dữ liệu —</span>
+        </td>
+      </tr>
+    )
+  }
+
   return (
     <tr
-      className={
-        isCurrent
-          ? 'bg-primary/5 font-medium'
-          : isFuture && isEmpty
-            ? 'text-muted-foreground/50'
-            : ''
-      }
+      className={isCurrent ? 'bg-primary/5 font-medium' : ''}
     >
       <td className='px-4 py-3 text-sm font-medium'>
         {MONTH_FULL[month.month - 1]}
@@ -183,15 +189,23 @@ export default function PnlReportPage() {
     }
 
     const header = ['Tháng', 'Doanh thu', 'Cọc vào', 'Cọc ra', 'Chi phí', 'Thuần vận hành', 'Dòng tiền ròng']
-    const rows = months.map((m) => [
-      escapeCsv(MONTH_FULL[m.month - 1]),
-      m.operationalIncome.toFixed(0),
-      m.depositsReceived.toFixed(0),
-      m.depositsRefunded.toFixed(0),
-      m.expenses.toFixed(0),
-      m.netOperational.toFixed(0),
-      m.netCashFlow.toFixed(0),
-    ])
+    const currentMonth = now.getMonth() + 1
+    const isCurrentYear = selectedYear === now.getFullYear()
+    const rows = months
+      .filter((m) => {
+        const isFuture = selectedYear > now.getFullYear() || (isCurrentYear && m.month > currentMonth)
+        const isEmpty = m.operationalIncome === 0 && m.expenses === 0 && m.depositsReceived === 0
+        return !(isFuture && isEmpty)
+      })
+      .map((m) => [
+        escapeCsv(MONTH_FULL[m.month - 1]),
+        m.operationalIncome.toFixed(0),
+        m.depositsReceived.toFixed(0),
+        m.depositsRefunded.toFixed(0),
+        m.expenses.toFixed(0),
+        m.netOperational.toFixed(0),
+        m.netCashFlow.toFixed(0),
+      ])
     rows.push([
       'Tổng',
       totals.operationalIncome.toFixed(0),

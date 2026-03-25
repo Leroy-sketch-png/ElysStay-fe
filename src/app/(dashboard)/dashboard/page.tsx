@@ -134,10 +134,10 @@ function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
       </AnimatedCard>
       <AnimatedCard>
         <StatCard
-          label='Sắp hết hạn'
+          label='Sắp hết hạn (30 ngày)'
           value={data.expiringContracts}
           icon={<Clock className='size-5' />}
-          trend={data.expiringContracts > 0 ? 'Trong 30 ngày tới' : undefined}
+          trend={data.expiringContracts > 0 ? 'Hợp đồng hết hạn trong 30 ngày tới' : 'Không có hợp đồng sắp hết hạn'}
           variant={data.expiringContracts > 0 ? 'warning' : 'default'}
           href='/contracts'
         />

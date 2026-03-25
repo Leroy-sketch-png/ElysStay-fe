@@ -258,8 +258,8 @@ export function RoomFormDialog({
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isPending}>
               Hủy
             </Button>
-            <Button type='submit' disabled={isPending}>
-              {isPending ? 'Đang lưu…' : isEdit ? 'Lưu thay đổi' : 'Tạo phòng'}
+            <Button type='submit' loading={isPending}>
+              {isEdit ? 'Lưu thay đổi' : 'Tạo phòng'}
             </Button>
           </DialogFooter>
         </form>

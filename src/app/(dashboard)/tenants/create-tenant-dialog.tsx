@@ -219,8 +219,8 @@ export function CreateTenantDialog({ open, onOpenChange }: CreateTenantDialogPro
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={createMutation.isPending}>
               Hủy
             </Button>
-            <Button type='submit' disabled={createMutation.isPending}>
-              {createMutation.isPending ? 'Đang tạo…' : 'Tạo khách thuê'}
+            <Button type='submit' loading={createMutation.isPending}>
+              Tạo khách thuê
             </Button>
           </DialogFooter>
         </form>

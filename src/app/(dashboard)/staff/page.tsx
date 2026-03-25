@@ -67,6 +67,27 @@ export default function StaffPage() {
       render: (row) => row.phone ?? '—',
     },
     {
+      key: 'assignedBuildings',
+      header: 'Tòa nhà phụ trách',
+      render: (row) => {
+        const buildings = row.assignedBuildingNames
+        if (!buildings || buildings.length === 0)
+          return <span className='text-muted-foreground text-xs'>Chưa phân công</span>
+        return (
+          <div className='flex flex-wrap gap-1'>
+            {buildings.map((name) => (
+              <span
+                key={name}
+                className='inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground'
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+        )
+      },
+    },
+    {
       key: 'status',
       header: 'Trạng thái',
       render: (row) => <UserStatusBadge status={row.status} />,

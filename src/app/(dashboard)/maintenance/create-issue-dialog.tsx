@@ -224,8 +224,8 @@ export function CreateIssueDialog({
             >
               Hủy
             </Button>
-            <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Đang gửi…' : 'Báo vấn đề'}
+            <Button type='submit' loading={mutation.isPending}>
+              Báo vấn đề
             </Button>
           </DialogFooter>
         </form>

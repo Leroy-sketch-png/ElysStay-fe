@@ -151,15 +151,8 @@ export default function SettingsPage() {
                 </div>
 
                 <div className='flex justify-end'>
-                  <Button type='submit' disabled={profileMutation.isPending}>
-                    {profileMutation.isPending ? (
-                      <>
-                        <Loader2 className='size-4 animate-spin' />
-                        Đang lưu…
-                      </>
-                    ) : (
-                      'Lưu thay đổi'
-                    )}
+                  <Button type='submit' loading={profileMutation.isPending}>
+                    Lưu thay đổi
                   </Button>
                 </div>
               </form>

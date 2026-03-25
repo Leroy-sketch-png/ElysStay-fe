@@ -296,8 +296,8 @@ export function CreateReservationDialog({
             >
               Hủy
             </Button>
-            <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Đang tạo…' : 'Tạo đặt cọc'}
+            <Button type='submit' loading={mutation.isPending}>
+              Tạo đặt cọc
             </Button>
           </DialogFooter>
         </form>

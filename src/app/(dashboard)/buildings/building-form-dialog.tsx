@@ -217,8 +217,8 @@ export function BuildingFormDialog({
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isPending}>
               Hủy
             </Button>
-            <Button type='submit' disabled={isPending}>
-              {isPending ? (isEdit ? 'Đang lưu…' : 'Đang tạo…') : isEdit ? 'Lưu thay đổi' : 'Tạo tòa nhà'}
+            <Button type='submit' loading={isPending}>
+              {isEdit ? 'Lưu thay đổi' : 'Tạo tòa nhà'}
             </Button>
           </DialogFooter>
         </form>

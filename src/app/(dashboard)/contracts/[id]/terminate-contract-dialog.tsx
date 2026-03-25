@@ -231,8 +231,8 @@ export function TerminateContractDialog({
             >
               Hủy
             </Button>
-            <Button type='submit' variant='destructive' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Đang chấm dứt…' : 'Chấm dứt hợp đồng'}
+            <Button type='submit' variant='destructive' loading={mutation.isPending}>
+              Chấm dứt hợp đồng
             </Button>
           </DialogFooter>
         </form>

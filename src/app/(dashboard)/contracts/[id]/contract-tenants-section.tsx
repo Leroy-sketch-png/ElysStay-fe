@@ -331,8 +331,8 @@ function AddRoommateDialog({
             <Button type='reset' variant='outline' disabled={mutation.isPending}>
               Hủy
             </Button>
-            <Button type='submit' disabled={mutation.isPending || availableTenants.length === 0}>
-              {mutation.isPending ? 'Đang thêm…' : 'Thêm người ở'}
+            <Button type='submit' loading={mutation.isPending} disabled={availableTenants.length === 0}>
+              Thêm người ở
             </Button>
           </DialogFooter>
         </form>

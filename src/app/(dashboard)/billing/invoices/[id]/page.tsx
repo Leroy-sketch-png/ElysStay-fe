@@ -130,10 +130,10 @@ export default function InvoiceDetailPage() {
             <Button
               variant='outline'
               onClick={() => setSendConfirmOpen(true)}
-              disabled={sendMutation.isPending}
+              loading={sendMutation.isPending}
             >
               <Send className='size-4' />
-              {sendMutation.isPending ? 'Đang gửi…' : 'Gửi hóa đơn'}
+              Gửi hóa đơn
             </Button>
           )}
           {canRecordPayment && (
@@ -146,10 +146,10 @@ export default function InvoiceDetailPage() {
             <Button
               variant='destructive'
               onClick={() => setVoidConfirmOpen(true)}
-              disabled={voidMutation.isPending}
+              loading={voidMutation.isPending}
             >
               <Ban className='size-4' />
-              {voidMutation.isPending ? 'Đang hủy…' : 'Hủy bỏ'}
+              Hủy bỏ
             </Button>
           )}
         </div>

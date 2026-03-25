@@ -247,9 +247,9 @@ export function RoomServicesTab({ roomId }: RoomServicesTabProps) {
             <RotateCcw className='size-3.5' />
             Hủy
           </Button>
-          <Button size='sm' onClick={handleSave} disabled={saveMutation.isPending}>
+          <Button size='sm' onClick={handleSave} loading={saveMutation.isPending}>
             <Save className='size-3.5' />
-            {saveMutation.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
+            Lưu thay đổi
           </Button>
         </div>
       )}

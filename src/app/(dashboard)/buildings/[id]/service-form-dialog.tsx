@@ -175,8 +175,8 @@ export function ServiceFormDialog({
             <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isPending}>
               Hủy
             </Button>
-            <Button type='submit' disabled={isPending}>
-              {isPending ? 'Đang lưu…' : isEdit ? 'Lưu thay đổi' : 'Tạo dịch vụ'}
+            <Button type='submit' loading={isPending}>
+              {isEdit ? 'Lưu thay đổi' : 'Tạo dịch vụ'}
             </Button>
           </DialogFooter>
         </form>

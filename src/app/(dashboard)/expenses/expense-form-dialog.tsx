@@ -322,10 +322,8 @@ export function ExpenseFormDialog({
             >
               Hủy
             </Button>
-            <Button type='submit' disabled={isPending}>
-              {isPending
-                ? isEdit ? 'Đang lưu…' : 'Đang tạo…'
-                : isEdit ? 'Lưu thay đổi' : 'Thêm chi phí'}
+            <Button type='submit' loading={isPending}>
+              {isEdit ? 'Lưu thay đổi' : 'Thêm chi phí'}
             </Button>
           </DialogFooter>
         </form>

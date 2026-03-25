@@ -16,7 +16,7 @@ import { DataTable, type Column } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { EmptyState } from '@/components/EmptyState'
 import { ReservationStatusBadge } from '@/components/ui/status-badge'
-import { RESERVATION_STATUS_OPTIONS, canManageReservation, DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
+import { RESERVATION_STATUS_OPTIONS, canManageReservation, RESERVATION_NEXT_ACTION, DROPDOWN_PAGE_SIZE, DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils'
 import {
   reservationKeys,
@@ -108,7 +108,17 @@ export default function ReservationsPage() {
     {
       key: 'status',
       header: 'Trạng thái',
-      render: (r) => <ReservationStatusBadge status={r.status} />,
+      render: (r) => {
+        const nextAction = RESERVATION_NEXT_ACTION[r.status as keyof typeof RESERVATION_NEXT_ACTION]
+        return (
+          <div>
+            <ReservationStatusBadge status={r.status} />
+            {nextAction && (
+              <p className='mt-0.5 text-xs text-muted-foreground'>{nextAction}</p>
+            )}
+          </div>
+        )
+      },
     },
     {
       key: 'expiresAt',

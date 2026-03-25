@@ -137,10 +137,11 @@ export function AssignStaffDialog({
           </Button>
           <Button
             onClick={handleAssign}
-            disabled={!selectedId || assignMutation.isPending}
+            disabled={!selectedId}
+            loading={assignMutation.isPending}
           >
             <UserPlus className='size-4' />
-            {assignMutation.isPending ? 'Đang phân công…' : 'Phân công'}
+            Phân công
           </Button>
         </DialogFooter>
       </DialogContent>

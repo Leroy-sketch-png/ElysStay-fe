@@ -158,10 +158,10 @@ export default function IssueDetailPage() {
             variant={t.variant ?? 'default'}
             size='sm'
             onClick={() => setConfirmAction({ status: t.status, label: t.label, variant: t.variant })}
-            disabled={statusMutation.isPending}
+            loading={statusMutation.isPending}
           >
             <t.icon className='size-4' />
-            {statusMutation.isPending ? 'Đang cập nhật…' : t.label}
+            {t.label}
           </Button>
         ))}
       </div>

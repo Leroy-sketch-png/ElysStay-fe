@@ -27,6 +27,8 @@ export interface UserDto {
   role: UserRole
   status: UserStatus
   createdAt: string
+  /** Populated for Staff users only. Names of buildings the staff member is assigned to. */
+  assignedBuildingNames?: string[]
 }
 
 export interface UserProfileDto extends UserDto {

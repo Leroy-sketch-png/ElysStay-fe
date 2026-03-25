@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { Loader2 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -35,18 +36,34 @@ function Button({
   variant,
   size,
   asChild = false,
+  loading = false,
+  children,
+  disabled,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
+    /** Show a spinner and disable the button while a mutation is pending. */
+    loading?: boolean
   }) {
   const Comp = asChild ? Slot : 'button'
+  const isDisabled = disabled || loading
   const buttonProps = asChild
-    ? props
-    : { type: props.type ?? 'button', ...props }
+    ? { disabled: isDisabled, ...props }
+    : { type: props.type ?? 'button', disabled: isDisabled, 'aria-busy': loading || undefined, ...props }
 
   return (
-    <Comp className={cn(buttonVariants({ variant, size, className }))} {...buttonProps} />
+    <Comp className={cn(buttonVariants({ variant, size, className }))} {...buttonProps}>
+      {loading && <Loader2 className='size-4 animate-spin' aria-hidden />}
+      {!asChild && loading
+        ? React.Children.map(children, (child) =>
+            // When loading, hide icon components (e.g. <Send />) — the spinner replaces them
+            React.isValidElement(child) && typeof child.type !== 'string' && child.type !== React.Fragment
+              ? null
+              : child,
+          )
+        : children}
+    </Comp>
   )
 }
 

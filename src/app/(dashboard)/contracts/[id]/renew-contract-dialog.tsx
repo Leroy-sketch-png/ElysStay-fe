@@ -258,8 +258,8 @@ export function RenewContractDialog({
             >
               Hủy
             </Button>
-            <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Đang gia hạn…' : 'Gia hạn'}
+            <Button type='submit' loading={mutation.isPending}>
+              Gia hạn
             </Button>
           </DialogFooter>
         </form>

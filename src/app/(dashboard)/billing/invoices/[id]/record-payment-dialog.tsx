@@ -240,8 +240,8 @@ export function RecordPaymentDialog({
             >
               Hủy
             </Button>
-            <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Đang ghi…' : 'Ghi nhận'}
+            <Button type='submit' loading={mutation.isPending}>
+              Ghi nhận
             </Button>
           </DialogFooter>
         </form>

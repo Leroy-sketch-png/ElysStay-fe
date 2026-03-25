@@ -180,8 +180,8 @@ export function EditContractDialog({
             >
               Hủy
             </Button>
-            <Button type='submit' disabled={mutation.isPending}>
-              {mutation.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
+            <Button type='submit' loading={mutation.isPending}>
+              Lưu thay đổi
             </Button>
           </DialogFooter>
         </form>
