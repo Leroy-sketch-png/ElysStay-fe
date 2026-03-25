@@ -23,7 +23,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   if (initialized && !authenticated && authError) {
     return (
       <div className='flex min-h-screen items-center justify-center bg-background px-6'>
-        <div className='w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm'>
+        <div className='w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-sm' role='alert'>
           <div className='space-y-4 text-center'>
             <div className='mx-auto flex size-12 items-center justify-center rounded-xl bg-destructive/10'>
               <svg className='size-6 text-destructive' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
@@ -49,12 +49,12 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!initialized || !authenticated) {
     return (
-      <div className='flex h-screen items-center justify-center bg-background'>
+      <div className='flex h-screen items-center justify-center bg-background' role='status'>
         <div className='flex flex-col items-center gap-4'>
           <div className='flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground'>
             <Building2 className='size-6' />
           </div>
-          <div className='size-6 rounded-full border-[2.5px] border-primary border-t-transparent animate-spin' />
+          <div className='size-6 rounded-full border-[2.5px] border-primary border-t-transparent animate-spin motion-reduce:animate-none' aria-hidden='true' />
           <p className='text-sm text-muted-foreground'>
             {!initialized ? 'Đang xác thực...' : 'Đang chuyển hướng...'}
           </p>

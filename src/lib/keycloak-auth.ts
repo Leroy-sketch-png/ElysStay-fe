@@ -81,6 +81,15 @@ export async function loginWithCredentials(
       if (err.error === 'account_temporarily_disabled') {
         return { success: false, error: 'Tài khoản tạm thời bị khóa. Vui lòng thử lại sau.' }
       }
+      if (err.error === 'invalid_client') {
+        return { success: false, error: 'Lỗi cấu hình hệ thống. Vui lòng liên hệ quản trị viên.' }
+      }
+      if (err.error === 'temporarily_unavailable') {
+        return { success: false, error: 'Máy chủ xác thực đang quá tải. Vui lòng thử lại sau.' }
+      }
+      if (err.error === 'unauthorized_client') {
+        return { success: false, error: 'Không được phép truy cập. Vui lòng liên hệ quản trị viên.' }
+      }
 
       return {
         success: false,
@@ -128,8 +137,9 @@ export async function refreshAccessToken(refreshToken: string): Promise<RefreshR
 
 /**
  * Trigger Keycloak logout (invalidate session server-side).
+ * Returns true if server session was successfully invalidated.
  */
-export async function keycloakLogout(refreshToken: string): Promise<void> {
+export async function keycloakLogout(refreshToken: string): Promise<boolean> {
   const logoutEndpoint = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/logout`
 
   const body = new URLSearchParams({
@@ -137,14 +147,21 @@ export async function keycloakLogout(refreshToken: string): Promise<void> {
     refresh_token: refreshToken,
   })
 
-  // Fire-and-forget — don't block on logout success
-  fetch(logoutEndpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  }).catch(() => {
-    // Swallow — even if server logout fails, local state is cleared
-  })
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(logoutEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      })
+      if (res.ok || res.status === 204) return true
+      // 400 likely means token already invalid — treat as success
+      if (res.status === 400) return true
+    } catch {
+      // Network error — retry once
+    }
+  }
+  return false
 }
 
 /**

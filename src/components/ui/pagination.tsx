@@ -47,6 +47,7 @@ function Pagination({
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
               className='h-8 rounded-md border border-input bg-transparent px-2 text-sm'
+              aria-label='Số kết quả mỗi trang'
             >
               {pageSizeOptions.map((size) => (
                 <option key={size} value={size}>
@@ -58,7 +59,7 @@ function Pagination({
         )}
       </div>
 
-      <div className='flex items-center gap-1'>
+      <nav className='flex items-center gap-1' aria-label='Phân trang'>
         <Button
           variant='outline'
           size='icon'
@@ -82,7 +83,7 @@ function Pagination({
 
         {getPageNumbers(page, totalPages).map((p, i) =>
           p === '...' ? (
-            <span key={`ellipsis-${i}`} className='px-1 text-sm text-muted-foreground'>
+            <span key={`ellipsis-${i}`} className='px-1 text-sm text-muted-foreground' aria-hidden='true'>
               …
             </span>
           ) : (
@@ -92,6 +93,8 @@ function Pagination({
               size='icon'
               className='size-8'
               onClick={() => onPageChange(p as number)}
+              aria-label={`Trang ${p}`}
+              aria-current={p === page ? 'page' : undefined}
             >
               {p}
             </Button>
@@ -118,7 +121,7 @@ function Pagination({
         >
           <ChevronsRight className='size-4' />
         </Button>
-      </div>
+      </nav>
     </div>
   )
 }

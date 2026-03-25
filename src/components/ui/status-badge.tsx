@@ -11,7 +11,7 @@ const roomStatusConfig: Record<string, { label: string; variant: BadgeProps['var
 
 export function RoomStatusBadge({ status }: { status: string }) {
   const config = roomStatusConfig[status] ?? { label: status, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── User Status ────────────────────────────────────────
@@ -23,7 +23,7 @@ const userStatusConfig: Record<string, { label: string; variant: BadgeProps['var
 
 export function UserStatusBadge({ status }: { status: string }) {
   const config = userStatusConfig[status] ?? { label: status, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── User Role ──────────────────────────────────────────
@@ -36,21 +36,21 @@ const userRoleConfig: Record<string, { label: string; variant: BadgeProps['varia
 
 export function UserRoleBadge({ role }: { role: string }) {
   const config = userRoleConfig[role] ?? { label: role, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── Boolean / Active Status ────────────────────────────
 
 export function ActiveBadge({ active }: { active: boolean }) {
   const label = active ? 'Hoạt động' : 'Ngừng'
-  return <Badge variant={active ? 'success' : 'muted'} title={label}>{label}</Badge>
+  return <Badge variant={active ? 'success' : 'muted'} title={label} role='status'>{label}</Badge>
 }
 
 // ─── Metered Badge ──────────────────────────────────────
 
 export function MeteredBadge({ metered }: { metered: boolean }) {
   const label = metered ? 'Đo đếm' : 'Cố định'
-  return <Badge variant={metered ? 'info' : 'secondary'} title={label}>{label}</Badge>
+  return <Badge variant={metered ? 'info' : 'secondary'} title={label} role='status'>{label}</Badge>
 }
 
 // ─── Contract Status ────────────────────────────────────
@@ -62,7 +62,7 @@ const contractStatusConfig: Record<string, { label: string; variant: BadgeProps[
 
 export function ContractStatusBadge({ status }: { status: string }) {
   const config = contractStatusConfig[status] ?? { label: status, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── Deposit Status ─────────────────────────────────────
@@ -76,7 +76,7 @@ const depositStatusConfig: Record<string, { label: string; variant: BadgeProps['
 
 export function DepositStatusBadge({ status }: { status: string }) {
   const config = depositStatusConfig[status] ?? { label: status, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── Invoice Status ─────────────────────────────────────
@@ -92,7 +92,7 @@ const invoiceStatusConfig: Record<string, { label: string; variant: BadgeProps['
 
 export function InvoiceStatusBadge({ status }: { status: string }) {
   const config = invoiceStatusConfig[status] ?? { label: status, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── Payment Type ───────────────────────────────────────
@@ -105,7 +105,7 @@ const paymentTypeConfig: Record<string, { label: string; variant: BadgeProps['va
 
 export function PaymentTypeBadge({ type }: { type: string }) {
   const config = paymentTypeConfig[type] ?? { label: type, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── Issue Status ───────────────────────────────────────
@@ -119,7 +119,7 @@ const issueStatusConfig: Record<string, { label: string; variant: BadgeProps['va
 
 export function IssueStatusBadge({ status }: { status: string }) {
   const config = issueStatusConfig[status] ?? { label: status, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── Priority Level ─────────────────────────────────────
@@ -132,7 +132,7 @@ const priorityConfig: Record<string, { label: string; variant: BadgeProps['varia
 
 export function PriorityBadge({ priority }: { priority: string }) {
   const config = priorityConfig[priority] ?? { label: priority, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }
 
 // ─── Reservation Status ─────────────────────────────────
@@ -147,5 +147,5 @@ const reservationStatusConfig: Record<string, { label: string; variant: BadgePro
 
 export function ReservationStatusBadge({ status }: { status: string }) {
   const config = reservationStatusConfig[status] ?? { label: status, variant: 'muted' as const }
-  return <Badge variant={config.variant} title={config.label}>{config.label}</Badge>
+  return <Badge variant={config.variant} title={config.label} role='status'>{config.label}</Badge>
 }

@@ -7,7 +7,7 @@ import { Skeleton } from './skeleton'
 
 function Table({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className='relative w-full overflow-auto rounded-lg border'>
+    <div className='relative w-full overflow-auto rounded-lg border' role='region' tabIndex={0}>
       <table className={cn('w-full caption-bottom text-sm', className)} {...props} />
     </div>
   )
@@ -76,6 +76,8 @@ interface DataTableProps<T> {
   onRowClick?: (row: T) => void
   rowKey: (row: T) => string
   className?: string
+  /** Accessible label for the table (screen readers) */
+  tableLabel?: string
 }
 
 function DataTable<T>({
@@ -88,10 +90,11 @@ function DataTable<T>({
   onRowClick,
   rowKey,
   className,
+  tableLabel,
 }: DataTableProps<T>) {
   if (loading) {
     return (
-      <Table className={className}>
+      <Table className={className} aria-label={tableLabel}>
         <TableHeader>
           <TableRow>
             {columns.map((col) => (
@@ -119,7 +122,7 @@ function DataTable<T>({
   if (data.length === 0) {
     return (
       <div className='rounded-lg border bg-card'>
-        <Table className={className}>
+        <Table className={className} aria-label={tableLabel}>
           <TableHeader>
             <TableRow>
               {columns.map((col) => (
@@ -139,7 +142,7 @@ function DataTable<T>({
   }
 
   return (
-    <Table className={className}>
+    <Table className={className} aria-label={tableLabel}>
       <TableHeader>
         <TableRow>
           {columns.map((col) => (

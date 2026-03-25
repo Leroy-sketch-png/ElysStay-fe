@@ -16,9 +16,9 @@ function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement
   return <div className={cn('flex flex-col space-y-1.5 p-6', className)} {...props} />
 }
 
-function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+function CardTitle({ className, as: Comp = 'h3', ...props }: React.HTMLAttributes<HTMLHeadingElement> & { as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' }) {
   return (
-    <h3 className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...props} />
+    <Comp className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...props} />
   )
 }
 

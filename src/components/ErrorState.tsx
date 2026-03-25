@@ -2,7 +2,7 @@
 
 import { AlertTriangle, Home, RefreshCw, ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 
 interface ErrorStateProps {
   /** Title displayed prominently */
@@ -73,12 +73,16 @@ export function ErrorState({
             </Button>
           )}
           {showHomeLink && (
-            <Button variant='ghost' size='sm' asChild>
-              <a href='/dashboard'>
-                <Home className='size-4' />
-                Tổng quan
-              </a>
-            </Button>
+            <a
+              href='/dashboard'
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                'gap-2',
+              )}
+            >
+              <Home className='size-4' />
+              Tổng quan
+            </a>
           )}
         </div>
       </div>

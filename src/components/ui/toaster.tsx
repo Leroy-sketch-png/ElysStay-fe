@@ -110,7 +110,7 @@ export function Toaster({ position = 'bottom-right', maxToasts = 3 }: ToasterPro
 
 	return (
 		<Portal>
-			<div className={cn('pointer-events-none fixed z-50 flex max-h-screen w-full gap-3 p-4 md:max-w-sm', positionClasses[position])}>
+			<div aria-live='polite' aria-relevant='additions removals' className={cn('pointer-events-none fixed z-50 flex max-h-screen w-full gap-3 p-4 md:max-w-sm', positionClasses[position])}>
 				{visible.map(cfg => (
 					<Toast key={cfg.id} {...cfg} onClose={() => toast.dismiss(cfg.id)} />
 				))}

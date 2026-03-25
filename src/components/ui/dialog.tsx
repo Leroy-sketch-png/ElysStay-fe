@@ -22,6 +22,7 @@ function getFocusableElements(container: HTMLElement): HTMLElement[] {
 interface DialogContextValue {
   open: boolean
   onOpenChange: (open: boolean) => void
+  titleId: string
 }
 
 const DialogContext = React.createContext<DialogContextValue | null>(null)
@@ -42,6 +43,7 @@ interface DialogProps {
 
 function Dialog({ open, onOpenChange, children }: DialogProps) {
   const previousFocusRef = React.useRef<HTMLElement | null>(null)
+  const titleId = React.useId()
 
   // Store the element that had focus before opening
   React.useEffect(() => {
@@ -81,7 +83,7 @@ function Dialog({ open, onOpenChange, children }: DialogProps) {
   }, [open])
 
   return (
-    <DialogContext.Provider value={{ open, onOpenChange }}>
+    <DialogContext.Provider value={{ open, onOpenChange, titleId }}>
       {children}
     </DialogContext.Provider>
   )
@@ -94,7 +96,7 @@ interface DialogContentProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 function DialogContent({ className, children, size = 'md', ...props }: DialogContentProps) {
-  const { open, onOpenChange } = useDialogContext()
+  const { open, onOpenChange, titleId } = useDialogContext()
   const contentRef = React.useRef<HTMLDivElement>(null)
 
   // Auto-focus first focusable element on open
@@ -162,6 +164,7 @@ function DialogContent({ className, children, size = 'md', ...props }: DialogCon
           ref={contentRef}
           role='dialog'
           aria-modal='true'
+          aria-labelledby={titleId}
           className={cn(
             'relative w-full rounded-lg border bg-background shadow-lg animate-slideInUp',
             'max-h-[85vh] overflow-y-auto',
@@ -189,8 +192,9 @@ function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 // ─── Dialog Title ───────────────────────────────────────
 
 function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+  const { titleId } = useDialogContext()
   return (
-    <h2 className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...props} />
+    <h2 id={titleId} className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...props} />
   )
 }
 
@@ -232,7 +236,7 @@ function DialogClose({ className, ...props }: React.ComponentProps<typeof Button
       {...props}
     >
       <X className='size-4' />
-      <span className='sr-only'>Close</span>
+      <span className='sr-only'>Đóng</span>
     </Button>
   )
 }

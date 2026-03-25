@@ -3,6 +3,7 @@
 /* ─── Light Theme ─────────────────────────────────────── */
 
 :root {
+  color-scheme: light;
   --background: oklch(0.98 0.003 247);
   --foreground: oklch(0.18 0.04 265);
 
@@ -48,6 +49,7 @@
 /* ─── Dark Theme ──────────────────────────────────────── */
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.13 0.02 265);
   --foreground: oklch(0.98 0.003 247);
 
@@ -64,7 +66,7 @@
   --secondary-foreground: oklch(0.90 0.005 247);
 
   --muted: oklch(0.24 0.015 260);
-  --muted-foreground: oklch(0.68 0.015 255);
+  --muted-foreground: oklch(0.71 0.015 255);
 
   --accent: oklch(0.24 0.015 260);
   --accent-foreground: oklch(0.90 0.005 247);
@@ -164,6 +166,7 @@
 /* ─── Base Styles ─────────────────────────────────────── */
 
 html {
+  scroll-behavior: smooth;
   transition: color-scheme 0.3s;
 }
 
@@ -180,8 +183,27 @@ body {
   scrollbar-color: var(--border) transparent;
 }
 
+/* Selection highlight */
+::selection {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
 /* Focus ring utility */
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+/* ─── Reduced Motion ──────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

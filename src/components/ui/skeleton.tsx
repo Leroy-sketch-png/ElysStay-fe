@@ -6,6 +6,7 @@ export function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
 	return (
 		<div
+			aria-hidden='true'
 			className={cn(
 				'relative overflow-hidden rounded-md bg-muted',
 				'before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer',

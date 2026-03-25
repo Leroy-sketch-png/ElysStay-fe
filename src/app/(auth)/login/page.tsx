@@ -7,6 +7,20 @@ import { Building2, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from 'luc
 import { useAuth } from '@/providers/AuthProvider'
 import { cn } from '@/lib/utils'
 
+const RETURN_TO_KEY = '__elysstay_return_to__'
+
+function consumeReturnTo(): string | null {
+  try {
+    const path = sessionStorage.getItem(RETURN_TO_KEY)
+    sessionStorage.removeItem(RETURN_TO_KEY)
+    return path
+  } catch {
+    return null
+  }
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function LoginPage() {
   const { initialized, authenticated, loginWithPassword, authError: providerError } = useAuth()
   const router = useRouter()
@@ -18,10 +32,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const emailRef = useRef<HTMLInputElement>(null)
 
-  // Redirect to dashboard if already authenticated
+  // Redirect to dashboard (or return-to path) if already authenticated
   useEffect(() => {
     if (initialized && authenticated) {
-      router.replace('/dashboard')
+      const returnTo = consumeReturnTo()
+      router.replace(returnTo || '/dashboard')
     }
   }, [initialized, authenticated, router])
 
@@ -39,6 +54,11 @@ export default function LoginPage() {
     const trimmedEmail = email.trim()
     if (!trimmedEmail || !password) {
       setError('Vui lòng nhập email và mật khẩu.')
+      return
+    }
+
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      setError('Địa chỉ email không hợp lệ.')
       return
     }
 
@@ -64,8 +84,8 @@ export default function LoginPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className='size-10 rounded-full border-[3px] border-primary border-t-transparent animate-spin' />
-          <p className='text-sm text-muted-foreground'>Đang tải...</p>
+          <div className='size-10 rounded-full border-[3px] border-primary border-t-transparent animate-spin motion-reduce:animate-none' />
+          <p className='text-sm text-muted-foreground'>Đang kiểm tra xác thực...</p>
         </motion.div>
       </div>
     )
@@ -79,7 +99,7 @@ export default function LoginPage() {
   return (
     <div className='flex min-h-screen'>
       {/* ─── Left: Login Form ──────────────────────────────── */}
-      <div className='flex w-full items-center justify-center px-6 py-12 lg:w-1/2'>
+      <div className='flex w-full items-center justify-center px-6 py-12 md:w-1/2'>
         <motion.div
           className='w-full max-w-[420px] space-y-8'
           initial={{ opacity: 0, y: 12 }}
@@ -105,6 +125,8 @@ export default function LoginPage() {
           <AnimatePresence mode='wait'>
             {displayError && (
               <motion.div
+                id='login-error'
+                role='alert'
                 initial={{ opacity: 0, y: -8, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -8, height: 0 }}
@@ -118,7 +140,7 @@ export default function LoginPage() {
           </AnimatePresence>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className='space-y-5'>
+          <form onSubmit={handleSubmit} className='space-y-5' noValidate>
             {/* Email */}
             <div className='space-y-2'>
               <label htmlFor='email' className='text-sm font-medium leading-none'>
@@ -129,8 +151,12 @@ export default function LoginPage() {
                 <input
                   ref={emailRef}
                   id='email'
+                  name='email'
                   type='email'
                   autoComplete='email'
+                  required
+                  aria-required='true'
+                  aria-describedby={displayError ? 'login-error' : undefined}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder='name@example.com'
@@ -154,8 +180,12 @@ export default function LoginPage() {
                 <Lock className='absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground' />
                 <input
                   id='password'
+                  name='password'
                   type={showPassword ? 'text' : 'password'}
                   autoComplete='current-password'
+                  required
+                  aria-required='true'
+                  aria-describedby={displayError ? 'login-error' : undefined}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder='••••••••'
@@ -170,7 +200,7 @@ export default function LoginPage() {
                 <button
                   type='button'
                   onClick={() => setShowPassword(!showPassword)}
-                  className='absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground transition-colors cursor-pointer'
+                  className='absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground hover:scale-110 transition-all cursor-pointer'
                   aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
                   tabIndex={-1}
                 >
@@ -183,15 +213,20 @@ export default function LoginPage() {
             <button
               type='submit'
               disabled={loading}
+              aria-busy={loading || undefined}
               className={cn(
                 'group relative flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-all duration-150',
                 'hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 'disabled:pointer-events-none disabled:opacity-60',
-                'cursor-pointer',
+                loading ? 'cursor-not-allowed' : 'cursor-pointer',
               )}
             >
               {loading ? (
-                <div className='size-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin' />
+                <>
+                  <div className='size-4 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin motion-reduce:animate-none' aria-hidden='true' />
+                  <span className='sr-only'>Đang đăng nhập</span>
+                  <span>Đang đăng nhập…</span>
+                </>
               ) : (
                 <>
                   Đăng nhập
@@ -209,7 +244,7 @@ export default function LoginPage() {
       </div>
 
       {/* ─── Right: Decorative Panel ──────────────────────── */}
-      <div className='hidden lg:block lg:w-1/2'>
+      <div className='hidden md:block md:w-1/2'>
         <div className='relative flex h-full items-center justify-center overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/70'>
           {/* Geometric pattern */}
           <div className='absolute inset-0 opacity-[0.07]' aria-hidden='true'>

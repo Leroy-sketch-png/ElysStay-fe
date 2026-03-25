@@ -56,6 +56,7 @@ export function createMockAuthValue(overrides: MockAuthOverrides = {}): AuthCont
     logout: vi.fn(),
     hasRole: (role: string) =>
       user?.roles.some((r) => r.toLowerCase() === role.toLowerCase()) ?? false,
+    sessionExpiringSoon: false,
   }
 }
 

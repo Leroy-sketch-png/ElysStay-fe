@@ -142,10 +142,23 @@ export function NotificationBell() {
   // ─── Keyboard ──────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') {
+        setOpen(false)
+        // Return focus to the bell button
+        buttonRef.current?.focus()
+      }
     }
     if (open) document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
+  }, [open])
+
+  // ─── Focus management ─────────────────────────────────
+  useEffect(() => {
+    if (open && dropdownRef.current) {
+      // Focus the dropdown so keyboard users have context
+      const firstFocusable = dropdownRef.current.querySelector<HTMLElement>('a, button:not([disabled])')
+      firstFocusable?.focus()
+    }
   }, [open])
 
   return (

@@ -56,6 +56,8 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
 		return (
 			<div
 				ref={ref}
+				role='status'
+				aria-live='polite'
 				className={cn(toastVariants({ variant }), !isVisible && 'translate-y-2 opacity-0', className)}
 				{...props}
 			>

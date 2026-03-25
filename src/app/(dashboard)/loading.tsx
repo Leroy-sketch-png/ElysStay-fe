@@ -2,7 +2,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 export default function DashboardLoading() {
   return (
-    <div className='p-6 space-y-6'>
+    <div className='p-6 space-y-6' role='status' aria-label='Đang tải trang'>
+      <span className='sr-only'>Đang tải...</span>
       {/* Page header skeleton */}
       <div className='space-y-2'>
         <Skeleton className='h-8 w-48' />

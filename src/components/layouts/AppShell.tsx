@@ -28,6 +28,7 @@ import {
   Monitor,
   ChevronRight,
   Home,
+  AlertTriangle,
   type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -120,7 +121,7 @@ const ROUTE_LABELS: Record<string, string> = {
 
 function HeaderBreadcrumbs({ pathname }: { pathname: string }) {
   const segments = pathname.split('/').filter(Boolean)
-  if (segments.length === 0) return <div className='flex-1' />
+  if (segments.length === 0) return <div className='flex-1' aria-hidden='true' />
 
   const crumbs = segments.map((segment, i) => {
     const isId = /^[0-9a-f-]{36}$/.test(segment) // UUID detection
@@ -129,8 +130,18 @@ function HeaderBreadcrumbs({ pathname }: { pathname: string }) {
     return { label, href, isLast: i === segments.length - 1 }
   })
 
+  // Mobile: show just the current page title
+  const lastCrumb = crumbs[crumbs.length - 1]
+
   return (
-    <nav aria-label='Breadcrumb' className='hidden md:flex flex-1 items-center gap-1 px-2 text-sm'>
+    <>
+      {/* Mobile: simple page title */}
+      <span className='flex-1 truncate text-sm font-medium text-foreground md:hidden'>
+        {lastCrumb.label}
+      </span>
+
+      {/* Desktop: full breadcrumb trail */}
+      <nav aria-label='Breadcrumb' className='hidden md:flex flex-1 items-center gap-1 px-2 text-sm'>
       <Link href='/dashboard' className='text-muted-foreground hover:text-foreground transition-colors'>
         <Home className='size-4' />
       </Link>
@@ -147,6 +158,7 @@ function HeaderBreadcrumbs({ pathname }: { pathname: string }) {
         </span>
       ))}
     </nav>
+    </>
   )
 }
 
@@ -157,7 +169,7 @@ interface AppShellProps {
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const { user, logout } = useAuth()
+  const { user, logout, sessionExpiringSoon } = useAuth()
   const { theme, setTheme } = useTheme()
   const pathname = usePathname()
 
@@ -167,6 +179,8 @@ export function AppShell({ children }: AppShellProps) {
     return localStorage.getItem(SIDEBAR.storageKey) === 'true'
   })
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
 
   // Persist collapsed state
   const toggleCollapsed = useCallback(() => {
@@ -189,10 +203,25 @@ export function AppShell({ children }: AppShellProps) {
         e.preventDefault()
         toggleCollapsed()
       }
+      // Close logout dialog on Escape
+      if (e.key === 'Escape' && showLogoutConfirm) {
+        setShowLogoutConfirm(false)
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [toggleCollapsed])
+  }, [toggleCollapsed, showLogoutConfirm])
+
+  // Confirmed logout handler
+  const handleLogout = useCallback(async () => {
+    setLoggingOut(true)
+    try {
+      await logout()
+    } finally {
+      setLoggingOut(false)
+      setShowLogoutConfirm(false)
+    }
+  }, [logout])
 
   // Filter nav groups by user role
   const visibleGroups = useMemo(() => {
@@ -267,6 +296,7 @@ export function AppShell({ children }: AppShellProps) {
                     <li key={item.href}>
                       <Link
                         href={item.href}
+                        aria-current={isActive ? 'page' : undefined}
                         className={cn(
                           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
                           'hover:bg-accent hover:text-accent-foreground',
@@ -291,7 +321,7 @@ export function AppShell({ children }: AppShellProps) {
           <button
             onClick={toggleCollapsed}
             className='flex w-full items-center justify-center rounded-lg p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors cursor-pointer'
-            title={collapsed ? 'Mở rộng' : 'Thu gọn'}
+            aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
           >
             <ChevronLeft
               className={cn('size-5 transition-transform', collapsed && 'rotate-180')}
@@ -328,7 +358,7 @@ export function AppShell({ children }: AppShellProps) {
                 setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'dark' : 'light')
               }
               className='p-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer'
-              title={`Chuyển sang chế độ ${theme === 'dark' ? 'sáng' : 'tối'}`}
+              aria-label={`Chuyển sang chế độ ${theme === 'dark' ? 'sáng' : 'tối'}`}
             >
               {theme === 'dark' ? (
                 <Sun className='size-[18px]' />
@@ -350,14 +380,14 @@ export function AppShell({ children }: AppShellProps) {
               <Link
                 href='/settings'
                 className='p-2.5 text-muted-foreground hover:text-foreground transition-colors'
-                title='Cài đặt'
+                aria-label='Cài đặt'
               >
                 <Settings className='size-5' />
               </Link>
               <button
-                onClick={logout}
+                onClick={() => setShowLogoutConfirm(true)}
                 className='p-2.5 text-muted-foreground hover:text-destructive transition-colors cursor-pointer'
-                title='Đăng xuất'
+                aria-label='Đăng xuất'
               >
                 <LogOut className='size-5' />
               </button>
@@ -365,11 +395,91 @@ export function AppShell({ children }: AppShellProps) {
           </div>
         </header>
 
+        {/* Session expiry warning */}
+        <AnimatePresence>
+          {sessionExpiringSoon && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className='flex items-center gap-3 border-b border-amber-500/20 bg-amber-500/10 px-4 py-2.5 text-sm text-amber-700 dark:text-amber-400'
+              role='alert'
+            >
+              <AlertTriangle className='size-4 shrink-0' />
+              <span>Phiên đăng nhập sắp hết hạn. Vui lòng lưu công việc và đăng nhập lại.</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Page content */}
         <main id='main-content' className='flex-1 overflow-y-auto'>
           {children}
         </main>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <AnimatePresence>
+        {showLogoutConfirm && (
+          <>
+            <motion.div
+              className='fixed inset-0 bg-black/50'
+              style={{ zIndex: Z_INDEX.overlay + 10 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !loggingOut && setShowLogoutConfirm(false)}
+              aria-hidden='true'
+            />
+            <motion.div
+              role='alertdialog'
+              aria-modal='true'
+              aria-labelledby='logout-dialog-title'
+              aria-describedby='logout-dialog-desc'
+              className='fixed left-1/2 top-1/2 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-background p-6 shadow-lg'
+              style={{ zIndex: Z_INDEX.overlay + 11 }}
+              initial={{ opacity: 0, scale: 0.95, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 8 }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className='flex flex-col items-center text-center'>
+                <div className='flex size-12 items-center justify-center rounded-full bg-destructive/10 mb-4'>
+                  <LogOut className='size-5 text-destructive' />
+                </div>
+                <h2 id='logout-dialog-title' className='text-lg font-semibold'>
+                  Đăng xuất?
+                </h2>
+                <p id='logout-dialog-desc' className='mt-2 text-sm text-muted-foreground'>
+                  Bạn sẽ mất các thay đổi chưa lưu. Bạn có chắc chắn muốn đăng xuất không?
+                </p>
+              </div>
+              <div className='mt-6 flex gap-3'>
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  disabled={loggingOut}
+                  className='flex-1 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent cursor-pointer disabled:opacity-50'
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className='flex-1 rounded-lg bg-destructive px-4 py-2.5 text-sm font-medium text-destructive-foreground transition-colors hover:bg-destructive/90 cursor-pointer disabled:opacity-50'
+                >
+                  {loggingOut ? (
+                    <span className='flex items-center justify-center gap-2'>
+                      <span className='size-3.5 rounded-full border-2 border-destructive-foreground border-t-transparent animate-spin' />
+                      Đang đăng xuất...
+                    </span>
+                  ) : (
+                    'Đăng xuất'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
