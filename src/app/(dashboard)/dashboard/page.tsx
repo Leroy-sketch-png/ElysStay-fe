@@ -97,7 +97,7 @@ function StatCard({ label, value, icon, trend, variant = 'default', href }: Stat
 
 function OwnerDashboard({ data }: { data: OwnerDashboardDto }) {
   return (
-    <StaggerContainer className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+    <StaggerContainer className='grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
       <AnimatedCard>
         <StatCard
           label='Tổng tòa nhà'
@@ -337,7 +337,7 @@ export default function DashboardPage() {
         description={getRoleDescription(user?.roles || [])}
       >
       {isLoading ? (
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+        <div className='grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className='h-32 rounded-lg' />
           ))}

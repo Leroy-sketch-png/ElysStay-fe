@@ -167,14 +167,14 @@ export function NotificationBell() {
       <button
         ref={buttonRef}
         onClick={() => setOpen((prev) => !prev)}
-        className='relative p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer'
+        className='relative p-2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background'
         aria-label={unreadCount > 0 ? `${unreadCount} thông báo chưa đọc` : 'Thông báo'}
         aria-haspopup='true'
         aria-expanded={open}
       >
         <Bell className='size-5' />
         {unreadCount > 0 && (
-          <span className='absolute -top-0.5 -right-0.5 flex size-4.5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground'>
+          <span className='absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground'>
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -186,7 +186,7 @@ export function NotificationBell() {
           ref={dropdownRef}
           role='dialog'
           aria-label='Thông báo'
-          className='absolute right-0 top-full mt-2 w-80 rounded-lg border bg-popover shadow-lg overflow-hidden'
+          className='absolute right-0 top-full mt-2 w-[min(calc(100vw-2rem),22rem)] rounded-lg border bg-popover shadow-lg overflow-hidden'
           style={{ zIndex: 50 }}
         >
           {/* Header */}
@@ -205,7 +205,7 @@ export function NotificationBell() {
           </div>
 
           {/* List */}
-          <div className='max-h-80 overflow-y-auto'>
+          <div className='max-h-[min(24rem,calc(100vh-12rem))] overflow-y-auto overscroll-contain'>
             {isLoading ? (
               <div className='flex items-center justify-center py-8'>
                 <Loader2 className='size-5 animate-spin text-muted-foreground' />

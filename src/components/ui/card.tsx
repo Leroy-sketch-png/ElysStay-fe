@@ -18,7 +18,7 @@ function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement
 
 function CardTitle({ className, as: Comp = 'h3', ...props }: React.HTMLAttributes<HTMLHeadingElement> & { as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' }) {
   return (
-    <Comp className={cn('text-lg font-semibold leading-none tracking-tight', className)} {...props} />
+    <Comp className={cn('text-base font-semibold leading-none tracking-tight', className)} {...props} />
   )
 }
 

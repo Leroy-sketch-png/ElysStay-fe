@@ -10,11 +10,11 @@ const toastVariants = cva(
 	{
 		variants: {
 			variant: {
-				default: 'text-muted-foreground',
-				success: 'text-muted-foreground [&>.toast-dot]:bg-success',
-				error: 'text-muted-foreground [&>.toast-dot]:bg-destructive',
-				warning: 'text-muted-foreground [&>.toast-dot]:bg-warning',
-				info: 'text-muted-foreground [&>.toast-dot]:bg-info',
+				default: 'text-foreground',
+				success: 'text-foreground [&>.toast-dot]:bg-success',
+				error: 'text-foreground [&>.toast-dot]:bg-destructive',
+				warning: 'text-foreground [&>.toast-dot]:bg-warning',
+				info: 'text-foreground [&>.toast-dot]:bg-info',
 			},
 		},
 		defaultVariants: { variant: 'default' },
@@ -75,7 +75,7 @@ export const Toast = React.forwardRef<HTMLDivElement, ToastProps>(
 				{onClose && (
 					<button
 						onClick={handleClose}
-						className='flex-shrink-0 opacity-0 transition-opacity group-hover:opacity-60 hover:!opacity-100'
+						className='flex-shrink-0 opacity-50 transition-opacity hover:opacity-100'
 						aria-label='Đóng'
 					>
 						<X className='size-3' />

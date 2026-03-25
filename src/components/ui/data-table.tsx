@@ -7,7 +7,7 @@ import { Skeleton } from './skeleton'
 
 function Table({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) {
   return (
-    <div className='relative w-full overflow-auto rounded-lg border' role='region' tabIndex={0}>
+    <div className='relative w-full overflow-auto overscroll-contain rounded-lg border' role='region' tabIndex={0}>
       <table className={cn('w-full caption-bottom text-sm', className)} {...props} />
     </div>
   )
@@ -25,7 +25,7 @@ function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElem
   return (
     <tr
       className={cn(
-        'border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted',
+        'border-b transition-colors hover:bg-muted/80 data-[state=selected]:bg-muted',
         className,
       )}
       {...props}
@@ -156,7 +156,7 @@ function DataTable<T>({
         {data.map((row) => (
           <TableRow
             key={rowKey(row)}
-            className={onRowClick ? 'cursor-pointer' : undefined}
+            className={onRowClick ? 'cursor-pointer focus-visible:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary' : undefined}
             onClick={() => onRowClick?.(row)}
             tabIndex={onRowClick ? 0 : undefined}
             role={onRowClick ? 'button' : undefined}

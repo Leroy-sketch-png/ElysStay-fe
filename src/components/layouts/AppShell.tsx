@@ -149,7 +149,7 @@ function HeaderBreadcrumbs({ pathname }: { pathname: string }) {
         <span key={i} className='flex items-center gap-1'>
           <ChevronRight className='size-3.5 text-muted-foreground/50' />
           {crumb.isLast ? (
-            <span className='font-medium text-foreground truncate max-w-[200px]'>{crumb.label}</span>
+            <span className='font-medium text-foreground'>{crumb.label}</span>
           ) : (
             <Link href={crumb.href} className='text-muted-foreground hover:text-foreground transition-colors truncate max-w-[200px]'>
               {crumb.label}
