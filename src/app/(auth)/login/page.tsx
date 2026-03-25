@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Building2, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff } from 'lucide-react'
+import { Building2, Mail, Lock, ArrowRight, AlertCircle, Eye, EyeOff, Zap, Crown, Shield, User } from 'lucide-react'
 import { useAuth } from '@/providers/AuthProvider'
 import { cn } from '@/lib/utils'
 
@@ -20,6 +20,81 @@ function consumeReturnTo(): string | null {
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// ─── Dev Quick Login ────────────────────────────────────
+
+const DEV_ACCOUNTS = [
+  { email: 'demo-owner@elysstay.com', label: 'Chủ nhà', name: 'Nguyễn Văn An', icon: Crown, color: 'text-amber-500' },
+  { email: 'demo-staff@elysstay.com', label: 'Nhân viên', name: 'Trần Thị Bình', icon: Shield, color: 'text-blue-500' },
+  { email: 'demo-tenant1@elysstay.com', label: 'Khách thuê', name: 'Lê Hoàng Cường', icon: User, color: 'text-emerald-500' },
+] as const
+
+const DEV_PASSWORD = 'Demo@123'
+
+function DevQuickLogin({ onLogin, disabled }: { onLogin: (email: string, password: string) => void; disabled: boolean }) {
+  const [loggingInAs, setLoggingInAs] = useState<string | null>(null)
+
+  if (process.env.NODE_ENV !== 'development') return null
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.5 }}
+      className='space-y-3'
+    >
+      <div className='relative'>
+        <div className='absolute inset-0 flex items-center'>
+          <span className='w-full border-t' />
+        </div>
+        <div className='relative flex justify-center text-xs'>
+          <span className='bg-background px-3 text-muted-foreground flex items-center gap-1.5'>
+            <Zap className='size-3' />
+            Dev Quick Login
+          </span>
+        </div>
+      </div>
+
+      <div className='grid gap-2'>
+        {DEV_ACCOUNTS.map((account) => {
+          const Icon = account.icon
+          const isLogging = loggingInAs === account.email
+          return (
+            <button
+              key={account.email}
+              type='button'
+              disabled={disabled || loggingInAs !== null}
+              onClick={() => {
+                setLoggingInAs(account.email)
+                onLogin(account.email, DEV_PASSWORD)
+              }}
+              className={cn(
+                'group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left text-sm transition-all',
+                'hover:bg-accent/50 hover:border-border/80',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                'disabled:pointer-events-none disabled:opacity-50',
+                'cursor-pointer',
+              )}
+            >
+              <div className={cn('flex size-8 items-center justify-center rounded-full bg-muted', account.color)}>
+                {isLogging ? (
+                  <div className='size-3.5 rounded-full border-2 border-current border-t-transparent animate-spin' />
+                ) : (
+                  <Icon className='size-3.5' />
+                )}
+              </div>
+              <div className='flex-1 min-w-0'>
+                <div className='font-medium truncate'>{account.name}</div>
+                <div className='text-xs text-muted-foreground truncate'>{account.label} · {account.email}</div>
+              </div>
+              <ArrowRight className='size-3.5 text-muted-foreground opacity-0 -translate-x-1 transition-all group-hover:opacity-100 group-hover:translate-x-0' />
+            </button>
+          )
+        })}
+      </div>
+    </motion.div>
+  )
+}
 
 export default function LoginPage() {
   const { initialized, authenticated, loginWithPassword, authError: providerError } = useAuth()
@@ -240,6 +315,23 @@ export default function LoginPage() {
           <p className='text-center text-xs text-muted-foreground'>
             Liên hệ quản trị viên nếu bạn chưa có tài khoản.
           </p>
+
+          {/* Dev-only quick login */}
+          <DevQuickLogin
+            onLogin={async (email, password) => {
+              setError(null)
+              setLoading(true)
+              setEmail(email)
+              setPassword('')
+              try {
+                const result = await loginWithPassword(email, password)
+                if (!result.success) setError(result.error)
+              } finally {
+                setLoading(false)
+              }
+            }}
+            disabled={loading}
+          />
         </motion.div>
       </div>
 
