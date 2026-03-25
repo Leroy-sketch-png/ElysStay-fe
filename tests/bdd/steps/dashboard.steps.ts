@@ -22,13 +22,13 @@ Then('I should see the following dashboard widgets:', async function (dataTable:
   const page: Page = this.page
   const widgets = dataTable.hashes()
   for (const row of widgets) {
-    await expect(page.getByText(new RegExp(row['widget']))).toBeVisible({ timeout: 5000 })
+    await expect(page.getByText(row['widget']).first()).toBeVisible({ timeout: 5000 })
   }
 })
 
 Then('I should not see owner-specific widgets', async function () {
   const page: Page = this.page
-  await expect(page.getByText(/Doanh thu tháng/)).not.toBeVisible({ timeout: 3000 })
+  await expect(page.getByText('Doanh thu tháng')).toHaveCount(0, { timeout: 3000 })
 })
 
 Then('I should see the tenant dashboard content', async function () {
@@ -43,7 +43,7 @@ Then('the occupancy rate should show {string}', async function (rate: string) {
 
 Then('the total rooms should show {string}', async function (count: string) {
   const page: Page = this.page
-  await expect(page.getByText(count)).toBeVisible({ timeout: 5000 })
+  await expect(page.getByRole('link', { name: new RegExp(`Tổng phòng\\s+${count}`) })).toBeVisible({ timeout: 5000 })
 })
 
 // ─── Reports Navigation ─────────────────────────────────
@@ -55,18 +55,21 @@ When('I visit the P&L report page', async function () {
 
 When('I select year {string}', async function (year: string) {
   const page: Page = this.page
-  await page.getByLabel(/Năm/).click()
-  await page.getByText(year).click()
+  await page.getByLabel(/Năm/).selectOption(year)
 })
 
 When('I select building {string}', async function (building: string) {
   const page: Page = this.page
-  await page.getByLabel(/Tòa nhà/).click()
-  await page.getByText(building).click()
+  await page.getByLabel(/Tòa nhà/).selectOption({ label: building })
 })
 
 When('I select {string}', async function (option: string) {
   const page: Page = this.page
+  if (option === 'Tất cả tòa nhà') {
+    await page.getByLabel(/Tòa nhà/).selectOption('')
+    return
+  }
+
   await page.getByText(option).click()
 })
 
@@ -79,23 +82,25 @@ When('I confirm invoice generation', async function () {
 
 Then('I should see monthly revenue and expense data', async function () {
   const page: Page = this.page
-  await expect(page.getByText(/Doanh thu|Thu nhập/)).toBeVisible({ timeout: 5000 })
-  await expect(page.getByText(/Chi phí/)).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText('Doanh thu vận hành')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText('Tổng chi phí')).toBeVisible({ timeout: 5000 })
 })
 
 Then('I should see the net cash flow for each month', async function () {
   const page: Page = this.page
-  await expect(page.getByText(/Dòng tiền|Lợi nhuận/)).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText('Dòng tiền ròng')).toBeVisible({ timeout: 5000 })
+  await expect(page.getByRole('columnheader', { name: 'Dòng tiền' })).toBeVisible({ timeout: 5000 })
 })
 
 Then('I should see aggregated P&L data across all buildings', async function () {
   const page: Page = this.page
-  await expect(page.getByText(/Tổng|Tất cả/)).toBeVisible({ timeout: 5000 })
+  await expect(page.getByLabel(/Tòa nhà/)).toHaveValue('', { timeout: 5000 })
+  await expect(page.getByText('Dòng tiền ròng')).toBeVisible({ timeout: 5000 })
 })
 
 Then('I should see P&L data for year {string}', async function (year: string) {
   const page: Page = this.page
-  await expect(page.getByText(year)).toBeVisible({ timeout: 5000 })
+  await expect(page.getByText(`Tổng kết tài chính năm ${year}`)).toBeVisible({ timeout: 5000 })
 })
 
 // ─── Responsive ─────────────────────────────────────────

@@ -230,6 +230,7 @@ export default function PnlReportPage() {
       <div className='flex flex-wrap items-end gap-4'>
         <div className='w-56'>
           <Select
+            aria-label='Tòa nhà'
             value={selectedBuildingId}
             onChange={(e) => setSelectedBuildingId(e.target.value)}
           >
@@ -243,6 +244,7 @@ export default function PnlReportPage() {
         </div>
         <div className='w-32'>
           <Select
+            aria-label='Năm'
             value={String(selectedYear)}
             onChange={(e) => setSelectedYear(Number(e.target.value))}
           >

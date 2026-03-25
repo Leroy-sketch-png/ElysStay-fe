@@ -21,6 +21,7 @@ import {
   type BuildingFilters,
 } from '@/lib/queries/buildings'
 import { DEFAULT_TABLE_PAGE_SIZE } from '@/lib/domain-constants'
+import type { PagedResponse } from '@/lib/api-client'
 import type { BuildingDto } from '@/types/api'
 import { BuildingFormDialog } from './building-form-dialog'
 import { ConfirmDialog } from '@/components/ui/dialog'
@@ -44,7 +45,32 @@ export default function BuildingsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteBuilding(id),
-    onSuccess: () => {
+    onSuccess: (_data, deletedId) => {
+      queryClient.setQueriesData(
+        { queryKey: buildingKeys.all },
+        (current: PagedResponse<BuildingDto> | BuildingDto | undefined) => {
+          if (!current) {
+            return current
+          }
+
+          if (Array.isArray((current as PagedResponse<BuildingDto>).data)) {
+            const paged = current as PagedResponse<BuildingDto>
+            const nextData = paged.data.filter((building) => building.id !== deletedId)
+
+            return {
+              ...paged,
+              data: nextData,
+              pagination: {
+                ...paged.pagination,
+                totalItems: Math.max(0, paged.pagination.totalItems - (paged.data.length - nextData.length)),
+                totalPages: Math.max(1, paged.pagination.totalPages),
+              },
+            }
+          }
+
+          return current
+        },
+      )
       toast.success('Tòa nhà đã được xóa')
       queryClient.invalidateQueries({ queryKey: buildingKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })

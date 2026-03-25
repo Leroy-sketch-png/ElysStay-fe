@@ -92,6 +92,7 @@ export function ChangeReservationStatusDialog({
     onSuccess: () => {
       toast.success('Đã xác nhận đặt cọc')
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
+      queryClient.invalidateQueries({ queryKey: reservationKeys.detail(reservation.id) })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })
@@ -112,6 +113,7 @@ export function ChangeReservationStatusDialog({
     onSuccess: () => {
       toast.success('Đã hủy đặt cọc')
       queryClient.invalidateQueries({ queryKey: reservationKeys.all })
+      queryClient.invalidateQueries({ queryKey: reservationKeys.detail(reservation.id) })
       queryClient.invalidateQueries({ queryKey: roomKeys.all })
       queryClient.invalidateQueries({ queryKey: paymentKeys.all })
       queryClient.invalidateQueries({ queryKey: reportKeys.all })

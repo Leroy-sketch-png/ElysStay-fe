@@ -119,8 +119,18 @@ export function BuildingFormDialog({
 
   const updateMutation = useMutation({
     mutationFn: (data: UpdateBuildingRequest) => updateBuilding(building!.id, data),
-    onSuccess: () => {
+    onSuccess: (updatedBuilding) => {
       toast.success('Tòa nhà đã cập nhật')
+      queryClient.setQueryData(buildingKeys.detail(building!.id), (current: BuildingDto | undefined) => {
+        if (!current) {
+          return current
+        }
+
+        return {
+          ...current,
+          ...updatedBuilding,
+        }
+      })
       queryClient.invalidateQueries({ queryKey: buildingKeys.all })
       queryClient.invalidateQueries({ queryKey: buildingKeys.detail(building!.id) })
       queryClient.invalidateQueries({ queryKey: userKeys.dashboard() })

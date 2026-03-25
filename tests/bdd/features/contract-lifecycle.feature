@@ -10,7 +10,7 @@ Feature: Contract Lifecycle
   @smoke @happy-path
   Scenario: Create a new contract
     Given I am viewing the contracts page
-    When I click the "Tạo hợp đồng" button
+    When I click the "Hợp đồng mới" button
     And I fill in the contract form with:
       | field         | value      |
       | Phòng         | 301        |
@@ -21,7 +21,7 @@ Feature: Contract Lifecycle
       | Tiền thuê     | 5000000    |
       | Tiền cọc      | 10000000   |
     And I submit the contract form
-    Then I should see a success message "Đã tạo hợp đồng"
+    Then I should see a success message "Tạo hợp đồng thành công"
     And the contract should appear in the contract list
 
   @happy-path
@@ -37,7 +37,7 @@ Feature: Contract Lifecycle
   Scenario: Terminate a contract with deposit deduction
     Given I am viewing the contract detail for room "101"
     And the contract is currently active
-    When I click the "Chấm dứt hợp đồng" button
+    When I click the "Chấm dứt" button
     And I fill in the termination form with:
       | field         | value              |
       | Ngày chấm dứt | 2026-06-30        |
@@ -51,7 +51,7 @@ Feature: Contract Lifecycle
   Scenario: Renew a contract
     Given I am viewing the contract detail for room "101"
     And the contract is currently active
-    When I click the "Gia hạn hợp đồng" button
+    When I click the "Gia hạn" button
     And I fill in the renewal form with:
       | field         | value      |
       | Ngày kết thúc mới | 2028-03-31 |
@@ -82,7 +82,7 @@ Feature: Contract Lifecycle
       | Held              | Đang giữ           |
       | PartiallyRefunded | Hoàn một phần      |
       | Refunded          | Đã hoàn            |
-      | Forfeited         | Đã tịch thu        |
+      | Forfeited         | Tịch thu           |
 
   @tenant-management
   Scenario: Add a co-tenant to a contract
@@ -92,7 +92,7 @@ Feature: Contract Lifecycle
     And I select tenant "Trần Thị B"
     And I fill in move-in date "2026-05-01"
     And I submit the co-tenant form
-    Then I should see a success message "Đã thêm người ở"
+    Then I should see a success message "Đã thêm người ở cùng"
     And "Trần Thị B" should appear in the tenant list
 
   @tenant-management
@@ -106,7 +106,7 @@ Feature: Contract Lifecycle
   @negative @validation
   Scenario: Reject contract creation with end date before start date
     Given I am viewing the contracts page
-    When I click the "Tạo hợp đồng" button
+    When I click the "Hợp đồng mới" button
     And I fill in the contract form with:
       | field         | value      |
       | Ngày bắt đầu  | 2026-04-01 |

@@ -36,38 +36,44 @@ async function mockShellApis(page: Page, role: string, world: Record<string, unk
     updatedAt: '2026-01-01T00:00:00Z',
   }
 
-  const dashboardByRole = {
-    Owner: {
-      totalBuildings: 1,
-      totalRooms: 12,
-      occupiedRooms: 9,
-      occupancyRate: 0.75,
-      activeContracts: 8,
-      expiringContracts: 1,
-      pendingReservations: 2,
-      monthlyRevenue: 45000000,
-      overdueInvoiceCount: 1,
-      overdueAmount: 2500000,
-      pendingMeterReadings: 3,
-    },
-    Staff: {
-      assignedBuildings: 1,
-      pendingIssues: 2,
-      pendingMeterReadings: 3,
-    },
-    Tenant: {
-      currentRoomNumber: '101',
-      buildingName: 'Elys Tower',
-      unpaidInvoiceCount: 1,
-      nextDueDate: '2026-03-28',
-      activeContractId: 'contract-1',
-      activeReservationId: null,
-      latestNotifications: 2,
-    },
-  } as const
-
   await page.route('**/api/v1/users/me/dashboard', async (route) => {
     world.lastAuthorizationHeader = route.request().headers()['authorization']
+    const totalBuildings = Number(world.dashboardBuildings ?? 1)
+    const totalRooms = Number(world.dashboardRooms ?? 12)
+    const occupiedRooms = Number(world.dashboardOccupied ?? 9)
+    const occupancyRate = totalRooms > 0 ? occupiedRooms / totalRooms : 0
+
+    const dashboardByRole = {
+      Owner: {
+        totalBuildings,
+        totalRooms,
+        occupiedRooms,
+        occupancyRate,
+        activeContracts: occupiedRooms,
+        expiringContracts: 1,
+        pendingReservations: 2,
+        monthlyRevenue: 45000000,
+        overdueInvoiceCount: 1,
+        overdueAmount: 2500000,
+        pendingMeterReadings: 3,
+      },
+      Staff: {
+        assignedBuildings: 1,
+        pendingIssues: 2,
+        pendingMeterReadings: 3,
+      },
+      Tenant: {
+        roomId: 'room-1',
+        roomNumber: '101',
+        buildingName: 'Tòa nhà A',
+        contractStatus: 'Active',
+        contractEndDate: '2026-12-31',
+        unpaidInvoiceCount: 1,
+        unpaidAmount: 2500000,
+        openIssueCount: 1,
+      },
+    } as const
+
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -110,29 +116,31 @@ async function mockShellApis(page: Page, role: string, world: Record<string, unk
     })
   })
 
-  await page.route('**/api/v1/buildings**', async (route) => {
-    world.lastAuthorizationHeader = route.request().headers()['authorization']
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        success: true,
-        data: [
-          {
-            id: 'building-1',
-            ownerId: 'owner-1',
-            name: 'Elys Tower',
-            address: '1 Demo Street',
-            totalFloors: 5,
-            invoiceDueDay: 10,
-            createdAt: '2026-01-01T00:00:00Z',
-            updatedAt: '2026-01-01T00:00:00Z',
-          },
-        ],
-        pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
-      }),
+  for (const pattern of ['**/api/v1/buildings', '**/api/v1/buildings?*']) {
+    await page.route(pattern, async (route) => {
+      world.lastAuthorizationHeader = route.request().headers()['authorization']
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          success: true,
+          data: [
+            {
+              id: 'building-1',
+              ownerId: 'owner-1',
+              name: 'Tòa nhà A',
+              address: '1 Demo Street',
+              totalFloors: 5,
+              invoiceDueDay: 10,
+              createdAt: '2026-01-01T00:00:00Z',
+              updatedAt: '2026-01-01T00:00:00Z',
+            },
+          ],
+          pagination: { page: 1, pageSize: 20, totalItems: 1, totalPages: 1 },
+        }),
+      })
     })
-  })
+  }
 
   await page.route('**/api/v1/rooms**', async (route) => {
     world.lastAuthorizationHeader = route.request().headers()['authorization']

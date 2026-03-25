@@ -1,0 +1,1905 @@
+[
+  {
+    "description": "  As a building owner\n  I want to manage my rental buildings\n  So that I can organize my property portfolio",
+    "elements": [
+      {
+        "description": "",
+        "id": "building-management;create-a-new-building",
+        "keyword": "Scenario",
+        "line": 11,
+        "name": "Create a new building",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 122765500
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 16902100
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 12,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 772290700
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 13,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 435676599
+            }
+          },
+          {
+            "arguments": [
+              {
+                "rows": [
+                  {
+                    "cells": [
+                      "field",
+                      "value"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "Tên",
+                      "Tòa nhà Sunrise"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "Địa chỉ",
+                      "123 Nguyễn Huệ, Q1"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "Mô tả",
+                      "Tòa nhà cao cấp"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "Số tầng",
+                      "10"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "Ngày hạn hóa đơn",
+                      "10"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "keyword": "And ",
+            "line": 14,
+            "name": "I fill in the building form with:",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:293"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 415539600
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 21,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 164215399
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 22,
+            "name": "I should see a success message \"Tòa nhà đã tạo\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:581"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 28851899
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 23,
+            "name": "the building \"Tòa nhà Sunrise\" should appear in the building list",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:358"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 25295500
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 21443900
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@smoke",
+            "line": 10
+          },
+          {
+            "name": "@happy-path",
+            "line": 10
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;edit-building-information",
+        "keyword": "Scenario",
+        "line": 26,
+        "name": "Edit building information",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 100254799
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 9260999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 27,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 481864700
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 28,
+            "name": "I click on building \"Tòa nhà A\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:326"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 476718000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 29,
+            "name": "I click the \"Sửa\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 1503456099
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 30,
+            "name": "I change the building name to \"Tòa nhà A - Premium\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:319"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 32185100
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 31,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 259525400
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 32,
+            "name": "I should see \"Tòa nhà A - Premium\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "failed",
+              "duration": 5011728299,
+              "error_message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Tòa nhà A - Premium')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"to.be.visible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Tòa nhà A - Premium')\u001b[22m\n\n    at Proxy.<anonymous> (D:\\code\\rent\\ElysStay-fe\\node_modules\\playwright\\lib\\matchers\\expect.js:213:24)\n    at World.<anonymous> (D:\\code\\rent\\ElysStay-fe\\tests\\bdd\\steps\\common.steps.ts:781:43)"
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 12349500
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@happy-path",
+            "line": 25
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;view-building-detail-page",
+        "keyword": "Scenario",
+        "line": 35,
+        "name": "View building detail page",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 84793599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 6349799
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 36,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 697293799
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 37,
+            "name": "I click on building \"Tòa nhà A\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:326"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 466923999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 38,
+            "name": "I should see the building detail page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:368"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 9750599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 39,
+            "name": "I should see building statistics",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:373"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 381499199
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 40,
+            "name": "I should see the occupancy rate",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:378"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 7283800
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 12908800
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@happy-path",
+            "line": 34
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;reject-building-creation-without-required-fields",
+        "keyword": "Scenario",
+        "line": 43,
+        "name": "Reject building creation without required fields",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 79145000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 5942299
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 44,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 464019499
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 45,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 485077700
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 46,
+            "name": "I submit the building form without filling required fields",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:308"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 387067000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 47,
+            "name": "I should see a validation error \"Tên là bắt buộc\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:596"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 10296800
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 48,
+            "name": "I should see a validation error \"Địa chỉ là bắt buộc\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:596"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 6949800
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 10657099
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@negative",
+            "line": 42
+          },
+          {
+            "name": "@validation",
+            "line": 42
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;reject-building-with-duplicate-name",
+        "keyword": "Scenario",
+        "line": 51,
+        "name": "Reject building with duplicate name",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 77670100
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 7907800
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 52,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 463040799
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 53,
+            "name": "building \"Tòa nhà A\" already exists",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:271"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 405999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 54,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 495158399
+            }
+          },
+          {
+            "arguments": [
+              {
+                "rows": [
+                  {
+                    "cells": [
+                      "field",
+                      "value"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "Tên",
+                      "Tòa nhà A"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "Địa chỉ",
+                      "456 Lê Lợi"
+                    ]
+                  },
+                  {
+                    "cells": [
+                      "Số tầng",
+                      "5"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "keyword": "And ",
+            "line": 55,
+            "name": "I fill in the building form with:",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:293"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 183536899
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 60,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 188485499
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 61,
+            "name": "I should see a form error \"Tòa nhà đã tồn tại\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:591"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 18616799
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 16906999
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@negative",
+            "line": 50
+          },
+          {
+            "name": "@validation",
+            "line": 50
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-building-floor-count-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 73,
+        "name": "Validate building floor count boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 86097599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 10371999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 65,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 886223799
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 66,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 1014110199
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 67,
+            "name": "I fill in building floors with \"0\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:331"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 238570100
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 68,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 253550999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 69,
+            "name": "I should see \"Tối thiểu 1 tầng\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 21079099
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 94326900
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 63
+          },
+          {
+            "name": "@validation",
+            "line": 63
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-building-floor-count-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 74,
+        "name": "Validate building floor count boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 186362399
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 13084100
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 65,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 1823671999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 66,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 534177700
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 67,
+            "name": "I fill in building floors with \"-1\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:331"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 46134200
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 68,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 265174900
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 69,
+            "name": "I should see \"Tối thiểu 1 tầng\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 14073899
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 19944500
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 63
+          },
+          {
+            "name": "@validation",
+            "line": 63
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-building-floor-count-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 75,
+        "name": "Validate building floor count boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 132593199
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 15152900
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 65,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 869133600
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 66,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 802228500
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 67,
+            "name": "I fill in building floors with \"1\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:331"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 125832099
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 68,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 271499099
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 69,
+            "name": "I should see \"Tòa nhà đã tạo\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "failed",
+              "duration": 5006936200,
+              "error_message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Tòa nhà đã tạo')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"to.be.visible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Tòa nhà đã tạo')\u001b[22m\n\n    at Proxy.<anonymous> (D:\\code\\rent\\ElysStay-fe\\node_modules\\playwright\\lib\\matchers\\expect.js:213:24)\n    at World.<anonymous> (D:\\code\\rent\\ElysStay-fe\\tests\\bdd\\steps\\common.steps.ts:781:43)"
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 11794699
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 63
+          },
+          {
+            "name": "@validation",
+            "line": 63
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-building-floor-count-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 76,
+        "name": "Validate building floor count boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 79834200
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 6336599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 65,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 422786299
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 66,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 446850299
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 67,
+            "name": "I fill in building floors with \"100\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:331"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 28498800
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 68,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 334961999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 69,
+            "name": "I should see \"Tòa nhà đã tạo\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "failed",
+              "duration": 5005069000,
+              "error_message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Tòa nhà đã tạo')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"to.be.visible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Tòa nhà đã tạo')\u001b[22m\n\n    at Proxy.<anonymous> (D:\\code\\rent\\ElysStay-fe\\node_modules\\playwright\\lib\\matchers\\expect.js:213:24)\n    at World.<anonymous> (D:\\code\\rent\\ElysStay-fe\\tests\\bdd\\steps\\common.steps.ts:781:43)"
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 24347499
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 63
+          },
+          {
+            "name": "@validation",
+            "line": 63
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-invoice-due-day-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 88,
+        "name": "Validate invoice due day boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 85938399
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 5536600
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 80,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 414366000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 81,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 437191400
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 82,
+            "name": "I fill in invoice due day with \"0\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:338"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 106294399
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 83,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 252171999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 84,
+            "name": "I should see \"Ngày tối thiểu 1\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 8517999
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 9551499
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 78
+          },
+          {
+            "name": "@validation",
+            "line": 78
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-invoice-due-day-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 89,
+        "name": "Validate invoice due day boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 72874400
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 4557399
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 80,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 458150800
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 81,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 507159400
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 82,
+            "name": "I fill in invoice due day with \"29\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:338"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 29627599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 83,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 254610899
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 84,
+            "name": "I should see \"Ngày tối đa 28\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 8419499
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 9200800
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 78
+          },
+          {
+            "name": "@validation",
+            "line": 78
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-invoice-due-day-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 90,
+        "name": "Validate invoice due day boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 69460999
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 6381900
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 80,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 468173399
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 81,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 686754500
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 82,
+            "name": "I fill in invoice due day with \"1\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:338"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 41770400
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 83,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 363669899
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 84,
+            "name": "I should see \"Tòa nhà đã tạo\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "failed",
+              "duration": 5006683599,
+              "error_message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Tòa nhà đã tạo')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"to.be.visible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Tòa nhà đã tạo')\u001b[22m\n\n    at Proxy.<anonymous> (D:\\code\\rent\\ElysStay-fe\\node_modules\\playwright\\lib\\matchers\\expect.js:213:24)\n    at World.<anonymous> (D:\\code\\rent\\ElysStay-fe\\tests\\bdd\\steps\\common.steps.ts:781:43)"
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 12010399
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 78
+          },
+          {
+            "name": "@validation",
+            "line": 78
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-invoice-due-day-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 91,
+        "name": "Validate invoice due day boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 71928599
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 6888000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 80,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 475766800
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 81,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 588213000
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 82,
+            "name": "I fill in invoice due day with \"28\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:338"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 36406199
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 83,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 267831700
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 84,
+            "name": "I should see \"Tòa nhà đã tạo\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "failed",
+              "duration": 5007847200,
+              "error_message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Tòa nhà đã tạo')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"to.be.visible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Tòa nhà đã tạo')\u001b[22m\n\n    at Proxy.<anonymous> (D:\\code\\rent\\ElysStay-fe\\node_modules\\playwright\\lib\\matchers\\expect.js:213:24)\n    at World.<anonymous> (D:\\code\\rent\\ElysStay-fe\\tests\\bdd\\steps\\common.steps.ts:781:43)"
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 17161699
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 78
+          },
+          {
+            "name": "@validation",
+            "line": 78
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;validate-invoice-due-day-boundaries",
+        "keyword": "Scenario Outline",
+        "line": 92,
+        "name": "Validate invoice due day boundaries",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 82945500
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 5817799
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 80,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 527938299
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 81,
+            "name": "I click the \"Thêm tòa nhà\" button",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:356"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 528752099
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 82,
+            "name": "I fill in invoice due day with \"10\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:338"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 38905500
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 83,
+            "name": "I submit the building form",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:303"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 340727100
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 84,
+            "name": "I should see \"Tòa nhà đã tạo\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:758"
+            },
+            "result": {
+              "status": "failed",
+              "duration": 5002638100,
+              "error_message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByText('Tòa nhà đã tạo')\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"to.be.visible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByText('Tòa nhà đã tạo')\u001b[22m\n\n    at Proxy.<anonymous> (D:\\code\\rent\\ElysStay-fe\\node_modules\\playwright\\lib\\matchers\\expect.js:213:24)\n    at World.<anonymous> (D:\\code\\rent\\ElysStay-fe\\tests\\bdd\\steps\\common.steps.ts:781:43)"
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 13444000
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@boundary",
+            "line": 78
+          },
+          {
+            "name": "@validation",
+            "line": 78
+          }
+        ],
+        "type": "scenario"
+      },
+      {
+        "description": "",
+        "id": "building-management;delete-a-building",
+        "keyword": "Scenario",
+        "line": 95,
+        "name": "Delete a building",
+        "steps": [
+          {
+            "keyword": "Before",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 76089700
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 8,
+            "name": "I am logged in as an owner",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:188"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 5824099
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Given ",
+            "line": 96,
+            "name": "I am viewing the buildings page",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:255"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 422879799
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 97,
+            "name": "building \"Tòa nhà Test\" exists with no active contracts",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:278"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 428100
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "When ",
+            "line": 98,
+            "name": "I click delete on building \"Tòa nhà Test\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:345"
+            },
+            "result": {
+              "status": "passed",
+              "duration": 482440700
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 99,
+            "name": "I confirm the deletion",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:351"
+            },
+            "result": {
+              "status": "failed",
+              "duration": 71277399,
+              "error_message": "locator.click: Error: strict mode violation: getByRole('button', { name: /Xóa|Xác nhận/ }) resolved to 5 elements:\n    1) <tr tabindex=\"0\" role=\"button\" class=\"border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted cursor-pointer\">…</tr> aka getByRole('button', { name: 'Tòa nhà A 12 Lý Thường Kiệt,' })\n    2) <button type=\"button\" class=\"inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer hover:bg-accent h-8 roun…>Xóa</button> aka getByRole('button', { name: 'Xóa' }).nth(1)\n    3) <tr tabindex=\"0\" role=\"button\" class=\"border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted cursor-pointer\">…</tr> aka getByRole('button', { name: 'Tòa nhà Test 99 Trần Hưng Đạo' })\n    4) <button type=\"button\" class=\"inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer hover:bg-accent h-8 roun…>Xóa</button> aka getByRole('button', { name: 'Xóa' }).nth(3)\n    5) <button type=\"button\" class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer bg-dest…>Xóa</button> aka getByRole('dialog').getByRole('button', { name: 'Xóa' })\n\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Xóa|Xác nhận/ })\u001b[22m\n\n    at World.<anonymous> (D:\\code\\rent\\ElysStay-fe\\tests\\bdd\\steps\\building.steps.ts:353:60)"
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "Then ",
+            "line": 100,
+            "name": "the building \"Tòa nhà Test\" should not appear in the building list",
+            "match": {
+              "location": "tests\\bdd\\steps\\building.steps.ts:363"
+            },
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "arguments": [],
+            "keyword": "And ",
+            "line": 101,
+            "name": "I should see a success message \"Tòa nhà đã được xóa\"",
+            "match": {
+              "location": "tests\\bdd\\steps\\common.steps.ts:581"
+            },
+            "result": {
+              "status": "skipped",
+              "duration": 0
+            }
+          },
+          {
+            "keyword": "After",
+            "hidden": true,
+            "result": {
+              "status": "passed",
+              "duration": 14485599
+            }
+          }
+        ],
+        "tags": [
+          {
+            "name": "@building-management",
+            "line": 1
+          },
+          {
+            "name": "@soft-delete",
+            "line": 94
+          }
+        ],
+        "type": "scenario"
+      }
+    ],
+    "id": "building-management",
+    "line": 2,
+    "keyword": "Feature",
+    "name": "Building Management",
+    "tags": [
+      {
+        "name": "@building-management",
+        "line": 1
+      }
+    ],
+    "uri": "tests\\bdd\\features\\building-management.feature"
+  }
+]

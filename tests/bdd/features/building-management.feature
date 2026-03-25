@@ -17,19 +17,19 @@ Feature: Building Management
       | Địa chỉ     | 123 Nguyễn Huệ, Q1    |
       | Mô tả       | Tòa nhà cao cấp       |
       | Số tầng     | 10                     |
-      | Ngày đến hạn | 10                    |
+      | Ngày hạn hóa đơn | 10                 |
     And I submit the building form
-    Then I should see a success message "Đã tạo tòa nhà"
+    Then I should see a success message "Tòa nhà đã tạo"
     And the building "Tòa nhà Sunrise" should appear in the building list
 
   @happy-path
   Scenario: Edit building information
     Given I am viewing the buildings page
-    And building "Tòa nhà A" exists
-    When I click edit on building "Tòa nhà A"
+    When I click on building "Tòa nhà A"
+    And I click the "Sửa" button
     And I change the building name to "Tòa nhà A - Premium"
     And I submit the building form
-    Then I should see a success message "Đã cập nhật tòa nhà"
+    Then the page title should be "Tòa nhà A - Premium"
 
   @happy-path
   Scenario: View building detail page
@@ -44,7 +44,7 @@ Feature: Building Management
     Given I am viewing the buildings page
     When I click the "Thêm tòa nhà" button
     And I submit the building form without filling required fields
-    Then I should see a validation error "Tên tòa nhà là bắt buộc"
+    Then I should see a validation error "Tên là bắt buộc"
     And I should see a validation error "Địa chỉ là bắt buộc"
 
   @negative @validation
@@ -70,10 +70,10 @@ Feature: Building Management
 
     Examples:
       | floors | result                    |
-      | 0      | Số tầng phải lớn hơn 0    |
-      | -1     | Số tầng phải lớn hơn 0    |
-      | 1      | success                   |
-      | 100    | success                   |
+      | 0      | Tối thiểu 1 tầng          |
+      | -1     | Tối thiểu 1 tầng          |
+      | 1      | Tòa nhà đã tạo            |
+      | 100    | Tòa nhà đã tạo            |
 
   @boundary @validation
   Scenario Outline: Validate invoice due day boundaries
@@ -85,11 +85,11 @@ Feature: Building Management
 
     Examples:
       | day | result                               |
-      | 0   | Ngày đến hạn phải từ 1 đến 28        |
-      | 29  | Ngày đến hạn phải từ 1 đến 28        |
-      | 1   | success                              |
-      | 28  | success                              |
-      | 10  | success                              |
+      | 0   | Ngày tối thiểu 1                     |
+      | 29  | Ngày tối đa 28                       |
+      | 1   | Tòa nhà đã tạo                       |
+      | 28  | Tòa nhà đã tạo                       |
+      | 10  | Tòa nhà đã tạo                       |
 
   @soft-delete
   Scenario: Delete a building
@@ -98,4 +98,4 @@ Feature: Building Management
     When I click delete on building "Tòa nhà Test"
     And I confirm the deletion
     Then the building "Tòa nhà Test" should not appear in the building list
-    And I should see a success message "Đã xóa tòa nhà"
+    And I should see a success message "Tòa nhà đã được xóa"

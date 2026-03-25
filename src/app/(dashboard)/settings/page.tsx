@@ -139,7 +139,12 @@ export default function SettingsPage() {
 
                 <div className='space-y-1.5'>
                   <Label>Email</Label>
-                  <Input value={profile?.email || ''} disabled />
+                  <Input
+                    value={profile?.email || ''}
+                    disabled
+                    aria-disabled='true'
+                    aria-label='Email hiện tại, chỉ đọc'
+                  />
                   <p className='text-xs text-muted-foreground'>
                     Email không thể thay đổi
                   </p>

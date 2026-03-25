@@ -370,6 +370,7 @@ export default function InvoicesPage() {
             <Button
               onClick={() => generateMutation.mutate()}
               disabled={generateMutation.isPending || !selectedBuildingId}
+              aria-label='Tạo hóa đơn cho tòa nhà đã chọn'
             >
               {generateMutation.isPending ? (
                 <>
@@ -379,13 +380,13 @@ export default function InvoicesPage() {
               ) : (
                 <>
                   <Plus className='size-4' />
-                  Tạo hóa đơn
+                  Tạo hóa đơn cho tòa nhà
                 </>
               )}
             </Button>
             {!selectedBuildingId && (
               <span className='absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block whitespace-nowrap rounded bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md border'>
-                Chọn tòa nhà trước
+                Chọn tòa nhà trước khi tạo hóa đơn cho kỳ này
               </span>
             )}
           </div>
@@ -519,15 +520,21 @@ export default function InvoicesPage() {
           icon={<FileText className='size-6' />}
           title='Không tìm thấy hóa đơn'
           description={
-            hasActiveFilters
+            !selectedBuildingId
+              ? 'Chọn một tòa nhà trước khi tạo hóa đơn cho kỳ đã chọn.'
+              : hasActiveFilters
               ? 'Không có hóa đơn phù hợp với bộ lọc tòa nhà, kỳ hoặc trạng thái hiện tại.'
-              : `Không có hóa đơn cho ${formatBillingPeriod(billingYear, billingMonth)}. Nhấn "Tạo hóa đơn" để tạo mới.`
+              : `Không có hóa đơn cho ${formatBillingPeriod(billingYear, billingMonth)} tại tòa nhà đã chọn. Nhấn "Tạo hóa đơn cho tòa nhà" để tạo mới.`
           }
         >
           {!hasActiveFilters && (
-            <Button onClick={() => generateMutation.mutate()} disabled={generateMutation.isPending}>
+            <Button
+              onClick={() => generateMutation.mutate()}
+              disabled={generateMutation.isPending || !selectedBuildingId}
+              aria-label='Tạo hóa đơn cho tòa nhà đã chọn'
+            >
               <Plus className='size-4' />
-              Tạo hóa đơn
+              Tạo hóa đơn cho tòa nhà
             </Button>
           )}
           {hasActiveFilters && (

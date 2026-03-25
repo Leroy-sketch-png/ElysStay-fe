@@ -13,7 +13,8 @@ Feature: Dashboard and Reports
       | Tổng tòa nhà         |
       | Tổng phòng           |
       | Tỷ lệ lấp đầy       |
-      | Hợp đồng sắp hết hạn|
+      | Hợp đồng hiệu lực    |
+      | Sắp hết hạn          |
       | Hóa đơn quá hạn      |
       | Doanh thu tháng      |
 
@@ -33,8 +34,8 @@ Feature: Dashboard and Reports
     Then I should see the following dashboard widgets:
       | widget                |
       | Tòa nhà phụ trách    |
-      | Yêu cầu bảo trì      |
-      | Chỉ số chờ nhập      |
+      | Yêu cầu chờ xử lý    |
+      | Ghi chỉ số chờ       |
     And I should not see owner-specific widgets
 
   @tenant
@@ -43,10 +44,10 @@ Feature: Dashboard and Reports
     When I visit the dashboard page
     Then I should see the following dashboard widgets:
       | widget                |
-      | Phòng đang thuê      |
-      | Trạng thái hợp đồng  |
+      | Phòng của bạn        |
+      | Đang hiệu lực        |
       | Hóa đơn chưa thanh toán|
-      | Yêu cầu bảo trì đang mở|
+      | Yêu cầu đang mở      |
 
   @reports @owner
   Scenario: Owner views P&L report

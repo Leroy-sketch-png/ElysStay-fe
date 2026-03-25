@@ -1,0 +1,18 @@
+Error: 
+          You're calling functions (e.g. "Given") on an instance of Cucumber that isn't running (status: PENDING).
+          This means you may have an invalid installation, potentially due to:
+          - Cucumber being installed globally
+          - A project structure where your support code is depending on a different instance of Cucumber
+          Either way, you'll need to address this in order for Cucumber to work.
+          See https://github.com/cucumber/cucumber-js/blob/main/docs/installation.md#invalid-installations
+          
+    at checkInstall (D:\code\rent\ElysStay-fe\node_modules\@cucumber\cucumber\src\support_code_library_builder\index.ts:136:15)
+    at <anonymous> (D:\code\rent\ElysStay-fe\node_modules\@cucumber\cucumber\src\support_code_library_builder\index.ts:154:11)
+    at <anonymous> (D:\code\rent\ElysStay-fe\tests\bdd\steps\building.steps.ts:10:1)
+    at Object.<anonymous> (D:\code\rent\ElysStay-fe\tests\bdd\steps\building.steps.ts:140:2)
+    at Module._compile (node:internal/modules/cjs/loader:1554:14)
+    at Object.transformer (d:\code\rent\ElysStay-fe\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1289:32)
+    at Function._load (node:internal/modules/cjs/loader:1108:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:220:24)
