@@ -32,11 +32,11 @@ function createAuthState(overrides: Partial<ReturnType<typeof useAuth>> = {}) {
     token: 'mock-token',
     authError: null,
     login: vi.fn(),
+    loginWithPassword: vi.fn().mockResolvedValue({ success: true }),
     logout: vi.fn(),
     hasRole: vi.fn((r: string) => r === 'Owner'),
-    updateToken: vi.fn(),
     ...overrides,
-  }
+  } satisfies ReturnType<typeof useAuth>
 }
 
 // ─── Tests ───────────────────────────────────────────────

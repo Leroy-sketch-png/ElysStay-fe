@@ -37,6 +37,7 @@ vi.mock('@/providers/AuthProvider', () => ({
     token: 'mock-jwt-token',
     authError: null,
     login: vi.fn(),
+    loginWithPassword: vi.fn().mockResolvedValue({ success: true }),
     logout: vi.fn(),
     hasRole: (role: string) => role.toLowerCase() === 'owner',
   }),

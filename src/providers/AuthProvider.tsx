@@ -10,9 +10,16 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import Keycloak from 'keycloak-js'
+import { useRouter } from 'next/navigation'
 import { setTokenAccessor, setOnUnauthorized, setTokenRefresher } from '@/lib/api-client'
 import { DEV_AUTH_STORAGE_KEY, readDevAuthOverride } from '@/lib/dev-auth'
+import {
+  loginWithCredentials,
+  refreshAccessToken,
+  keycloakLogout,
+  parseAccessToken,
+  type LoginResult,
+} from '@/lib/keycloak-auth'
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -30,108 +37,159 @@ export interface AuthContextValue {
   authenticated: boolean
   /** Parsed user info from the JWT token */
   user: AuthUser | null
-  /** The raw Keycloak access token (for debug; prefer api-client auto-injection) */
+  /** The raw access token (for debug; prefer api-client auto-injection) */
   token: string | undefined
-  /** User-facing auth bootstrap error, if Keycloak could not be reached */
+  /** User-facing auth bootstrap error */
   authError: string | null
-  /** Redirect to Keycloak login page */
+  /** Navigate to custom login page */
   login: () => void
-  /** Redirect to Keycloak logout page */
+  /** Log out and clear session */
   logout: () => void
+  /** Authenticate with email/password via custom login form */
+  loginWithPassword: (email: string, password: string) => Promise<LoginResult>
   /** Check if user has a specific realm role */
   hasRole: (role: string) => boolean
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
-// ─── Config ─────────────────────────────────────────────
+// ─── Session Token Storage ──────────────────────────────
 
-const KEYCLOAK_URL =
-  process.env.NEXT_PUBLIC_KEYCLOAK_URL ||
-  (process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : '')
-const KEYCLOAK_REALM =
-  process.env.NEXT_PUBLIC_KEYCLOAK_REALM ||
-  (process.env.NODE_ENV === 'development' ? 'elysstay' : '')
-const KEYCLOAK_CLIENT_ID =
-  process.env.NEXT_PUBLIC_KEYCLOAK_CLIENT_ID ||
-  (process.env.NODE_ENV === 'development' ? 'elysstay-fe' : '')
+const TOKEN_STORAGE_KEY = '__elysstay_tokens__'
 
-if (!KEYCLOAK_URL || !KEYCLOAK_REALM || !KEYCLOAK_CLIENT_ID) {
-  throw new Error('Missing Keycloak public env vars in non-development environment.')
+interface StoredTokens {
+  accessToken: string
+  refreshToken: string
+  expiresAt: number // Unix timestamp in ms
 }
 
-/** How many seconds before token expiry to refresh (default 60s) */
-const MIN_TOKEN_VALIDITY = 60
+function storeTokens(accessToken: string, refreshToken: string, expiresIn: number) {
+  const data: StoredTokens = {
+    accessToken,
+    refreshToken,
+    expiresAt: Date.now() + expiresIn * 1000,
+  }
+  try {
+    sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(data))
+  } catch {
+    // Private browsing or storage full — tokens live in memory only
+  }
+}
+
+function readStoredTokens(): StoredTokens | null {
+  try {
+    const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as StoredTokens
+  } catch {
+    return null
+  }
+}
+
+function clearStoredTokens() {
+  try {
+    sessionStorage.removeItem(TOKEN_STORAGE_KEY)
+  } catch {
+    // Ignore
+  }
+}
+
+// ─── Token Parsing ──────────────────────────────────────
+
+function parseUser(accessToken: string): AuthUser | null {
+  const parsed = parseAccessToken(accessToken)
+  if (!parsed || typeof parsed.sub !== 'string') return null
+
+  const realmAccess = parsed.realm_access as { roles?: string[] } | undefined
+
+  return {
+    keycloakId: parsed.sub,
+    email: typeof parsed.email === 'string' ? parsed.email : '',
+    fullName:
+      typeof parsed.name === 'string'
+        ? parsed.name
+        : typeof parsed.preferred_username === 'string'
+          ? parsed.preferred_username
+          : '',
+    roles: Array.isArray(realmAccess?.roles)
+      ? realmAccess.roles.filter(
+          (r): r is string => typeof r === 'string' && !r.startsWith('default-roles-'),
+        )
+      : [],
+  }
+}
 
 // ─── Provider ───────────────────────────────────────────
 
+/** Seconds before expiry to trigger proactive refresh */
+const REFRESH_BUFFER_S = 60
+
 interface AuthProviderProps {
   children: ReactNode
-  /**
-   * If true, immediately redirects to Keycloak login if not authenticated.
-   * If false, initializes silently (check-sso) — useful for public pages.
-   * Default: false
-   */
-  loginRequired?: boolean
 }
 
-export function AuthProvider({ children, loginRequired = false }: AuthProviderProps) {
+export function AuthProvider({ children }: AuthProviderProps) {
   const [initialized, setInitialized] = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
   const [user, setUser] = useState<AuthUser | null>(null)
   const [token, setToken] = useState<string | undefined>(undefined)
   const [authError, setAuthError] = useState<string | null>(null)
-  const keycloakRef = useRef<Keycloak | null>(null)
-  const initCalledRef = useRef(false)
+  const refreshTokenRef = useRef<string | null>(null)
   const refreshingRef = useRef(false)
+  const initCalledRef = useRef(false)
+  const router = useRouter()
 
-  // Parse user from Keycloak token
-  const parseUser = useCallback((kc: Keycloak): AuthUser | null => {
-    if (!kc.tokenParsed) return null
-    const parsed = kc.tokenParsed as Record<string, unknown>
-    const sub = parsed.sub
-    if (typeof sub !== 'string') return null
-    const realmAccess = parsed.realm_access as { roles?: string[] } | undefined
-    return {
-      keycloakId: sub,
-      email: typeof parsed.email === 'string' ? parsed.email : '',
-      fullName: typeof parsed.name === 'string'
-        ? parsed.name
-        : typeof parsed.preferred_username === 'string'
-          ? parsed.preferred_username
-          : '',
-      roles: Array.isArray(realmAccess?.roles)
-        ? realmAccess.roles.filter((r): r is string => typeof r === 'string' && !r.startsWith('default-roles-'))
-        : [],
-    }
+  // ── Apply auth state from tokens ────────────────────
+
+  const applyAuthState = useCallback(
+    (accessToken: string, refreshToken: string, expiresIn: number) => {
+      const parsedUser = parseUser(accessToken)
+      refreshTokenRef.current = refreshToken
+      setToken(accessToken)
+      setUser(parsedUser)
+      setAuthenticated(true)
+      setAuthError(null)
+      storeTokens(accessToken, refreshToken, expiresIn)
+    },
+    [],
+  )
+
+  const clearAuthState = useCallback(() => {
+    refreshTokenRef.current = null
+    setToken(undefined)
+    setUser(null)
+    setAuthenticated(false)
+    clearStoredTokens()
   }, [])
 
-  // Shared token refresh — prevents concurrent updateToken calls from race condition
-  const refreshToken = useCallback((kc: Keycloak) => {
-    if (refreshingRef.current) return
-    refreshingRef.current = true
-    kc.updateToken(MIN_TOKEN_VALIDITY)
-      .then(refreshed => {
-        setAuthError(null)
-        if (refreshed) {
-          setToken(kc.token)
-          setUser(parseUser(kc))
-        }
-      })
-      .catch(() => {
-        // Transient refresh failures should not immediately destroy the session.
-        // The next API request will still attempt refresh once more before redirecting.
-      })
-      .finally(() => {
-        refreshingRef.current = false
-      })
-  }, [parseUser])
+  // ── Token refresh ───────────────────────────────────
 
-  // Initialize Keycloak
+  const doRefresh = useCallback(async (): Promise<boolean> => {
+    const rt = refreshTokenRef.current
+    if (!rt || refreshingRef.current) return false
+    refreshingRef.current = true
+
+    try {
+      const result = await refreshAccessToken(rt)
+      if (result.success) {
+        applyAuthState(result.tokens.access_token, result.tokens.refresh_token, result.tokens.expires_in)
+        return true
+      }
+      // Refresh failed — session expired
+      clearAuthState()
+      return false
+    } finally {
+      refreshingRef.current = false
+    }
+  }, [applyAuthState, clearAuthState])
+
+  // ── Initialize: restore session from storage ────────
+
   useEffect(() => {
     if (initCalledRef.current) return
     initCalledRef.current = true
 
+    // Dev-auth bypass (for testing without Keycloak)
     const devOverride = readDevAuthOverride()
     if (devOverride) {
       const devToken = devOverride.authenticated ? devOverride.token ?? 'dev-auth-token' : undefined
@@ -158,82 +216,71 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
       return
     }
 
-    const kc = new Keycloak({
-      url: KEYCLOAK_URL,
-      realm: KEYCLOAK_REALM,
-      clientId: KEYCLOAK_CLIENT_ID,
-    })
-    keycloakRef.current = kc
-
-    kc.init({
-      onLoad: loginRequired ? 'login-required' : 'check-sso',
-      checkLoginIframe: false,
-      pkceMethod: 'S256',
-      silentCheckSsoRedirectUri: typeof window !== 'undefined'
-        ? `${window.location.origin}/silent-check-sso.html`
-        : undefined,
-    })
-      .then(auth => {
-        setAuthError(null)
-        setAuthenticated(auth)
-        if (auth) {
-          setUser(parseUser(kc))
-          setToken(kc.token)
-          setTokenAccessor(() => kc.token)
-          // Redirect to login on any 401 API response (after refresh attempt fails)
-          setOnUnauthorized(() => kc.login())
-          // Allow api-client to silently refresh token on 401 before redirecting
-          setTokenRefresher(async () => {
-            try {
-              const refreshed = await kc.updateToken(-1)
-              if (refreshed) {
-                setToken(kc.token)
-                setUser(parseUser(kc))
-              }
-              return true // token is valid (refreshed or still valid)
-            } catch {
-              return false
-            }
-          })
+    // Try to restore from sessionStorage
+    const stored = readStoredTokens()
+    if (stored && stored.expiresAt > Date.now() + 10_000) {
+      // Token still valid (with 10s margin)
+      applyAuthState(
+        stored.accessToken,
+        stored.refreshToken,
+        Math.floor((stored.expiresAt - Date.now()) / 1000),
+      )
+      setInitialized(true)
+    } else if (stored?.refreshToken) {
+      // Token expired but we have a refresh token — try refreshing
+      refreshAccessToken(stored.refreshToken).then((result) => {
+        if (result.success) {
+          applyAuthState(
+            result.tokens.access_token,
+            result.tokens.refresh_token,
+            result.tokens.expires_in,
+          )
+        } else {
+          clearStoredTokens()
         }
         setInitialized(true)
       })
-      .catch(() => {
-        setAuthenticated(false)
-        setUser(null)
-        setToken(undefined)
-        setAuthError('Không thể kết nối tới máy chủ xác thực. Vui lòng thử lại sau.')
-        setInitialized(true)
-      })
-
-    // Reactive token refresh (fallback when onTokenExpired fires)
-    kc.onTokenExpired = () => {
-      refreshToken(kc)
+    } else {
+      // No stored session — user needs to login
+      setInitialized(true)
     }
+  }, [applyAuthState])
 
-    // Proactive token refresh — refresh well before expiry so requests never hit a stale token
-    const REFRESH_INTERVAL_MS = 30_000 // check every 30s
-    const refreshInterval = setInterval(() => {
-      if (kc.authenticated) {
-        refreshToken(kc)
+  // ── Wire up api-client token injection ──────────────
+
+  useEffect(() => {
+    if (!initialized) return
+
+    setTokenAccessor(() => token)
+    setTokenRefresher(async () => {
+      return await doRefresh()
+    })
+    setOnUnauthorized(() => {
+      clearAuthState()
+      router.push('/login')
+    })
+  }, [initialized, token, doRefresh, clearAuthState, router])
+
+  // ── Proactive token refresh ─────────────────────────
+
+  useEffect(() => {
+    if (!authenticated) return
+
+    const INTERVAL_MS = 30_000 // Check every 30s
+    const interval = setInterval(() => {
+      const stored = readStoredTokens()
+      if (stored) {
+        const secondsUntilExpiry = (stored.expiresAt - Date.now()) / 1000
+        if (secondsUntilExpiry < REFRESH_BUFFER_S) {
+          doRefresh()
+        }
       }
-    }, REFRESH_INTERVAL_MS)
+    }, INTERVAL_MS)
 
-    // Auth state events
-    kc.onAuthLogout = () => {
-      setAuthenticated(false)
-      setUser(null)
-      setToken(undefined)
-    }
+    return () => clearInterval(interval)
+  }, [authenticated, doRefresh])
 
-    kc.onAuthRefreshError = () => {
-      setAuthError('Phiên đăng nhập tạm thời không thể làm mới. Hệ thống sẽ thử lại khi cần.')
-    }
-
-    return () => {
-      clearInterval(refreshInterval)
-    }
-  }, [loginRequired, parseUser, refreshToken])
+  // ── Actions ─────────────────────────────────────────
 
   const login = useCallback(() => {
     const devOverride = typeof window !== 'undefined' ? readDevAuthOverride() : undefined
@@ -247,8 +294,23 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
     }
 
     setAuthError(null)
-    keycloakRef.current?.login()
-  }, [])
+    router.push('/login')
+  }, [router])
+
+  const loginWithPasswordFn = useCallback(
+    async (email: string, password: string): Promise<LoginResult> => {
+      const result = await loginWithCredentials(email, password)
+      if (result.success) {
+        applyAuthState(
+          result.tokens.access_token,
+          result.tokens.refresh_token,
+          result.tokens.expires_in,
+        )
+      }
+      return result
+    },
+    [applyAuthState],
+  )
 
   const logout = useCallback(() => {
     if (typeof window !== 'undefined' && readDevAuthOverride()) {
@@ -258,17 +320,33 @@ export function AuthProvider({ children, loginRequired = false }: AuthProviderPr
       setToken(undefined)
       return
     }
-    keycloakRef.current?.logout({ redirectUri: window.location.origin })
-  }, [])
+
+    const rt = refreshTokenRef.current
+    clearAuthState()
+    if (rt) {
+      keycloakLogout(rt)
+    }
+    router.push('/login')
+  }, [clearAuthState, router])
 
   const hasRole = useCallback(
-    (role: string) => user?.roles.some(r => r.toLowerCase() === role.toLowerCase()) ?? false,
+    (role: string) => user?.roles.some((r) => r.toLowerCase() === role.toLowerCase()) ?? false,
     [user],
   )
 
   const value = useMemo<AuthContextValue>(
-    () => ({ initialized, authenticated, user, token, authError, login, logout, hasRole }),
-    [initialized, authenticated, user, token, authError, login, logout, hasRole],
+    () => ({
+      initialized,
+      authenticated,
+      user,
+      token,
+      authError,
+      login,
+      logout,
+      loginWithPassword: loginWithPasswordFn,
+      hasRole,
+    }),
+    [initialized, authenticated, user, token, authError, login, logout, loginWithPasswordFn, hasRole],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

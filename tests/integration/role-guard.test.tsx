@@ -57,9 +57,9 @@ function setupAuth(user: typeof OWNER | typeof STAFF | typeof TENANT) {
     token: 'mock-token',
     authError: null,
     login: vi.fn(),
+    loginWithPassword: vi.fn().mockResolvedValue({ success: true }),
     logout: vi.fn(),
     hasRole: (role: string) => user.roles.includes(role),
-    updateToken: vi.fn(),
   } as any)
 }
 

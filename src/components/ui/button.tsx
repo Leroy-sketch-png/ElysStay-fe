@@ -46,16 +46,26 @@ function Button({
     /** Show a spinner and disable the button while a mutation is pending. */
     loading?: boolean
   }) {
-  const Comp = asChild ? Slot : 'button'
   const isDisabled = disabled || loading
-  const buttonProps = asChild
-    ? { disabled: isDisabled, ...props }
-    : { type: props.type ?? 'button', disabled: isDisabled, 'aria-busy': loading || undefined, ...props }
+
+  if (asChild) {
+    return (
+      <Slot className={cn(buttonVariants({ variant, size, className }))} {...props}>
+        {children}
+      </Slot>
+    )
+  }
 
   return (
-    <Comp className={cn(buttonVariants({ variant, size, className }))} {...buttonProps}>
+    <button
+      className={cn(buttonVariants({ variant, size, className }))}
+      type={props.type ?? 'button'}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
+      {...props}
+    >
       {loading && <Loader2 className='size-4 animate-spin' aria-hidden />}
-      {!asChild && loading
+      {loading
         ? React.Children.map(children, (child) =>
             // When loading, hide icon components (e.g. <Send />) — the spinner replaces them
             React.isValidElement(child) && typeof child.type !== 'string' && child.type !== React.Fragment
@@ -63,7 +73,7 @@ function Button({
               : child,
           )
         : children}
-    </Comp>
+    </button>
   )
 }
 

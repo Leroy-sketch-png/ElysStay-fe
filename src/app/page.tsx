@@ -35,7 +35,7 @@ const FEATURES = [
 ]
 
 export default function HomePage() {
-  const { initialized, authenticated, login } = useAuth()
+  const { initialized, authenticated } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -104,7 +104,7 @@ export default function HomePage() {
             <div className='mt-10 flex items-center justify-center'>
               <button
                 type='button'
-                onClick={login}
+                onClick={() => router.push('/login')}
                 className='group relative inline-flex items-center gap-2 rounded-md bg-white px-8 py-3.5 text-sm font-semibold text-primary shadow-lg transition-colors duration-150 hover:shadow-xl cursor-pointer'
               >
                 Đăng nhập

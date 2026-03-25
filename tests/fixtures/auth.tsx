@@ -52,6 +52,7 @@ export function createMockAuthValue(overrides: MockAuthOverrides = {}): AuthCont
     token: overrides.token ?? 'mock-jwt-token',
     authError: overrides.authError ?? null,
     login: vi.fn(),
+    loginWithPassword: vi.fn().mockResolvedValue({ success: true }),
     logout: vi.fn(),
     hasRole: (role: string) =>
       user?.roles.some((r) => r.toLowerCase() === role.toLowerCase()) ?? false,
