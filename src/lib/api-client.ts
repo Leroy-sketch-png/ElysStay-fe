@@ -121,7 +121,7 @@ async function apiFetch<T>(
 
   // Only set Content-Type for JSON requests (not FormData)
   if (options.body && !(options.body instanceof FormData)) {
-    ;(headers as Record<string, string>)['Content-Type'] = 'application/json'
+    ;(headers as Record<string, string>)['Content-Type'] = 'application/json; charset=utf-8'
   }
 
   if (token) {
