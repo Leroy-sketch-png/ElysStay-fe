@@ -206,7 +206,7 @@ export default function PaymentsPage() {
       }
     >
       {/* Filters */}
-      <div className='flex flex-wrap items-end gap-4'>
+      <div className='mb-6 flex flex-wrap items-end gap-4'>
         <div className='w-56'>
           <Select
             value={selectedBuildingId}

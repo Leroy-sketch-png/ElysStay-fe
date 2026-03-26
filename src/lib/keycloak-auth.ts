@@ -173,7 +173,12 @@ export function parseAccessToken(token: string): Record<string, unknown> | null 
     const parts = token.split('.')
     if (parts.length !== 3) return null
     const payload = parts[1]
-    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    // atob() produces a binary string (1 byte per char) which mangles
+    // multi-byte UTF-8 sequences (e.g. Vietnamese diacritics).
+    // Decode via TextDecoder to handle UTF-8 correctly.
+    const binary = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    const bytes = Uint8Array.from(binary, c => c.charCodeAt(0))
+    const decoded = new TextDecoder().decode(bytes)
     return JSON.parse(decoded)
   } catch {
     return null

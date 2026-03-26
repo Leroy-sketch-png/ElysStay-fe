@@ -127,7 +127,7 @@ export default function RoomsPage() {
       ) : undefined}
     >
       {/* Filters */}
-      <div className='flex flex-wrap items-center gap-3 mb-4'>
+      <div className='mb-6 flex flex-wrap items-center gap-3'>
         <Select
           value={buildingFilter}
           onChange={(e) => { setBuildingFilter(e.target.value); setPage(1) }}

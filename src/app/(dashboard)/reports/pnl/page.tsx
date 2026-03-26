@@ -241,7 +241,7 @@ export default function PnlReportPage() {
       }
     >
       {/* Filters */}
-      <div className='flex flex-wrap items-end gap-4'>
+      <div className='mb-6 flex flex-wrap items-end gap-4'>
         <div className='w-56'>
           <Select
             aria-label='Tòa nhà'

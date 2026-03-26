@@ -232,7 +232,7 @@ export default function ExpensesPage() {
       }
     >
       {/* Filters */}
-      <div className='flex flex-wrap items-end gap-4'>
+      <div className='mb-6 flex flex-wrap items-end gap-4'>
         <div className='space-y-1.5'>
           <Label htmlFor='exp-building'>Tòa nhà</Label>
           <Select
