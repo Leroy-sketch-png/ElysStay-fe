@@ -29,7 +29,10 @@ import type { ServiceDto, CreateServiceRequest, UpdateServiceRequest } from '@/t
 const serviceSchema = z.object({
   name: z.string().min(1, 'Tên là bắt buộc').max(100, 'Tên không vượt quá 100 ký tự'),
   unit: z.string().min(1, 'Đơn vị là bắt buộc').max(50, 'Đơn vị không vượt quá 50 ký tự'),
-  unitPrice: z.number().positive('Giá phải lớn hơn 0'),
+  unitPrice: z.number().positive('Giá phải lớn hơn 0').refine(
+    (value) => Math.round(value * 100) === value * 100,
+    'Giá chỉ được tối đa 2 chữ số thập phân'
+  ),
   isMetered: z.enum(['true', 'false']),
 })
 
@@ -154,7 +157,7 @@ export function ServiceFormDialog({
               </div>
               <div className='space-y-2'>
                 <Label htmlFor='svc-price'>Đơn giá (VND) *</Label>
-                <Input id='svc-price' type='number' min={0} step={100} {...register('unitPrice', { valueAsNumber: true })} aria-invalid={!!errors.unitPrice} />
+                <Input id='svc-price' type='number' min={0.01} step={0.01} {...register('unitPrice', { valueAsNumber: true })} aria-invalid={!!errors.unitPrice} />
                 {errors.unitPrice && <p className='text-xs text-destructive'>{errors.unitPrice.message}</p>}
               </div>
             </div>

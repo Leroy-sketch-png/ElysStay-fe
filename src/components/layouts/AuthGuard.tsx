@@ -1,24 +1,22 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAuth } from '@/providers/AuthProvider'
 import { Building2 } from 'lucide-react'
 
 /**
  * Guard component that requires authentication.
  * Shows a branded loading state while auth initializes.
- * Redirects to /login if not authenticated.
+ * Calls Keycloak login() if not authenticated.
  */
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { initialized, authenticated, authError, login } = useAuth()
-  const router = useRouter()
 
   useEffect(() => {
     if (initialized && !authenticated && !authError) {
-      router.replace('/login')
+      login()
     }
-  }, [initialized, authenticated, authError, router])
+  }, [initialized, authenticated, authError, login])
 
   if (initialized && !authenticated && authError) {
     return (
@@ -56,7 +54,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           </div>
           <div className='size-6 rounded-full border-[2.5px] border-primary border-t-transparent animate-spin motion-reduce:animate-none' aria-hidden='true' />
           <p className='text-sm text-muted-foreground'>
-            {!initialized ? 'Đang xác thực...' : 'Đang chuyển hướng...'}
+            {!initialized ? 'Đang xác thực...' : 'Đang chuyển hướng đăng nhập...'}
           </p>
         </div>
       </div>
