@@ -10,6 +10,21 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    // Visual regression: consistent viewport for reproducible snapshots
+    viewport: { width: 1280, height: 900 },
+    // Disable CSS animations so snapshots don't capture mid-animation frames
+    launchOptions: {
+      args: ['--force-prefers-reduced-motion'],
+    },
+  },
+  // Visual regression snapshot settings
+  snapshotPathTemplate: '{testDir}/{testFileDir}/__snapshots__/{testFileName}/{arg}{ext}',
+  expect: {
+    toHaveScreenshot: {
+      // Allow minor anti-aliasing differences across platforms
+      maxDiffPixelRatio: 0.01,
+      animations: 'disabled',
+    },
   },
   projects: [
     {
