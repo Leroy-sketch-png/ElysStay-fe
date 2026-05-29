@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toaster'
+import { ReceiptUpload } from '@/components/ui/receipt-upload'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
 import { DROPDOWN_PAGE_SIZE } from '@/lib/domain-constants'
 import { roomKeys, fetchRooms } from '@/lib/queries/rooms'
@@ -36,6 +37,7 @@ const issueSchema = z.object({
   roomId: z.string().optional().or(z.literal('')),
   title: z.string().trim().min(1, 'Tiêu đề là bắt buộc').max(200),
   description: z.string().trim().min(1, 'Mô tả là bắt buộc').max(5000, 'Mô tả không vượt quá 5000 ký tự'),
+  photoUrl: z.string().optional(),
 })
 
 type IssueFormData = z.infer<typeof issueSchema>
@@ -71,6 +73,7 @@ export function CreateIssueDialog({
       roomId: '',
       title: '',
       description: '',
+      photoUrl: '',
     },
   })
 
@@ -94,7 +97,7 @@ export function CreateIssueDialog({
   // ─── Reset on open ────────────────────────────────────
   useEffect(() => {
     if (open) {
-      reset({ buildingId: '', roomId: '', title: '', description: '' })
+      reset({ buildingId: '', roomId: '', title: '', description: '', photoUrl: '' })
     }
   }, [open, reset])
 
@@ -213,6 +216,14 @@ export function CreateIssueDialog({
                 <p className='text-xs text-destructive'>{errors.description.message}</p>
               )}
             </div>
+
+            {/* Photo */}
+            <ReceiptUpload 
+              value={watch('photoUrl')}
+              onChange={(url) => setValue('photoUrl', url, { shouldDirty: true })}
+              label="Ảnh đính kèm (không bắt buộc)"
+              emptyText="Kéo thả ảnh hoặc nhấn để chọn"
+            />
           </DialogBody>
 
           <DialogFooter>

@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/components/ui/toaster'
+import { ReceiptUpload } from '@/components/ui/receipt-upload'
 import { buildingKeys, fetchBuildings } from '@/lib/queries/buildings'
 import { reportKeys } from '@/lib/queries/reports'
 import { roomKeys, fetchRooms } from '@/lib/queries/rooms'
@@ -55,6 +56,7 @@ const expenseSchema = z.object({
     z.number({ error: 'Nhập số tiền hợp lệ' }).positive('Số tiền phải lớn hơn 0'),
   ),
   expenseDate: z.string().min(1, 'Ngày là bắt buộc'),
+  receiptUrl: z.string().optional(),
 }).refine((data) => data.expenseDate <= getTodayDate(), {
   message: 'Ngày chi phí không được ở tương lai',
   path: ['expenseDate'],
@@ -84,6 +86,7 @@ export function ExpenseFormDialog({
     handleSubmit,
     reset,
     watch,
+    setValue,
     setError,
     formState: { errors },
   } = useForm<ExpenseFormData, unknown, ExpenseFormOutput>({
@@ -95,6 +98,7 @@ export function ExpenseFormDialog({
       description: '',
       amount: 0,
       expenseDate: getTodayDate(),
+      receiptUrl: '',
     },
   })
 
@@ -135,6 +139,7 @@ export function ExpenseFormDialog({
           description: '',
           amount: 0,
           expenseDate: getTodayDate(),
+          receiptUrl: '',
         })
       }
     }
@@ -311,6 +316,12 @@ export function ExpenseFormDialog({
                 <p className='text-xs text-destructive'>{errors.expenseDate.message}</p>
               )}
             </div>
+            
+            {/* Receipt Upload */}
+            <ReceiptUpload 
+              value={watch('receiptUrl')}
+              onChange={(url) => setValue('receiptUrl', url, { shouldDirty: true })}
+            />
           </DialogBody>
 
           <DialogFooter>

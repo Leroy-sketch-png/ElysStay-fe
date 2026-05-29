@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/toaster'
+import { AvatarUpload } from '@/components/ui/avatar-upload'
+import { motion } from 'framer-motion'
 import { userKeys, fetchCurrentUser, updateProfile } from '@/lib/queries/users'
 import { useAuth } from '@/providers/AuthProvider'
 
@@ -25,6 +27,7 @@ const ROLE_LABELS: Record<string, string> = { Owner: 'Chủ nhà', Staff: 'Nhân
 const profileSchema = z.object({
   fullName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự').max(200, 'Họ tên không vượt quá 200 ký tự'),
   phone: z.string().regex(/^\d{10}$/, 'Số điện thoại phải đúng 10 chữ số').optional().or(z.literal('')),
+  avatarUrl: z.string().optional(),
 })
 
 type ProfileFormData = z.infer<typeof profileSchema>
@@ -43,7 +46,7 @@ export default function SettingsPage() {
   // ─── Profile Form ──────────────────────────────────────
   const profileForm = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
-    defaultValues: { fullName: '', phone: '' },
+    defaultValues: { fullName: '', phone: '', avatarUrl: '' },
   })
 
   const { reset: resetForm } = profileForm
@@ -53,6 +56,7 @@ export default function SettingsPage() {
       resetForm({
         fullName: profile.fullName || '',
         phone: profile.phone || '',
+        avatarUrl: profile.avatarUrl || '', // Assuming backend adds this later
       })
     }
   }, [profile, resetForm])
@@ -89,56 +93,77 @@ export default function SettingsPage() {
       )}
 
       {!isError && (
-      <div className='grid gap-6 max-w-2xl'>
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, staggerChildren: 0.1 }}
+        className='grid gap-8 max-w-4xl mx-auto'
+      >
         {/* Profile Card */}
-        <Card>
-          <CardHeader>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className='overflow-hidden border-border/50 shadow-sm'>
+          <CardHeader className='bg-muted/30 border-b pb-8 pt-8'>
             <div className='flex items-center gap-3'>
-              <User className='size-5 text-primary' />
+              <div className='p-2 bg-primary/10 rounded-lg'>
+                <User className='size-5 text-primary' />
+              </div>
               <div>
-                <CardTitle>Hồ sơ</CardTitle>
-                <CardDescription>Cập nhật tên hiển thị và thông tin liên hệ</CardDescription>
+                <CardTitle className='text-xl'>Hồ sơ cá nhân</CardTitle>
+                <CardDescription>Cập nhật thông tin công khai và liên hệ của bạn</CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className='pt-8'>
             {isLoading ? (
               <div className='space-y-4'>
                 <Skeleton className='h-10 w-full' />
                 <Skeleton className='h-10 w-full' />
               </div>
             ) : (
-              <form noValidate onSubmit={onProfileSubmit} className='space-y-4'>
-                <div className='space-y-1.5'>
-                  <Label htmlFor='fullName'>Họ và tên</Label>
-                  <Input
-                    id='fullName'
-                    {...profileForm.register('fullName')}
-                    placeholder='Tên của bạn'
-                  />
-                  {profileForm.formState.errors.fullName && (
-                    <p className='text-xs text-destructive'>
-                      {profileForm.formState.errors.fullName.message}
-                    </p>
-                  )}
+              <form noValidate onSubmit={onProfileSubmit} className='space-y-8'>
+                <div className='flex flex-col sm:flex-row gap-8 items-start'>
+                  <div className='flex-shrink-0'>
+                    <Label className='block mb-3 text-muted-foreground'>Ảnh đại diện</Label>
+                    <AvatarUpload 
+                      value={profileForm.watch('avatarUrl')} 
+                      onChange={(url) => profileForm.setValue('avatarUrl', url, { shouldDirty: true })}
+                    />
+                  </div>
+                  <div className='flex-grow space-y-5 w-full'>
+                    <div className='space-y-1.5'>
+                      <Label htmlFor='fullName'>Họ và tên</Label>
+                      <Input
+                        id='fullName'
+                        className='max-w-md'
+                        {...profileForm.register('fullName')}
+                        placeholder='Tên của bạn'
+                      />
+                      {profileForm.formState.errors.fullName && (
+                        <p className='text-xs text-destructive'>
+                          {profileForm.formState.errors.fullName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className='space-y-1.5'>
+                      <Label htmlFor='phone'>Số điện thoại</Label>
+                      <Input
+                        id='phone'
+                        className='max-w-md'
+                        {...profileForm.register('phone')}
+                        placeholder='+84 xxx xxx xxx'
+                      />
+                      {profileForm.formState.errors.phone && (
+                        <p className='text-xs text-destructive'>
+                          {profileForm.formState.errors.phone.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                <div className='space-y-1.5'>
-                  <Label htmlFor='phone'>Số điện thoại</Label>
-                  <Input
-                    id='phone'
-                    {...profileForm.register('phone')}
-                    placeholder='+84 xxx xxx xxx'
-                  />
-                  {profileForm.formState.errors.phone && (
-                    <p className='text-xs text-destructive'>
-                      {profileForm.formState.errors.phone.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className='space-y-1.5'>
-                  <Label>Email</Label>
+                <div className='space-y-1.5 pt-4 border-t border-border/50'>
+                  <Label>Email đăng nhập</Label>
                   <Input
                     value={profile?.email || ''}
                     disabled
@@ -150,8 +175,8 @@ export default function SettingsPage() {
                   </p>
                 </div>
 
-                <div className='flex justify-end'>
-                  <Button type='submit' loading={profileMutation.isPending}>
+                <div className='flex justify-end pt-4'>
+                  <Button type='submit' loading={profileMutation.isPending} className='min-w-[120px]'>
                     Lưu thay đổi
                   </Button>
                 </div>
@@ -159,12 +184,16 @@ export default function SettingsPage() {
             )}
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Password / Security Card */}
-        <Card>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className='border-border/50 shadow-sm'>
           <CardHeader>
             <div className='flex items-center gap-3'>
-              <Lock className='size-5 text-primary' />
+              <div className='p-2 bg-primary/10 rounded-lg'>
+                <Lock className='size-5 text-primary' />
+              </div>
               <div>
                 <CardTitle>Bảo mật</CardTitle>
                 <CardDescription>Quản lý mật khẩu và cài đặt đăng nhập</CardDescription>
@@ -193,12 +222,16 @@ export default function SettingsPage() {
             </a>
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Account Info Card */}
-        <Card>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <Card className='border-border/50 shadow-sm'>
           <CardHeader>
             <div className='flex items-center gap-3'>
-              <Shield className='size-5 text-primary' />
+              <div className='p-2 bg-primary/10 rounded-lg'>
+                <Shield className='size-5 text-primary' />
+              </div>
               <div>
                 <CardTitle>Tài khoản</CardTitle>
                 <CardDescription>Thông tin tài khoản của bạn</CardDescription>
@@ -220,7 +253,8 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </motion.div>
+      </motion.div>
       )}
     </PageContainer>
     </PageTransition>

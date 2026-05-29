@@ -14,6 +14,7 @@ import {
   fetchTenantProfile,
   updateTenantProfile,
 } from '@/lib/queries/tenant-profiles'
+import { CCCDUpload } from '@/components/ui/cccd-upload'
 import type { TenantProfileDto, UpdateTenantProfileRequest } from '@/types/api'
 
 interface TenantProfileTabProps {
@@ -23,7 +24,7 @@ interface TenantProfileTabProps {
 export function TenantProfileTab({ userId }: TenantProfileTabProps) {
   const queryClient = useQueryClient()
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState<UpdateTenantProfileRequest>({})
+  const [form, setForm] = useState<UpdateTenantProfileRequest & { cccdFrontUrl?: string; cccdBackUrl?: string }>({})
 
   const { data: profile, isLoading, isError } = useQuery({
     queryKey: tenantProfileKeys.detail(userId),
@@ -149,6 +150,7 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
             </p>
           </div>
         ) : (
+        <>
           <div className='grid gap-4 sm:grid-cols-2'>
             <ProfileField
               label='Số CCCD'
@@ -200,6 +202,20 @@ export function TenantProfileTab({ userId }: TenantProfileTabProps) {
               placeholder='Cơ quan cấp'
             />
           </div>
+
+          <div className='mt-8 pt-6 border-t'>
+            <h4 className='text-sm font-medium mb-4'>Hình ảnh CCCD</h4>
+            <CCCDUpload 
+              frontImage={form.cccdFrontUrl}
+              backImage={form.cccdBackUrl}
+              onChange={(type, url) => {
+                if (type === 'front') setForm(p => ({ ...p, cccdFrontUrl: url }))
+                if (type === 'back') setForm(p => ({ ...p, cccdBackUrl: url }))
+              }}
+              disabled={!editing}
+            />
+          </div>
+        </>
         )}
       </CardContent>
     </Card>

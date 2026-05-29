@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  ArrowLeft, FileText, Send, Ban, DollarSign, CalendarDays, Building2, User, Receipt,
+  ArrowLeft, FileText, Send, Ban, DollarSign, CalendarDays, Building2, User, Receipt, Download
 } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { Breadcrumbs } from '@/components/Breadcrumbs'
@@ -125,6 +125,10 @@ export default function InvoiceDetailPage() {
           <Button variant='outline' onClick={() => router.push('/billing/invoices')}>
             <ArrowLeft className='size-4' />
             Quay lại
+          </Button>
+          <Button variant='outline' onClick={() => window.print()}>
+            <Download className='size-4' />
+            Tải PDF / In
           </Button>
           {canSend && (
             <Button
