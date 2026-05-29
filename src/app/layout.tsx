@@ -19,8 +19,26 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ElysStay — Quản lý cho thuê",
-  description: "Hệ thống quản lý cho thuê thông minh dành cho chủ nhà, nhân viên và khách thuê",
+  title: {
+    template: "%s | ElysStay",
+    default: "ElysStay — Nền tảng quản lý cho thuê thông minh",
+  },
+  description: "Hệ thống quản lý phòng trọ, căn hộ cho thuê toàn diện dành cho chủ nhà, nhân viên vận hành và khách thuê.",
+  keywords: ["quản lý nhà trọ", "quản lý căn hộ", "thuê phòng", "elysstay", "property management", "phần mềm quản lý", "bất động sản"],
+  authors: [{ name: "ElysStay Team" }],
+  openGraph: {
+    type: "website",
+    locale: "vi_VN",
+    url: "https://elysstay.com",
+    title: "ElysStay — Nền tảng quản lý cho thuê thông minh",
+    description: "Hệ thống quản lý phòng trọ, căn hộ cho thuê toàn diện dành cho chủ nhà, nhân viên vận hành và khách thuê.",
+    siteName: "ElysStay",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ElysStay — Nền tảng quản lý cho thuê thông minh",
+    description: "Hệ thống quản lý phòng trọ, căn hộ cho thuê toàn diện.",
+  },
 };
 
 export default function RootLayout({

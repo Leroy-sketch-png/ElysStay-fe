@@ -2,6 +2,7 @@ import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 
@@ -57,11 +58,13 @@ function Button({
   }
 
   return (
-    <button
+    <motion.button
+      whileTap={!isDisabled ? { scale: 0.97 } : undefined}
       className={cn(buttonVariants({ variant, size, className }))}
       type={props.type ?? 'button'}
       disabled={isDisabled}
       aria-busy={loading || undefined}
+      data-testid={props['data-testid'] || 'button'}
       {...props}
     >
       {loading && <Loader2 className='size-4 animate-spin' aria-hidden='true' />}
@@ -74,7 +77,7 @@ function Button({
               : child,
           )
         : children}
-    </button>
+    </motion.button>
   )
 }
 

@@ -11,6 +11,16 @@ import {
   AlertTriangle,
   Download,
 } from 'lucide-react'
+import {
+  ResponsiveContainer,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  Bar
+} from 'recharts'
 import { EmptyState } from '@/components/EmptyState'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
@@ -323,6 +333,35 @@ export default function PnlReportPage() {
             variant={totals.netCashFlow >= 0 ? 'success' : 'destructive'}
           />
         </div>
+      )}
+
+      {!loadError && buildings.length > 0 && !isLoading && months.length > 0 && (
+        <Card className='mb-6 mt-6'>
+          <CardContent className='p-6'>
+            <div className='h-[400px] w-full'>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={months.map(m => ({
+                    ...m,
+                    name: MONTH_NAMES[m.month - 1],
+                  }))}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="name" className="text-xs" />
+                  <YAxis className="text-xs" tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`} />
+                  <Tooltip 
+                    formatter={(value: number) => formatCurrency(value)}
+                    contentStyle={{ backgroundColor: 'var(--color-card)', borderColor: 'var(--color-border)', borderRadius: '8px' }}
+                  />
+                  <Legend />
+                  <Bar dataKey="operationalIncome" name="Doanh thu" fill="#10b981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="expenses" name="Chi phí" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {!loadError && buildings.length > 0 && !isLoading && months.length === 0 ? (
