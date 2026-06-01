@@ -206,6 +206,13 @@ export const api = {
     })
   },
 
+  postForm<T>(path: string, body: FormData): Promise<ApiResponse<T>> {
+    return apiFetch<ApiResponse<T>>(path, {
+      method: 'POST',
+      body,
+    })
+  },
+
   put<T>(path: string, body?: unknown): Promise<ApiResponse<T>> {
     return apiFetch<ApiResponse<T>>(path, {
       method: 'PUT',

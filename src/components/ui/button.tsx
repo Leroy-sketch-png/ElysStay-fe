@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { Loader2 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, type HTMLMotionProps } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 
@@ -32,6 +32,14 @@ const buttonVariants = cva(
   }
 )
 
+type ButtonProps = React.ComponentPropsWithoutRef<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+    /** Show a spinner and disable the button while a mutation is pending. */
+    loading?: boolean
+    'data-testid'?: string
+  }
+
 function Button({
   className,
   variant,
@@ -40,22 +48,20 @@ function Button({
   loading = false,
   children,
   disabled,
+  'data-testid': dataTestId,
   ...props
-}: React.ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
-    /** Show a spinner and disable the button while a mutation is pending. */
-    loading?: boolean
-  }) {
+}: ButtonProps) {
   const isDisabled = disabled || loading
 
   if (asChild) {
     return (
-      <Slot className={cn(buttonVariants({ variant, size, className }))} {...props}>
+      <Slot className={cn(buttonVariants({ variant, size, className }))} data-testid={dataTestId || 'button'} {...props}>
         {children}
       </Slot>
     )
   }
+
+  const motionProps = props as HTMLMotionProps<'button'>
 
   return (
     <motion.button
@@ -64,8 +70,8 @@ function Button({
       type={props.type ?? 'button'}
       disabled={isDisabled}
       aria-busy={loading || undefined}
-      data-testid={props['data-testid'] || 'button'}
-      {...props}
+      data-testid={dataTestId || 'button'}
+      {...motionProps}
     >
       {loading && <Loader2 className='size-4 animate-spin' aria-hidden='true' />}
       {loading && <span className='sr-only'>Đang tải</span>}

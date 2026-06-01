@@ -35,6 +35,7 @@ function createAuthState(overrides: Partial<ReturnType<typeof useAuth>> = {}) {
     loginWithPassword: vi.fn().mockResolvedValue({ success: true }),
     logout: vi.fn(),
     hasRole: vi.fn((r: string) => r === 'Owner'),
+    sessionExpiringSoon: false,
     ...overrides,
   } satisfies ReturnType<typeof useAuth>
 }

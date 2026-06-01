@@ -29,6 +29,14 @@ export async function updateProfile(body: { fullName?: string; phone?: string })
   return requireData(res)
 }
 
+export async function uploadAvatar(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  const res = await api.postForm<{ avatarUrl: string }>('/users/me/avatar', formData)
+  return requireData(res).avatarUrl
+}
+
 export async function changePassword(body: { currentPassword: string; newPassword: string }) {
   await api.put('/users/me/password', body)
 }

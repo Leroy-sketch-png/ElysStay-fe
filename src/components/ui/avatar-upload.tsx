@@ -8,10 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 interface AvatarUploadProps {
   value?: string
   onChange?: (url: string) => void
+  onUpload?: (file: File) => Promise<string>
   disabled?: boolean
 }
 
-export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
+export function AvatarUpload({ value, onChange, onUpload, disabled }: AvatarUploadProps) {
   const [isHovering, setIsHovering] = React.useState(false)
   const [isUploading, setIsUploading] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
@@ -20,19 +21,22 @@ export function AvatarUpload({ value, onChange, disabled }: AvatarUploadProps) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Simulate upload delay for UI polish
+    if (!onUpload) {
+      toast.error('Tải ảnh đại diện chưa được cấu hình')
+      return
+    }
+
     setIsUploading(true)
     try {
-      // In a real app, we would upload to a bucket. 
-      // For now, we simulate and generate an object URL.
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      const url = URL.createObjectURL(file)
+      const url = await onUpload(file)
       onChange?.(url)
       toast.success('Đã tải lên ảnh đại diện')
     } catch (err) {
-      toast.error('Không thể tải lên ảnh')
+      const message = err instanceof Error ? err.message : 'Không thể tải lên ảnh'
+      toast.error('Không thể tải lên ảnh đại diện', message)
     } finally {
       setIsUploading(false)
+      e.target.value = ''
     }
   }
 

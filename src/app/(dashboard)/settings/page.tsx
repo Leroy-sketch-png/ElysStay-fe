@@ -6,7 +6,7 @@ import { mapApiErrorsToForm } from '@/lib/form-utils'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
-import { User, Lock, Shield, Loader2 } from 'lucide-react'
+import { User, Lock, Shield } from 'lucide-react'
 import { PageContainer } from '@/components/layouts/PageContainer'
 import { PageTransition } from '@/components/Motion'
 import { Button } from '@/components/ui/button'
@@ -17,16 +17,24 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/components/ui/toaster'
 import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { motion } from 'framer-motion'
-import { userKeys, fetchCurrentUser, updateProfile } from '@/lib/queries/users'
+import { userKeys, fetchCurrentUser, updateProfile, uploadAvatar } from '@/lib/queries/users'
 import { useAuth } from '@/providers/AuthProvider'
 
 // ─── Schemas ────────────────────────────────────────────
 
 const ROLE_LABELS: Record<string, string> = { Owner: 'Chủ nhà', Staff: 'Nhân viên', Tenant: 'Khách thuê' }
 
+const phoneSchema = z
+  .string()
+  .transform((value) => value.replace(/\s+/g, ''))
+  .refine(
+    (value) => value === '' || /^(?:\+?84|0)\d{9}$/.test(value),
+    'Số điện thoại phải là 10 chữ số hoặc +84xxxxxxxxx.',
+  )
+
 const profileSchema = z.object({
   fullName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự').max(200, 'Họ tên không vượt quá 200 ký tự'),
-  phone: z.string().regex(/^\d{10}$/, 'Số điện thoại phải đúng 10 chữ số').optional().or(z.literal('')),
+  phone: phoneSchema,
   avatarUrl: z.string().optional(),
 })
 
@@ -71,6 +79,13 @@ export default function SettingsPage() {
       if (!mapApiErrorsToForm(error, profileForm.setError)) {
         toast.error('Không thể cập nhật hồ sơ', error.message)
       }
+    },
+  })
+
+  const avatarMutation = useMutation({
+    mutationFn: uploadAvatar,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: userKeys.me() })
     },
   })
 
@@ -126,7 +141,9 @@ export default function SettingsPage() {
                     <Label className='block mb-3 text-muted-foreground'>Ảnh đại diện</Label>
                     <AvatarUpload 
                       value={profileForm.watch('avatarUrl')} 
+                      onUpload={(file) => avatarMutation.mutateAsync(file)}
                       onChange={(url) => profileForm.setValue('avatarUrl', url, { shouldDirty: true })}
+                      disabled={avatarMutation.isPending}
                     />
                   </div>
                   <div className='flex-grow space-y-5 w-full'>
@@ -150,8 +167,9 @@ export default function SettingsPage() {
                       <Input
                         id='phone'
                         className='max-w-md'
+                        inputMode='tel'
                         {...profileForm.register('phone')}
-                        placeholder='+84 xxx xxx xxx'
+                        placeholder='0xxxxxxxxx hoặc +84xxxxxxxxx'
                       />
                       {profileForm.formState.errors.phone && (
                         <p className='text-xs text-destructive'>

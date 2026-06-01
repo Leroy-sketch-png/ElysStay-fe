@@ -1,8 +1,10 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
-  ({ className, type, ...props }, ref) => {
+type InputProps = React.ComponentProps<'input'> & { 'data-testid'?: string }
+
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, 'data-testid': dataTestId, ...props }, ref) => {
     return (
       <input
         type={type}
@@ -16,7 +18,7 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(
           className,
         )}
         ref={ref}
-        data-testid={props['data-testid'] || 'input'}
+        data-testid={dataTestId || 'input'}
         {...props}
       />
     )
