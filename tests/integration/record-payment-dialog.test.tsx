@@ -1,17 +1,6 @@
-/**
- * Integration tests for RecordPaymentDialog.
- *
- * Covers:
- * - Rendering initial state (amount due pre-filled, invoice summary)
- * - "Toàn bộ" button resets amount to full amount due
- * - Payment preview updates as amount changes
- * - Zod validation: amount required, positive, not exceeding amount due
- * - Successful submission calls POST and closes dialog
- * - Server-side validation error mapped to form field
- * - API errors shown as toast
- */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import '../fixtures/server'
 import { server } from '../fixtures/server'
@@ -28,6 +17,10 @@ vi.mock('@/components/ui/toaster', () => ({
     info: vi.fn(),
   },
 }))
+
+beforeEach(() => {
+  vi.clearAllMocks()
+})
 
 // ─── Fixtures ────────────────────────────────────────────
 
@@ -123,7 +116,7 @@ describe('RecordPaymentDialog — rendering', () => {
 
 // ─── "Toàn bộ" button ────────────────────────────────────
 
-describe('RecordPaymentDialog — "Toàn bộ" button', () => {
+describe('RecordPaymentDialog — "Tổng tiền" button', () => {
   it('resets the amount to full amount due', async () => {
     const user = userEvent.setup()
     renderDialog()
@@ -132,7 +125,9 @@ describe('RecordPaymentDialog — "Toàn bộ" button', () => {
     await user.clear(amountInput)
     await user.type(amountInput, '1000000')
 
-    await user.click(screen.getByRole('button', { name: 'Toàn bộ' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Tổng tiền' })
+    )
 
     expect(amountInput).toHaveValue(5500000)
   })
@@ -149,9 +144,8 @@ describe('RecordPaymentDialog — payment preview', () => {
     await user.clear(amountInput)
     await user.type(amountInput, '5500000')
 
-    await waitFor(() => {
-      expect(screen.getByText('Đã thanh toán đủ')).toBeInTheDocument()
-    })
+    expect(await screen.findByText('Đã thanh toán đủ'))
+      .toBeInTheDocument()
   })
 
   it('shows remaining balance for partial payment', async () => {

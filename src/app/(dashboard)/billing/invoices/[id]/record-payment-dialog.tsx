@@ -189,10 +189,10 @@ export function RecordPaymentDialog({
                   size='sm'
                   onClick={() => reset({ ...watch(), amount: amountDue })}
                 >
-                  Toàn bộ
+                  Tổng tiền
                 </Button>
                 <span className='text-xs text-muted-foreground'>
-                  Nhấn để thanh toán toàn bộ số còn lại
+                  Nhấn để thanh toán tổng số còn lại
                 </span>
               </div>
             </div>
