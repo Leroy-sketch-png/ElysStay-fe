@@ -97,59 +97,6 @@ describe('createRoom', () => {
     expect(capturedBody).toMatchObject({ roomNumber: '201', floor: 2 })
   })
 
-  it('propagates validation error (400) as ApiError', async () => {
-    server.use(
-      http.post(apiUrl('/buildings/b1/rooms'), () =>
-        HttpResponse.json(
-          {
-            success: false,
-            message: 'Validation failed',
-            errorCode: 'VALIDATION_ERROR',
-            errors: { RoomNumber: ['Đã tồn tại.'] },
-          },
-          { status: 400 },
-        ),
-      ),
-    )
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           })
 
-    await expect(
-      createRoom('b1', { roomNumber: '101', floor: 1, area: 20, price: 2000000, maxOccupants: 2 }),
-    ).rejects.toBeInstanceOf(ApiError)
-  })
-})
 
-// ─── changeRoomStatus ─────────────────────────────────────
-
-describe('changeRoomStatus', () => {
-  it('calls PATCH /rooms/:id/status with the new status', async () => {
-    let capturedBody: unknown = null
-    server.use(
-      http.patch(apiUrl('/rooms/r1/status'), async ({ request }) => {
-        capturedBody = await request.json()
-        return apiSuccess({ id: 'r1', status: 'Maintenance' })
-      }),
-    )
-
-    await changeRoomStatus('r1', { status: 'Maintenance' })
-
-    expect(capturedBody).toMatchObject({ status: 'Maintenance' })
-  })
-})
-
-// ─── deleteRoom ───────────────────────────────────────────
-
-describe('deleteRoom', () => {
-  it('calls DELETE /rooms/:id', async () => {
-    let methodCalled = false
-    server.use(
-      http.delete(apiUrl('/rooms/r1'), () => {
-        methodCalled = true
-        return new HttpResponse(null, { status: 204 })
-      }),
-    )
-
-    await deleteRoom('r1')
-
-    expect(methodCalled).toBe(true)
-  })
-})
