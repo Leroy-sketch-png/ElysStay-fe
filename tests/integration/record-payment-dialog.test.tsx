@@ -55,7 +55,11 @@ function makeInvoice(overrides: Partial<InvoiceDetailDto> = {}): InvoiceDetailDt
 const DEFAULT_INVOICE = makeInvoice()
 
 function renderDialog(
-  props: Partial<{ open: boolean; onOpenChange: ReturnType<typeof vi.fn>; invoice: InvoiceDetailDto }> = {},
+  props: Partial<{
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    invoice: InvoiceDetailDto
+  }> = {},
 ) {
   const onOpenChange = props.onOpenChange ?? vi.fn()
   renderWithProviders(

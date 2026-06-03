@@ -129,3 +129,102 @@ Feature: Maintenance Issue Workflow
       | Mô tả    | Bình nóng lạnh phòng tắm hỏng|
     And I submit the issue form
     Then I should see a success message "Đã tạo yêu cầu"
+
+  # ─── Tenant submission process (c) ────────────────────────────────────────
+
+  @tenant-reported @image-upload
+  Scenario: Tenant submits a maintenance request with images
+    Given I am logged in as a tenant
+    And I am viewing the maintenance page
+    When I click the "Tạo yêu cầu" button
+    And I fill in the issue form with:
+      | field    | value                           |
+      | Tiêu đề  | Quạt trần bị hỏng               |
+      | Mô tả    | Quạt trần phòng khách không quay|
+    And I attach an image "broken-fan.jpg" of size "5MB"
+    And I submit the issue form
+    Then I should see a success message "Đã tạo yêu cầu"
+    And the issue "Quạt trần bị hỏng" should appear with status "Mới"
+
+  @tenant-reported @image-upload
+  Scenario: Tenant can attach up to 3 images to a request
+    Given I am logged in as a tenant
+    And I am viewing the maintenance page
+    When I click the "Tạo yêu cầu" button
+    And I fill in the issue title "Hỏng đèn phòng ngủ"
+    And I fill in the issue description "Đèn phòng ngủ không sáng"
+    And I attach images:
+      | filename    | size |
+      | img1.jpg    | 5MB  |
+      | img2.jpg    | 5MB  |
+      | img3.jpg    | 5MB  |
+    And I submit the issue form
+    Then I should see a success message "Đã tạo yêu cầu"
+
+  @tenant-reported @image-upload @validation
+  Scenario: Rejecting a 4th image attachment
+    Given I am logged in as a tenant
+    And I am viewing the maintenance page
+    When I click the "Tạo yêu cầu" button
+    And I have already attached 3 images
+    Then the image attachment button is disabled
+    And I should see the message "Chỉ được đính kèm tối đa 3 ảnh"
+
+  @tenant-reported @image-upload @validation
+  Scenario: Rejecting an image that exceeds 30MB
+    Given I am logged in as a tenant
+    And I am viewing the maintenance page
+    When I click the "Tạo yêu cầu" button
+    And I attach an image "large-photo.jpg" of size "35MB"
+    Then I should see a validation error "Kích thước ảnh không được vượt quá 30MB"
+    And the image is not added to the form
+
+  # ─── Status notifications to tenant ──────────────────────────────────────
+
+  @status-updates
+  Scenario: Tenant receives notification when issue moves to In Progress
+    Given I am logged in as an owner
+    And there is a New maintenance issue submitted by tenant for room "101"
+    When I change the issue status to "Đang xử lý"
+    Then the tenant should receive a notification about the status change
+    And the notification message mentions "Đang xử lý"
+
+  @status-updates
+  Scenario: Tenant receives notification when issue is resolved
+    Given I am logged in as an owner
+    And there is an InProgress maintenance issue submitted by tenant for room "101"
+    When I change the issue status to "Đã giải quyết"
+    Then the tenant should receive a notification about the status change
+    And the notification message mentions "Đã giải quyết"
+
+  @status-updates
+  Scenario: Each status change generates a separate notification for the tenant
+    Given I am logged in as an owner
+    And there is a New maintenance issue submitted by tenant for room "201"
+    When I change the issue status to "Đang xử lý"
+    And I change the issue status to "Đã giải quyết"
+    Then "2" notifications are sent to the tenant
+
+  # ─── Duplicate and invalid request handling ───────────────────────────────
+
+  @duplicate-handling
+  Scenario: Duplicate request for the same room and issue is flagged
+    Given there is already an open issue "Hỏng điều hòa" for room "101"
+    When I am logged in as a tenant
+    And I am viewing the maintenance page
+    And I click the "Tạo yêu cầu" button
+    And I fill in the issue form with:
+      | field    | value          |
+      | Tiêu đề  | Hỏng điều hòa  |
+      | Mô tả    | Điều hòa hỏng  |
+    And I submit the issue form
+    Then I should see an error message "Đã có yêu cầu tương tự đang được xử lý"
+
+  @duplicate-handling
+  Scenario: Invalid or spam request can be closed by owner
+    Given I am logged in as an owner
+    And there is a New issue "Test spam request" flagged as invalid
+    When I view the issue detail for "Test spam request"
+    And I close the issue as invalid
+    Then the issue status should change to "Đã đóng"
+    And the closure reason is recorded

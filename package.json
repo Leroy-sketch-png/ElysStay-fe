@@ -20,7 +20,11 @@
     "test:bdd:json": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --format json:tests/bdd/reports/report.json",
     "test:bdd:buildings": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@building-management --format=summary",
     "test:bdd:contracts": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@contract-lifecycle --format=summary",
-    "test:bdd:dashboard": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@dashboard --format=summary"
+    "test:bdd:dashboard": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@dashboard --format=summary",
+    "test:bdd:invoices": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@invoice-workflow --format=summary",
+    "test:bdd:billing": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@monthly-billing --format=summary",
+    "test:bdd:payments": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@monthly-payment-process --format=summary",
+    "test:bdd:maintenance": "tsx ./node_modules/@cucumber/cucumber/bin/cucumber.js --tags=@maintenance-workflow --format=summary"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
